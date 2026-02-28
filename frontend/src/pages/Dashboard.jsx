@@ -1,8 +1,13 @@
 import React from 'react'
+import Tabla from './Tabla'
 
 function Dashboard() {
     return (
-        <div>Dashboard</div>
+        <div>
+            Dashboard
+            <Tabla />
+
+        </div>
     )
 }
 

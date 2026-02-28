@@ -4,6 +4,7 @@ mi-proyecto-mern/
 │   ├── controllers/        # Lógica de las funciones (qué hace cada ruta)
 │   ├── models/             # Esquemas de MongoDB (Mongoose)
 │   ├── routes/             # Definición de los endpoints de la API
+│   ├── services/           # Se comunica con la base de datos
 │   ├── middleware/         # Funciones de validación o autenticación (JWT)
 │   ├── utils/              # Funciones de ayuda reutilizables
 │   ├── .env                # Variables sensibles (no se sube a GitHub)

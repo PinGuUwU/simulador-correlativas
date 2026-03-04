@@ -1,3 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Inyectamos el tema de HeroUI desde el archivo que creamos */
+@plugin "./hero.js";
+
+/* Le decimos dónde buscar las clases de los componentes */
+@source "../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}";

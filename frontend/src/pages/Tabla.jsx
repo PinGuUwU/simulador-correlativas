@@ -11,8 +11,9 @@ function Tabla() {
     const numsRomanos = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"]
     const estadosPosibles = ['Disponible', 'Regular', 'Aprobado']
     const [progreso, setProgreso] = useState({}) //Los estados de cada tarjeta de cada materia
-
+    //Simulacion del plan elegido
     const plan = "17.13"
+    //Busca las materias desde la base de datos, en base al plan seleccionado
     useEffect(() => {
         const fetchMaterias = async () => {
             try {
@@ -62,6 +63,32 @@ function Tabla() {
         }
     }, [progreso])
 
+    //Por la situación en específico de la Tesina
+    useEffect(() => {
+        let huboCambios = false
+        let nuevoProgreso = { ...progreso }
+        //Obtengo la tesina
+        const materia = materias.filter((m) => m.nombre.toLowerCase().includes("tesina de grado"))
+        const tesina = materia[0]
+
+        const revisarTesina = () => {
+            //Verifico si se desaprobo alguna materia anteriormente aprobada
+            const hayMateriasPendientes = materias
+                .filter((m) => m.nombre.toLowerCase() != tesina.nombre.toLowerCase())
+                .some(m => progreso[m.codigo] !== estadosPosibles[2])
+
+            if (hayMateriasPendientes && progreso[tesina.codigo] != bloquear) {
+                //Si hay materias pendientes y la tesina no está bloqueada, la bloqueo y aviso que se debe actualizar el progreso
+                nuevoProgreso[tesina.codigo] = bloquear
+                huboCambios = true
+            }
+        }
+        revisarTesina()
+        if (huboCambios) {
+            setProgreso(nuevoProgreso)
+        }
+    }, [progreso])
+
     const cambioDeEstado = (codigoMateria) => {
 
         //Busco el estado actual de la materia, si no existe la inicializo
@@ -80,10 +107,14 @@ function Tabla() {
         //el número del cuatrimestre que debe tener regular
         const cuatrimestre = materiaActual.correlativas[0]
         const esCuatrimestre = /^[1-9]$/.test(cuatrimestre)
-        if (esCuatrimestre) {
+        //Si es la tesina
+        if (materiaActual.correlativas[0] === "Todas") {
+            aprobarHastaCuatri(materiaActual.cuatrimestre - 1, nuevoProgreso, materiasModificadas)
+        } else if (esCuatrimestre && estadoInicial === bloquear && estadoNuevo === estadosPosibles[1]) {
             //Si es el número de un cuatrimestre entonces tengo que aprobar todas las materias hasta ese cuatrimestre
             aprobarHastaCuatri(cuatrimestre, nuevoProgreso, materiasModificadas)
         } else {
+            console.log("llego3");
             //4 casos posibles:
             if ((estadoInicial === bloquear || estadoInicial === estadosPosibles[0]) && estadoNuevo === estadosPosibles[1]) {
                 // 1. Bloqueado -> Regular || 2. disponible -> regular
@@ -91,7 +122,7 @@ function Tabla() {
                 if (materiaActual.correlativas.length > 0) {
                     regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
                 }
-            } else if (estadoInicial === estadosPosibles[1] && estadoNuevo === estadosPosibles[2] || materiaActual.correlativas[0] === "Todas") {
+            } else if (estadoInicial === estadosPosibles[1] && estadoNuevo === estadosPosibles[2]) {
                 //(caso extra, si se necesita tener todas aprobadas entonces es la tesina)
 
                 //3. regular -> aprobado

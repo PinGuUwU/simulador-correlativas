@@ -6,7 +6,11 @@ function Tabla() {
     //Estados para guardar las materias y para mostrar una imagen de cargando
     const [materias, setMaterias] = useState([])
     const [cargando, setCargando] = useState(true)
+    const bloquear = 'Bloqueado'
+    const desbloquear = 'Desbloqueado'
     const numsRomanos = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"]
+    const estadosPosibles = ['Disponible', 'Regular', 'Aprobado']
+    const [progreso, setProgreso] = useState({}) //Los estados de cada tarjeta de cada materia
 
     const plan = "17.13"
     useEffect(() => {
@@ -30,18 +34,158 @@ function Tabla() {
         fetchMaterias()
     }, [])//Array vacío para que se ejecute una única vez
 
+    const cambioDeEstado = (codigoMateria) => {
+
+        //Busco el estado actual de la materia, si no existe la inicializo
+        const materiaActual = materias.find((materia) => materia.codigo === codigoMateria)
+        const estadoInicial = progreso[codigoMateria]
+
+        //Actualizo su estado a el siguiente estado posible
+        const estadoNuevo = actualizarEstado(estadoInicial)
+
+        //Creo un progreso con el nuevo cambio
+        let nuevoProgreso = { ...progreso, [codigoMateria]: estadoNuevo }
+        let materiasModificadas = [materiaActual.codigo]
+
+        //4 casos posibles:
+        if ((estadoInicial === bloquear || estadoInicial === estadosPosibles[0]) && estadoNuevo === estadosPosibles[1]) {
+            // 1. Bloqueado -> Regular || 2. disponible -> regular
+            //Solo si tiene correlativas
+            if (materiaActual.correlativas.length > 0) {
+                regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
+            }
+            //Después desbloqueo dependencias
+        } else if (estadoInicial === estadosPosibles[1] && estadoNuevo === estadosPosibles[2]) {
+            //3. regular -> aprobado
+            //Solo si tiene correlativas
+            if (materiaActual.correlativas.length > 0) {
+                aprobarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
+            }
+            console.log(materiasModificadas);
+            //Después desbloqueo dependencias
+
+        } else if (estadoInicial === estadosPosibles[2] && estadoNuevo === estadosPosibles[0]) {
+            //4. aprobado -> disponible
+            bloquearDependencias(codigoMateria, nuevoProgreso)
+        } else {
+            //extra. bloqueado -> disponible
+            //No existe, es "actualizarCorrelativas()" que hace esta transición solo a partir de las materias modificadas
+        }
+
+        if (materiasModificadas.length > 1) {
+            materiasModificadas.forEach((codigoMateria) => {
+                desbloquearDependencias(codigoMateria, nuevoProgreso)
+            })
+        }
+        setProgreso(nuevoProgreso)
+
+
+    }
+
+
+
+    // Funciones recursivas para la actualización de estado de materias 
+    const regularizarCorrelativas = (codigosCorrelativas, nuevoProgreso, materiasModificadas) => {
+        //Dos casos posibles
+        //1. bloqueado -> disponible
+        //2. disponible -> regular (Descartado, si anteriormente se puso en estado disponible entonces ya se encargó de regularizar las correlativas)
+
+        codigosCorrelativas.forEach((codigo) => {
+            //si la materia no está regularizada o aprobada 
+            if (!([estadosPosibles[1], estadosPosibles[2]].includes(nuevoProgreso[codigo]))) {
+                nuevoProgreso[codigo] = estadosPosibles[1]
+                //Ya que fue modificada, la agrego al array de materias modificadas para luego revisar si tiene que desbloquear dependencias
+                materiasModificadas.push(codigo)
+                //Reviso también para regularizar sus correlativas si es que tiene
+                const materiaActual = materias.find((materia) => materia.codigo === codigo)
+                if (materiaActual.correlativas.length > 0) {
+                    regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
+                }
+            }
+        })
+
+    }
+    const bloquearDependencias = (codigoMateria, nuevoProgreso) => {
+        //aprobado -> disponibes
+        //Debe bloquear a las materias cuyas correlativas incluyen su código
+        materias.forEach((m) => {
+            if (m.correlativas.includes(codigoMateria) && nuevoProgreso[m.codigo] != bloquear) {
+                //Si esta materia tiene como correlativa codigoMateria y no está bloqueada, entonces la bloqueo
+                nuevoProgreso[m.codigo] = bloquear
+                //Busco a ver si hay otras materias dependientes a esta, que acaba de ser bloqueada, para bloquearlas
+                bloquearDependencias(m.codigo, nuevoProgreso)
+            }
+        })
+    }
+    const desbloquearDependencias = (codigoMateria, nuevoProgreso) => {
+        //bloqueado -> disponibles
+        //Debo desbloquear las materias que tengan esta materia como correlativa y el resto de correlativas también estén regular o aprobadas
+        materias.forEach((m) => {
+            const todasBien = m.correlativas.every(c => ([estadosPosibles[1], estadosPosibles[2]].includes(nuevoProgreso[c])))
+            const buenEstado = [estadosPosibles[1], estadosPosibles[2]].includes(nuevoProgreso[m.codigo])
+            if (m.correlativas.includes(codigoMateria) && todasBien && !buenEstado) {
+                nuevoProgreso[m.codigo] = estadosPosibles[0]
+                //Creo que acá no necesito hacer recursividad como en otras funciones, con una pasada es suficiente
+            }
+        })
+
+
+    }
+
+    const aprobarCorrelativas = (codigosCorrelativas, nuevoProgreso, materiasModificadas) => {
+        // regular -> aprobado
+        codigosCorrelativas.forEach((codigo) => {
+            // Si su correlativa no está aprobada, la apruebo
+            if (nuevoProgreso[codigo] != estadosPosibles[2]) {
+                nuevoProgreso[codigo] = estadosPosibles[2]
+                // Agrego la materia a materias Modificadas
+                materiasModificadas.push(codigo)
+                //Reviso también para aprobar sus correlativas si es que tiene
+                const materiaActual = materias.find((materia) => materia.codigo === codigo)
+                if (materiaActual.correlativas.length > 0) {
+                    aprobarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
+                }
+            }
+        })
+    }
+
+
+    //Función para poder actualizar el estado individual de cada materia
+    const actualizarEstado = (estadoMateria) => {
+        const posEstado = estadosPosibles.indexOf(estadoMateria)
+        console.log(estadoMateria);
+        if (posEstado === 0) {
+            //Si está disponible -> regular
+            return estadosPosibles[posEstado + 1]
+        } else if (estadoMateria === bloquear) {
+            //Si está bloqueado -> regular
+            return estadosPosibles[1]
+        } else if (posEstado === (estadosPosibles.length - 1)) {
+            //Si está aprobado -> disponible
+            return estadosPosibles[0]
+        } else {
+            //Si está regular -> aprobado
+            return estadosPosibles[2]
+        }
+
+
+    }
+
+    const inicializarMateria = (materia) => {
+        const estadoNuevo = (materia.correlativas.length > 0 ? 'Bloqueado' : estadosPosibles[0])
+        setProgreso((prev) => { return { ...prev, [materia.codigo]: estadoNuevo } })
+        progreso[materia.codigo]
+        return estadoNuevo
+    }
+    //Ordeno las materias dentro del array cuatrimestres, para poder mostrarlas en orden y separarlas por cuatrimestre
     const cuatrimestres = [...new Set(materias.map((m) => Number(m.cuatrimestre)))].sort((a, b) => a - b)
 
     return (
         <div className=''>
-            {/* {
-                materias.map((materia, index) => (
-                    <MateriaCard
-                        key={materia.codigo != "N/A" ? materia.codigo : (materia.codigo + `${index}`)} // Le hago el id único porque es buena práctica
-                        materia={materia} //Paso la materia
-                    />
-                ))
-            } */}
+            {//Mientras se están cargando las materias
+                cargando && !materias
+                //Mostrar un cosito de carga de HeroUI
+            }
             <Table isStriped aria-label="Plan de estudios">
                 <TableHeader>
                     <TableColumn className='text-center'>Cuatrimestre</TableColumn>
@@ -70,6 +214,11 @@ function Tabla() {
                                             <MateriaCard
                                                 key={materia.codigo != "N/A" ? materia.codigo : (materia.codigo + `${index}`)} // Le hago el id único porque es buena práctica
                                                 materia={materia} //Paso la materia
+                                                estado={
+                                                    progreso[materia.codigo] ||
+                                                    inicializarMateria(materia)
+                                                }
+                                                actualizarEstados={cambioDeEstado}
                                             />
                                         ))}
                                     </div>
@@ -83,6 +232,7 @@ function Tabla() {
         </div>
     )
 }
+
 
 
 

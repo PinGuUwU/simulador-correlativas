@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import { Card, CardHeader, CardBody, CardFooter } from "@heroui/react"
+import { Card, CardHeader, CardBody, CardFooter, addToast } from "@heroui/react"
 
-function MateriaCard({ materia }) {
-    const [estado, setEstado] = useState()
+function MateriaCard({ materia, estado, actualizarEstados }) {
+    //El estado de parámetro lo uso únicamente para inicializar el estadoLocal de cada tarjeta
 
-    useEffect(() => {
-        if (materia.cuatrimestre === "0" || materia.cuatrimestre === "1") {
-            setEstado("Disponible")
-        }
-    }, [materia])
+    const actualizar = () => {
+        actualizarEstados(materia.codigo, materia.correlativas)
+    }
 
     return (
         <div className=''>
-            <Card className='flex h-35 w-55'>
+            <Card className='flex h-35 w-55 hover:cursor-pointer'
+                isPressable
+                onPress={() => { actualizar() }}
+            >
                 <CardHeader className='justify-center'>{materia.codigo}</CardHeader>
                 <CardBody className='text-center grow overflow-hidden'>{materia.nombre}</CardBody>
                 <CardFooter className='justify-center'>{estado}</CardFooter>
@@ -20,5 +21,6 @@ function MateriaCard({ materia }) {
         </div>
     )
 }
+
 
 export default MateriaCard

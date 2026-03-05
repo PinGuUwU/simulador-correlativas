@@ -34,6 +34,34 @@ function Tabla() {
         fetchMaterias()
     }, [])//Array vacío para que se ejecute una única vez
 
+    //Por la situación especial de las optativas, debo tener un useEffect para que cuando se actualice el progreso, revisar si hay que actualizar las optativas
+    useEffect(() => {
+        let huboCambios = false
+        let nuevoProgreso = { ...progreso }
+        const revisarOptativas = () => {
+            //Filtro las optativas
+            const optativas = materias.filter((m) => m.nombre.toLowerCase().includes("optativa "))
+            //Recorro las optativas
+            optativas.forEach((op) => {
+                const cuatriLimite = Number(op.correlativas[0])
+
+                //Verifico que todas las materias hasta el cuatri 7 estén aprobadas
+                const hayMateriasPendientes = materias
+                    .filter(m => Number(m.cuatrimestre) <= cuatriLimite)
+                    .some(m => progreso[m.codigo] !== estadosPosibles[2])
+                if (hayMateriasPendientes && progreso[op.codigo] !== bloquear) {
+                    //Entonceshay materias no aprobadas, se bloquea la optativa
+                    nuevoProgreso[op.codigo] = bloquear
+                    huboCambios = true
+                }
+            })
+        }
+        revisarOptativas()
+        if (huboCambios) {
+            setProgreso(nuevoProgreso)
+        }
+    }, [progreso])
+
     const cambioDeEstado = (codigoMateria) => {
 
         //Busco el estado actual de la materia, si no existe la inicializo
@@ -47,31 +75,40 @@ function Tabla() {
         let nuevoProgreso = { ...progreso, [codigoMateria]: estadoNuevo }
         let materiasModificadas = [materiaActual.codigo]
 
-        //4 casos posibles:
-        if ((estadoInicial === bloquear || estadoInicial === estadosPosibles[0]) && estadoNuevo === estadosPosibles[1]) {
-            // 1. Bloqueado -> Regular || 2. disponible -> regular
-            //Solo si tiene correlativas
-            if (materiaActual.correlativas.length > 0) {
-                regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
-            }
-            //Después desbloqueo dependencias
-        } else if (estadoInicial === estadosPosibles[1] && estadoNuevo === estadosPosibles[2]) {
-            //3. regular -> aprobado
-            //Solo si tiene correlativas
-            if (materiaActual.correlativas.length > 0) {
-                aprobarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
-            }
-            console.log(materiasModificadas);
-            //Después desbloqueo dependencias
-
-        } else if (estadoInicial === estadosPosibles[2] && estadoNuevo === estadosPosibles[0]) {
-            //4. aprobado -> disponible
-            bloquearDependencias(codigoMateria, nuevoProgreso)
+        //Si es una materia optativa  tendrá un valor en "correlativas" distinto
+        //Que se debe manejar como caso aparte
+        //el número del cuatrimestre que debe tener regular
+        const cuatrimestre = materiaActual.correlativas[0]
+        const esCuatrimestre = /^[1-9]$/.test(cuatrimestre)
+        if (esCuatrimestre) {
+            //Si es el número de un cuatrimestre entonces tengo que aprobar todas las materias hasta ese cuatrimestre
+            aprobarHastaCuatri(cuatrimestre, nuevoProgreso, materiasModificadas)
         } else {
-            //extra. bloqueado -> disponible
-            //No existe, es "actualizarCorrelativas()" que hace esta transición solo a partir de las materias modificadas
+            //4 casos posibles:
+            if ((estadoInicial === bloquear || estadoInicial === estadosPosibles[0]) && estadoNuevo === estadosPosibles[1]) {
+                // 1. Bloqueado -> Regular || 2. disponible -> regular
+                //Solo si tiene correlativas
+                if (materiaActual.correlativas.length > 0) {
+                    regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
+                }
+            } else if (estadoInicial === estadosPosibles[1] && estadoNuevo === estadosPosibles[2] || materiaActual.correlativas[0] === "Todas") {
+                //(caso extra, si se necesita tener todas aprobadas entonces es la tesina)
+
+                //3. regular -> aprobado
+                //Solo si tiene correlativas
+                if (materiaActual.correlativas.length > 0) {
+                    aprobarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
+                }
+            } else if (estadoInicial === estadosPosibles[2] && estadoNuevo === estadosPosibles[0]) {
+                //4. aprobado -> disponible
+                bloquearDependencias(codigoMateria, nuevoProgreso)
+            } else {
+                //extra. bloqueado -> disponible
+                //No existe, es "actualizarCorrelativas()" que hace esta transición solo a partir de las materias modificadas
+            }
         }
 
+        //Desbloqueo dependencias
         if (materiasModificadas.length > 1) {
             materiasModificadas.forEach((codigoMateria) => {
                 desbloquearDependencias(codigoMateria, nuevoProgreso)
@@ -82,7 +119,21 @@ function Tabla() {
 
     }
 
-
+    //Funcion para aprobar todas las materias hasta cierto cuatri, para materias optativas del plan viejo
+    const aprobarHastaCuatri = (cuatrimestre, nuevoProgreso, materiasModificadas) => {
+        const cuatriLimite = Number(cuatrimestre)
+        materias.forEach((m) => {
+            const cuatriMateria = Number(m.cuatrimestre)
+            if (cuatriMateria <= cuatriLimite) {
+                //Si es mejor o igual al cuatrimestre elegido
+                console.log(m + " " + m.cuatrimestre);
+                //Si el cuatrimeste de la materia es menor o igual al que tenemos, la apruebo
+                nuevoProgreso[m.codigo] = estadosPosibles[2]
+                //Ya que se modifico, la guardo
+                materiasModificadas.push(m.codigo)
+            }
+        })
+    }
 
     // Funciones recursivas para la actualización de estado de materias 
     const regularizarCorrelativas = (codigosCorrelativas, nuevoProgreso, materiasModificadas) => {

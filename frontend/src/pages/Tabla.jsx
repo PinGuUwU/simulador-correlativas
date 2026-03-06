@@ -25,6 +25,14 @@ function Tabla() {
 
                 const data = await response.json()
                 setMaterias(data)
+
+                //Inicializo acá mismo el progreso
+                const progresoInicial = {}
+                data.forEach(m => {
+                    progresoInicial[m.codigo] = (m.correlativas.length > 0 ? 'Bloqueado' : estadosPosibles[0])
+                })
+                setProgreso(progresoInicial)
+
                 //Ya no está cargando porque ya tenemos la data
                 setCargando(false)
             } catch (error) {
@@ -42,6 +50,8 @@ function Tabla() {
         const revisarOptativas = () => {
             //Filtro las optativas
             const optativas = materias.filter((m) => m.nombre.toLowerCase().includes("optativa "))
+            //Si todavía no se cargaron las materias de la base de datos
+            if (optativas.length === 0) return
             //Recorro las optativas
             optativas.forEach((op) => {
                 const cuatriLimite = Number(op.correlativas[0])
@@ -70,6 +80,8 @@ function Tabla() {
         //Obtengo la tesina
         const materia = materias.filter((m) => m.nombre.toLowerCase().includes("tesina de grado"))
         const tesina = materia[0]
+        //Si todavía no se cargaron las materias de la base de datos
+        if (!tesina) return
 
         const revisarTesina = () => {
             //Verifico si se desaprobo alguna materia anteriormente aprobada
@@ -109,12 +121,11 @@ function Tabla() {
         const esCuatrimestre = /^[1-9]$/.test(cuatrimestre)
         //Si es la tesina
         if (materiaActual.correlativas[0] === "Todas") {
-            aprobarHastaCuatri(materiaActual.cuatrimestre - 1, nuevoProgreso, materiasModificadas)
-        } else if (esCuatrimestre && estadoInicial === bloquear && estadoNuevo === estadosPosibles[1]) {
+            aprobarHastaCuatri(materiaActual.cuatrimestre, nuevoProgreso, materiasModificadas)
+        } else if (esCuatrimestre) {
             //Si es el número de un cuatrimestre entonces tengo que aprobar todas las materias hasta ese cuatrimestre
             aprobarHastaCuatri(cuatrimestre, nuevoProgreso, materiasModificadas)
         } else {
-            console.log("llego3");
             //4 casos posibles:
             if ((estadoInicial === bloquear || estadoInicial === estadosPosibles[0]) && estadoNuevo === estadosPosibles[1]) {
                 // 1. Bloqueado -> Regular || 2. disponible -> regular
@@ -154,14 +165,15 @@ function Tabla() {
     const aprobarHastaCuatri = (cuatrimestre, nuevoProgreso, materiasModificadas) => {
         const cuatriLimite = Number(cuatrimestre)
         materias.forEach((m) => {
-            const cuatriMateria = Number(m.cuatrimestre)
-            if (cuatriMateria <= cuatriLimite) {
-                //Si es mejor o igual al cuatrimestre elegido
-                console.log(m + " " + m.cuatrimestre);
-                //Si el cuatrimeste de la materia es menor o igual al que tenemos, la apruebo
-                nuevoProgreso[m.codigo] = estadosPosibles[2]
-                //Ya que se modifico, la guardo
-                materiasModificadas.push(m.codigo)
+            if (!m.nombre.toLowerCase().includes("tesina de grado")) {
+                const cuatriMateria = Number(m.cuatrimestre)
+                if (cuatriMateria <= cuatriLimite) {
+                    //Si es mejor o igual al cuatrimestre elegido
+                    //Si el cuatrimeste de la materia es menor o igual al que tenemos, la apruebo
+                    nuevoProgreso[m.codigo] = estadosPosibles[2]
+                    //Ya que se modifico, la guardo
+                    materiasModificadas.push(m.codigo)
+                }
             }
         })
     }
@@ -235,7 +247,6 @@ function Tabla() {
     //Función para poder actualizar el estado individual de cada materia
     const actualizarEstado = (estadoMateria) => {
         const posEstado = estadosPosibles.indexOf(estadoMateria)
-        console.log(estadoMateria);
         if (posEstado === 0) {
             //Si está disponible -> regular
             return estadosPosibles[posEstado + 1]
@@ -253,12 +264,6 @@ function Tabla() {
 
     }
 
-    const inicializarMateria = (materia) => {
-        const estadoNuevo = (materia.correlativas.length > 0 ? 'Bloqueado' : estadosPosibles[0])
-        setProgreso((prev) => { return { ...prev, [materia.codigo]: estadoNuevo } })
-        progreso[materia.codigo]
-        return estadoNuevo
-    }
     //Ordeno las materias dentro del array cuatrimestres, para poder mostrarlas en orden y separarlas por cuatrimestre
     const cuatrimestres = [...new Set(materias.map((m) => Number(m.cuatrimestre)))].sort((a, b) => a - b)
 
@@ -289,17 +294,14 @@ function Tabla() {
                                     <p>{numsRomanos[cuatri]}</p>
                                 </TableCell>
                                 <TableCell className='py-8 md:py-10'>
-                                    <div className='grid gap-8 place-items-center'
+                                    <div className='grid gap-8 place-items-center w-full overflow-x-auto pb-4'
                                         style={{ gridTemplateColumns: `repeat(${materiasCuatri.length}, minmax(0, 1fr))` }}
                                     >
                                         {materiasCuatri.map((materia, index) => (
                                             <MateriaCard
                                                 key={materia.codigo != "N/A" ? materia.codigo : (materia.codigo + `${index}`)} // Le hago el id único porque es buena práctica
                                                 materia={materia} //Paso la materia
-                                                estado={
-                                                    progreso[materia.codigo] ||
-                                                    inicializarMateria(materia)
-                                                }
+                                                estado={progreso[materia.codigo]}
                                                 actualizarEstados={cambioDeEstado}
                                             />
                                         ))}

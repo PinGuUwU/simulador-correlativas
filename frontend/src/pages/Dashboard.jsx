@@ -28,9 +28,6 @@ function Dashboard() {
                 <button onClick={zoomOut} className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-bold">
                     ➖
                 </button>
-                <span className="font-semibold text-gray-600 min-w-[60px] text-center">
-                    {Math.round(escala * 100)}%
-                </span>
                 <button onClick={zoomIn} className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-bold">
                     ➕
                 </button>

@@ -5,3 +5,7 @@
 
 /* Le decimos dónde buscar las clases de los componentes */
 @source "../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}";
+
+body {
+    font-family: 'Inter', sans-serif;
+}

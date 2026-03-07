@@ -1,10 +1,14 @@
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/react"
 
-function MateriaCard({ materia, estado, actualizarEstados }) {
+function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {
     //El estado de parámetro lo uso únicamente para inicializar el estadoLocal de cada tarjeta
 
-    const actualizar = () => {
-        actualizarEstados(materia.codigo, materia.correlativas)
+    const interaccion = () => {
+        if (modo) {
+            actualizarEstados(materia.codigo, materia.correlativas)
+        } else {
+            abrirInfo(materia)
+        }
     }
 
     const estilosSegunEstado = {
@@ -18,13 +22,23 @@ function MateriaCard({ materia, estado, actualizarEstados }) {
 
     return (
         <div className=''>
-            <Card className={`flex  h-35 w-55 hover border-6 transition-colors duration-300 ${estilo} hover:font-bold font-medium`}
+            <Card className={`w-full hover border-3 transition-colors duration-300 ${estilo} hover:font-bold font-medium`}
                 isPressable
-                onPress={() => { actualizar() }}
+                onPress={() => { interaccion() }}
             >
-                <CardHeader className='justify-center'>{materia.codigo}</CardHeader>
-                <CardBody className='text-center grow overflow-hidden'>{materia.nombre}</CardBody>
-                <CardFooter className='justify-center'>{estado}</CardFooter>
+                {/* <CardHeader className='justify-center'>{materia.codigo}</CardHeader> */}
+                <CardHeader> Simbolo de estado | {estado}</CardHeader>
+                {/* <CardBody className='text-center'>{materia.nombre}</CardBody> */}
+                <CardBody>
+                    <div>
+                        {materia.codigo}
+                    </div>
+                    <div className="truncate">
+                        {materia.nombre}
+                    </div>
+                </CardBody>
+                {/* <CardFooter className='justify-center'>{estado}</CardFooter> */}
+                <CardFooter>{materia.anio}° Año * C{Number(materia.cuatrimestre)}</CardFooter>
             </Card>
         </div>
     )

@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
-import MateriaCard from '../components/MateriaCard'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react'
+import React, { useEffect, useState } from 'react'
+import MateriaCard from './MateriaCard'
+import { ButtonGroup, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, Switch, useDisclosure } from '@heroui/react'
 
-function Tabla() {
+function MateriasList() {
     //Estados para guardar las materias y para mostrar una imagen de cargando
     const [materias, setMaterias] = useState([])
+    const [modo, setModo] = useState(false) //Para saber si se está editando el estado o no
+    const [infoMateria, setInfoMateria] = useState()
     const [cargando, setCargando] = useState(true)
     const bloquear = 'Bloqueado'
     const desbloquear = 'Desbloqueado'
@@ -32,6 +34,7 @@ function Tabla() {
                     progresoInicial[m.codigo] = (m.correlativas.length > 0 ? 'Bloqueado' : estadosPosibles[0])
                 })
                 setProgreso(progresoInicial)
+
 
                 //Ya no está cargando porque ya tenemos la data
                 setCargando(false)
@@ -264,65 +267,105 @@ function Tabla() {
 
     }
 
-    //Ordeno las materias dentro del array cuatrimestres, para poder mostrarlas en orden y separarlas por cuatrimestre
-    const cuatrimestres = [...new Set(materias.map((m) => Number(m.cuatrimestre)))].sort((a, b) => a - b)
+    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
+    //Abrir la info de una materia con Drawer de HeroUI
+    const abrirInfo = (materia) => {
+        setInfoMateria(materia)
+        onOpen()
+    }
 
+
+    //Ordeno las materias dentro del array cuatrimestres, para poder mostrarlas en orden y separarlas por cuatrimestre
+    const anios = [...new Set(materias.map((m) => Number(m.anio)))].sort((a, b) => a - b)
     return (
-        <div className=''>
-            {//Mientras se están cargando las materias
-                cargando && !materias
-                //Mostrar un cosito de carga de HeroUI
+        <div>
+            <div className='text-center'>
+                <Switch
+                    color="success"
+                    onChange={() => setModo(!modo)}
+                    endContent={<div>off</div>}
+                    startContent={<div>on</div>}
+                >Edit mode</Switch>
+            </div>
+            {anios.map((anio) => {
+                //Me quedo con las materias de este año
+                const materiasAnio = materias.filter((m) => Number(m.anio) === anio)
+                //Hago el bloque visual del año
+                return (
+                    <div key={anio}>
+                        <div>{anio}° Año</div>
+                        <div>
+                            {[1, 2].map((cuatri) => {
+                                //Me quedo con las materias que pertenecen a este cuatrimestre (primer o segundo cuatri)
+                                const materiasCuatri = materiasAnio.filter((m) => (((Number(m.cuatrimestre) % 2 === 0) ? 2 : 1)) === cuatri)
+                                return (
+                                    <div key={cuatri}>
+                                        <div>{cuatri}° Cuatrimestre</div>
+                                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
+                                            {
+                                                materiasCuatri.map((materia, index) => (
+                                                    <MateriaCard
+                                                        key={materia.codigo != "N/A" ? materia.codigo : (materia.codigo + `${index}`)}
+                                                        materia={materia}
+                                                        estado={progreso[materia.codigo]}
+                                                        actualizarEstados={cambioDeEstado}
+                                                        modo={modo}
+                                                        abrirInfo={() => abrirInfo(materia)}
+                                                    />
+                                                ))
+                                            }
+                                        </div>
+                                    </div>
+                                )
+
+                            })}
+                        </div>
+                    </div>
+                )
+            })
             }
 
-            {/* nuevo */}
+            {/* Drawer de info de las materiasd */}
+            <Drawer isOpen={isOpen} onOpenChange={onOpenChange}>
+                <DrawerContent>
+                    {(onClose) => (
+                        <>
+                            {infoMateria ? (
+                                <>
+                                    <DrawerHeader>
+                                        <div>Detalle de Materia</div>
+                                        {/* poner un divider */}
+                                        {infoMateria.codigo}<br></br>
+                                        {infoMateria.nombre} <br></br>
+                                        {infoMateria.estado} | {infoMateria.anio}° Año | Cuatrimestre {infoMateria.cuatrimestre}
+                                        Descripción: Agregarle descripción a las materias
+                                    </DrawerHeader>
+                                    <DrawerBody>
+                                        <div>
+                                            Correlativas para cursar
+                                            Mapear correlativas con estado disponible
+                                        </div>
+                                        <div>
+                                            Correlativas para rendir examen final
+                                            mapear correlativas con estado regular
+                                        </div>
+                                        A cada una que mapee tengo que ponerle el estado, ya sea con simbolo o palabra de estado
 
+                                    </DrawerBody>
+                                    <DrawerFooter>
 
-            {/* antiguo */}
-            <Table isStriped aria-label="Plan de estudios">
-                <TableHeader>
-                    <TableColumn className='text-center'>Cuatrimestre</TableColumn>
-                    <TableColumn className='text-center'>Materias</TableColumn>
-                </TableHeader>
+                                        {/* Acá agregar el consejo */}
+                                    </DrawerFooter>
 
-                <TableBody>
-                    {cuatrimestres.map((cuatri) => {
-                        // Me quedo con las materias de este cuatrimestre
-                        const materiasCuatri = materias.filter((m) => Number(m.cuatrimestre) === cuatri)
+                                </>
+                            ) : <DrawerBody>Cargando contenido...</DrawerBody>}
 
-                        //Hago el bloque visual del cuatrimestre
-                        return (
-                            <TableRow key={cuatri}>
-                                <TableCell className='text-center p-6'>
-                                    <p>
-                                        Cuatrimestre {cuatri}
-                                    </p>
-                                    <p>{numsRomanos[cuatri]}</p>
-                                </TableCell>
-                                <TableCell className='py-8 md:py-10'>
-                                    <div className='grid gap-8 place-items-center w-full overflow-x-auto pb-4'
-                                        style={{ gridTemplateColumns: `repeat(${materiasCuatri.length}, minmax(0, 1fr))` }}
-                                    >
-                                        {materiasCuatri.map((materia, index) => (
-                                            <MateriaCard
-                                                key={materia.codigo != "N/A" ? materia.codigo : (materia.codigo + `${index}`)} // Le hago el id único porque es buena práctica
-                                                materia={materia} //Paso la materia
-                                                estado={progreso[materia.codigo]}
-                                                actualizarEstados={cambioDeEstado}
-                                            />
-                                        ))}
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )
-                    })
-                    }
-                </TableBody>
-            </Table>
+                        </>
+                    )}
+                </DrawerContent>
+            </Drawer>
         </div>
     )
 }
 
-
-
-
-export default Tabla
+export default MateriasList

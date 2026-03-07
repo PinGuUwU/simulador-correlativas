@@ -27,7 +27,9 @@ function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {
                 onPress={() => { interaccion() }}
             >
                 {/* <CardHeader className='justify-center'>{materia.codigo}</CardHeader> */}
-                <CardHeader> Simbolo de estado | {estado}</CardHeader>
+                <CardHeader>
+
+                    | {estado}</CardHeader>
                 {/* <CardBody className='text-center'>{materia.nombre}</CardBody> */}
                 <CardBody>
                     <div>

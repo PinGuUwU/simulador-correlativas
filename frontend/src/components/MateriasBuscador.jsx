@@ -1,11 +1,14 @@
 import { Autocomplete } from '@heroui/react'
 import React from 'react'
 
-function MateriasBuscador() {
+function MateriasBuscador({ }) {
     return (
         <div>
             {/* Pensar si vale la pena tener un buscador de materias */}
             {/* Qué mostraría? */}
+
+            {/* Zona pestañas por años */}
+
         </div>
     )
 }

@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react'
 import MateriaCard from './MateriaCard'
 import { ButtonGroup, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, Switch, useDisclosure } from '@heroui/react'
 
-function MateriasList() {
-    //Estados para guardar las materias y para mostrar una imagen de cargando
-    const [materias, setMaterias] = useState([])
+function MateriasList({ progreso, setProgreso, materias, setMaterias }) {
     const [modo, setModo] = useState(false) //Para saber si se está editando el estado o no
     const [infoMateria, setInfoMateria] = useState()
     const [cargando, setCargando] = useState(true)
@@ -12,7 +10,6 @@ function MateriasList() {
     const desbloquear = 'Desbloqueado'
     const numsRomanos = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"]
     const estadosPosibles = ['Disponible', 'Regular', 'Aprobado']
-    const [progreso, setProgreso] = useState({}) //Los estados de cada tarjeta de cada materia
     //Simulacion del plan elegido
     const plan = "17.13"
     //Busca las materias desde la base de datos, en base al plan seleccionado

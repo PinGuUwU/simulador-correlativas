@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@awesome.me/webawesome": "^3.3.1",
+    "@fortawesome/fontawesome-free": "^7.2.0",
     "@fortawesome/fontawesome-svg-core": "^7.2.0",
     "@fortawesome/react-fontawesome": "^3.2.0",
     "@heroui/card": "^2.2.27",

@@ -8,10 +8,12 @@ import Tabla from './pages/Tabla'
 
 function App() {
     const [count, setCount] = useState(0)
+    //Simulo la carrera, en el futuro debo hacer el fetch de plan en el dashboard y  de ahi pasar todo
+    const carrera = "Livenciatura en Sistemas de Información"
 
     return (
         <BrowserRouter>
-            <NavBar />
+            <NavBar carrera={carrera} />
             <main>
                 <Routes>
                     <Route path='/' element={<Dashboard />} />

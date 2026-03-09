@@ -1,121 +1,94 @@
 import { Card, CardBody, CardFooter, CardHeader } from '@heroui/card'
 import { Progress } from '@heroui/react'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 function MateriasProgreso({ progreso, materias }) {
-    //Calculo los datos que voy a mostrar
-    useEffect(() => {
-        if (progreso.length < 0) return
-        let materiasAprobadas = 0
-        let materiasDisponibles = 0
-        let materiasBloqueadas = 0
-        let materiasRegulares = 0
-        materias.forEach((m) => {
-            switch (progreso[m.codigo]) {
-                case "Disponible":
-                    materiasDisponibles += 1
-                    break;
-                case "Regular":
-                    materiasRegulares += 1
-                    break;
-                case "Aprobada":
-                    materiasAprobadas += 1
-                    break;
-                default:
-                    materiasBloqueadas += 1
-                    break;
-            }
-        })
-
-    }, [progreso])
-
-    const materiasAprobadas = materias.filter((m) => progreso[m.codigo] === "Aprobado").length
-    const materiasDisponibles = materias.filter((m) => progreso[m.codigo] === "Disponible").length
-    const materiasRegulares = materias.filter((m) => progreso[m.codigo] === "Regular").length
-    const materiasBloqueadas = materias.filter((m) => progreso[m.codigo] === "Bloqueado").length
-
+    // 1. Cálculos de datos (Lógica optimizada)
     const materiasTotales = materias.length
+    const stats = [
+        {
+            label: "Aprobadas",
+            count: materias.filter(m => progreso[m.codigo] === "Aprobado").length,
+            color: "success",
+            icon: "fa-check-double",
+            accent: "green",
+            bg: "bg-green-50/50"
+        },
+        {
+            label: "Disponibles",
+            count: materias.filter(m => progreso[m.codigo] === "Disponible").length,
+            color: "primary",
+            icon: "fa-unlock",
+            accent: "cyan",
+            bg: "bg-blue-50/50"
+        },
+        {
+            label: "Regulares",
+            count: materias.filter(m => progreso[m.codigo] === "Regular").length,
+            color: "warning",
+            icon: "fa-clock",
+            accent: "amber",
+            bg: "bg-amber-50/50"
+        },
+        {
+            label: "Bloqueadas",
+            count: materias.filter(m => progreso[m.codigo] === "Bloqueado").length,
+            color: "default",
+            icon: "fa-lock",
+            accent: "slate",
+            bg: "bg-slate-50/50"
+        }
+    ]
 
-    const calcularProgreso = (cant) => {
-        return (cant * 100) / materiasTotales
-    }
+    const calcularPorcentaje = (cant) => (materiasTotales > 0 ? (cant * 100) / materiasTotales : 0)
 
     return (
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
-            <Card className='px-4 border-4 border-green-200'>
-                <CardHeader>
-                    Materias Aprobadas
-                </CardHeader>
-                <CardBody className='flex flex-row justify-between'>
-                    <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 my-8">
+            {stats.map((stat, index) => (
+                <Card
+                    key={index}
+                    className={`border-none shadow-sm hover:shadow-md transition-shadow duration-300 ${stat.bg}`}
+                >
+                    <CardHeader className="pb-0 pt-4 px-5 flex-col items-start">
+                        <p className="text-tiny uppercase font-bold text-slate-400 tracking-wider">
+                            {stat.label}
+                        </p>
+                    </CardHeader>
 
-                        {materiasAprobadas}
-                    </div>
-                    <div className='bg-green-950 p-3 rounded-4xl border-green-400 border-3 shadow-md shadow-green-200 h-min w-min'>
-                        <i className="fa-solid fa-arrow-trend-up text-xl text-green-400 "></i>
-                    </div>
-                </CardBody>
-                <CardFooter>
-                    <div className="w-full my-1">
-                        <Progress aria-label="progreso aprobadas" color="success" size="sm" value={calcularProgreso(materiasAprobadas)} />
-                    </div>
-                </CardFooter>
-            </Card>
-            <Card className='px-4 border-4 border-blue-200'>
-                <CardHeader>
-                    Materias Disponibles
-                    {/* Agregarle que si haces click o con hover sale una ventanita con más info o un simbolo de ? */}
-                </CardHeader>
-                <CardBody className='flex flex-row justify-between'>
-                    <div>
-                        {materiasDisponibles}
-                    </div>
-                    <div className='bg-blue-950 p-3 rounded-4xl border-cyan-400 border-3 shadow-md shadow-cyan-200 h-min w-min'>
-                        <i className="fa-solid fa-arrow-trend-up text-xl text-cyan-400 "></i>
-                    </div>
-                </CardBody>
-                <CardFooter>
-                    <div className="w-full my-1">
-                        <Progress aria-label="progreso disponibles" size="sm" value={calcularProgreso(materiasDisponibles)} />
-                    </div>
-                </CardFooter>
-            </Card>
-            <Card className='px-4 border-4 border-amber-200'>
-                <CardHeader>
-                    Materias Regulares
-                </CardHeader>
-                <CardBody className='flex flex-row justify-between'>
-                    <div>
-                        {materiasRegulares}
-                    </div>
-                    <div className='bg-yellow-950 p-3 rounded-4xl border-amber-300 border-3 shadow-md shadow-amber-200 h-min w-min'>
-                        <i className="fa-solid fa-arrow-trend-up text-xl text-amber-400 "></i>
-                    </div>
-                </CardBody>
-                <CardFooter>
-                    <div className="w-full my-1">
-                        <Progress aria-label="progreso regulares" color="warning" size="sm" value={calcularProgreso(materiasRegulares)} />
-                    </div>
-                </CardFooter>
-            </Card>
-            <Card className='px-4 border-4 border-gray-200'>
-                <CardHeader>
-                    Materias Bloqueadas
-                </CardHeader>
-                <CardBody className='flex flex-row justify-between'>
-                    <div>
-                        {materiasBloqueadas}
-                    </div>
-                    <div className='bg-gray-950 p-3 rounded-4xl border-gray-400 border-3 shadow-md shadow-gray-200 h-min w-min'>
-                        <i className="fa-solid fa-arrow-trend-up text-xl text-gray-400"></i>
-                    </div>
-                </CardBody>
-                <CardFooter>
-                    <div className="w-full my-1">
-                        <Progress aria-label="progreso bloqueadas" color="default" size="sm" value={calcularProgreso(materiasBloqueadas)} />
-                    </div>
-                </CardFooter>
-            </Card>
+                    <CardBody className="py-4 px-5 flex flex-row items-center justify-between overflow-visible">
+                        <h4 className="font-black text-4xl text-slate-800">
+                            {stat.count}
+                        </h4>
+
+                        {/* Contenedor del Icono Estilo "Neon" del prototipo */}
+                        <div className={`
+              flex items-center justify-center
+              w-12 h-12 rounded-full border-2 bg-slate-900
+              border-${stat.accent}-400/50 
+              shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.4)]
+              shadow-${stat.accent}-400/30
+            `}>
+                            <i className={`fa-solid ${stat.icon} text-${stat.accent}-400 text-lg`}></i>
+                        </div>
+                    </CardBody>
+
+                    <CardFooter className="px-5 pb-5">
+                        <div className="flex flex-col w-full gap-2">
+                            <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
+                                <span>Avance</span>
+                                <span>{Math.round(calcularPorcentaje(stat.count))}%</span>
+                            </div>
+                            <Progress
+                                aria-label={`Progreso ${stat.label}`}
+                                color={stat.color}
+                                size="sm"
+                                value={calcularPorcentaje(stat.count)}
+                                className="max-w-md"
+                            />
+                        </div>
+                    </CardFooter>
+                </Card>
+            ))}
         </div>
     )
 }

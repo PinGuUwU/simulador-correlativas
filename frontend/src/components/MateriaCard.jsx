@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardBody, CardFooter } from "@heroui/react"
+import { Card, CardHeader, CardBody, CardFooter, Chip } from "@heroui/react"
 
 function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {
     //El estado de parámetro lo uso únicamente para inicializar el estadoLocal de cada tarjeta
@@ -17,7 +17,22 @@ function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {
         'Regular': 'bg-yellow-50 border-yellow-200 hover:bg-yellow-200 hover:border-yellow-400',
         'Aprobado': 'bg-green-100 border-green-500 hover:bg-green-200 hover:border-green-400'
     }
+    const colorsTag = {
+        'Bloqueado': "default",
+        'Disponible': "primary",
+        'Regular': "warning",
+        'Aprobado': "success"
+    }
 
+    const symbols = {
+        'Bloqueado': "fa-solid fa-lock",
+        'Disponible': "fa-solid fa-lock-open",
+        'Regular': "fa-regular fa-clock",
+        'Aprobado': "fa-regular fa-circle-check"
+    }
+
+    const symbol = symbols[estado]
+    const colorTag = colorsTag[estado]
     const estilo = estilosSegunEstado[estado]
 
     return (
@@ -27,9 +42,14 @@ function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {
                 onPress={() => { interaccion() }}
             >
                 {/* <CardHeader className='justify-center'>{materia.codigo}</CardHeader> */}
-                <CardHeader>
-
-                    | {estado}</CardHeader>
+                <CardHeader className="flex justify-between ">
+                    <Chip color={colorTag} variant="flat">
+                        <i className={symbol}></i>
+                    </Chip>
+                    <Chip color={colorTag} variant="flat">
+                        <div className="font-bold">
+                            {estado}</div></Chip>
+                </CardHeader>
                 {/* <CardBody className='text-center'>{materia.nombre}</CardBody> */}
                 <CardBody>
                     <div>

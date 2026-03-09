@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import materiaUtils from "../utils/materiasUtils"
+import materiasUtils from "../utils/materiasUtils"
 
 const useProgresoMaterias = (progreso, setProgreso, materias) => {
     //Por la situación especial de las optativas, debo tener un useEffect para que cuando se actualice el progreso, revisar si hay que actualizar las optativas
@@ -18,10 +18,10 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
                 //Verifico que todas las materias hasta el cuatri 7 estén aprobadas
                 const hayMateriasPendientes = materias
                     .filter(m => Number(m.cuatrimestre) <= cuatriLimite)
-                    .some(m => progreso[m.codigo] !== materiaUtils.estadosPosibles[2])
-                if (hayMateriasPendientes && progreso[op.codigo] !== materiaUtils.bloquear) {
+                    .some(m => progreso[m.codigo] !== materiasUtils.estadosPosibles[2])
+                if (hayMateriasPendientes && progreso[op.codigo] !== materiasUtils.bloquear) {
                     //Entonceshay materias no aprobadas, se bloquea la optativa
-                    nuevoProgreso[op.codigo] = materiaUtils.bloquear
+                    nuevoProgreso[op.codigo] = materiasUtils.bloquear
                     huboCambios = true
                 }
             })
@@ -46,11 +46,11 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
             //Verifico si se desaprobo alguna materia anteriormente aprobada
             const hayMateriasPendientes = materias
                 .filter((m) => m.nombre.toLowerCase() != tesina.nombre.toLowerCase())
-                .some(m => progreso[m.codigo] !== materiaUtils.estadosPosibles[2])
+                .some(m => progreso[m.codigo] !== materiasUtils.estadosPosibles[2])
 
-            if (hayMateriasPendientes && progreso[tesina.codigo] != materiaUtils.bloquear) {
+            if (hayMateriasPendientes && progreso[tesina.codigo] != materiasUtils.bloquear) {
                 //Si hay materias pendientes y la tesina no está bloqueada, la bloqueo y aviso que se debe actualizar el progreso
-                nuevoProgreso[tesina.codigo] = materiaUtils.bloquear
+                nuevoProgreso[tesina.codigo] = materiasUtils.bloquear
                 huboCambios = true
             }
         }
@@ -69,7 +69,7 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
                 if (cuatriMateria <= cuatriLimite) {
                     //Si es mejor o igual al cuatrimestre elegido
                     //Si el cuatrimeste de la materia es menor o igual al que tenemos, la apruebo
-                    nuevoProgreso[m.codigo] = materiaUtils.estadosPosibles[2]
+                    nuevoProgreso[m.codigo] = materiasUtils.estadosPosibles[2]
                     //Ya que se modifico, la guardo
                     materiasModificadas.push(m.codigo)
                 }
@@ -85,8 +85,8 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
 
         codigosCorrelativas.forEach((codigo) => {
             //si la materia no está regularizada o aprobada 
-            if (!([materiaUtils.estadosPosibles[1], materiaUtils.estadosPosibles[2]].includes(nuevoProgreso[codigo]))) {
-                nuevoProgreso[codigo] = materiaUtils.estadosPosibles[1]
+            if (!([materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2]].includes(nuevoProgreso[codigo]))) {
+                nuevoProgreso[codigo] = materiasUtils.estadosPosibles[1]
                 //Ya que fue modificada, la agrego al array de materias modificadas para luego revisar si tiene que desbloquear dependencias
                 materiasModificadas.push(codigo)
                 //Reviso también para regularizar sus correlativas si es que tiene
@@ -100,11 +100,11 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
     }
     const bloquearDependencias = (codigoMateria, nuevoProgreso) => {
         //aprobado -> disponibes
-        //Debe materiaUtils.bloquear a las materias cuyas correlativas incluyen su código
+        //Debe materiasUtils.bloquear a las materias cuyas correlativas incluyen su código
         materias.forEach((m) => {
-            if (m.correlativas.includes(codigoMateria) && nuevoProgreso[m.codigo] != materiaUtils.bloquear) {
+            if (m.correlativas.includes(codigoMateria) && nuevoProgreso[m.codigo] != materiasUtils.bloquear) {
                 //Si esta materia tiene como correlativa codigoMateria y no está bloqueada, entonces la bloqueo
-                nuevoProgreso[m.codigo] = materiaUtils.bloquear
+                nuevoProgreso[m.codigo] = materiasUtils.bloquear
                 //Busco a ver si hay otras materias dependientes a esta, que acaba de ser bloqueada, para bloquearlas
                 bloquearDependencias(m.codigo, nuevoProgreso)
             }
@@ -114,10 +114,10 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
         //bloqueado -> disponibles
         //Debo desbloquear las materias que tengan esta materia como correlativa y el resto de correlativas también estén regular o aprobadas
         materias.forEach((m) => {
-            const todasBien = m.correlativas.every(c => ([materiaUtils.estadosPosibles[1], materiaUtils.estadosPosibles[2]].includes(nuevoProgreso[c])))
-            const buenEstado = [materiaUtils.estadosPosibles[1], materiaUtils.estadosPosibles[2]].includes(nuevoProgreso[m.codigo])
+            const todasBien = m.correlativas.every(c => ([materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2]].includes(nuevoProgreso[c])))
+            const buenEstado = [materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2]].includes(nuevoProgreso[m.codigo])
             if (m.correlativas.includes(codigoMateria) && todasBien && !buenEstado) {
-                nuevoProgreso[m.codigo] = materiaUtils.estadosPosibles[0]
+                nuevoProgreso[m.codigo] = materiasUtils.estadosPosibles[0]
                 //Creo que acá no necesito hacer recursividad como en otras funciones, con una pasada es suficiente
             }
         })
@@ -129,8 +129,8 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
         // regular -> aprobado
         codigosCorrelativas.forEach((codigo) => {
             // Si su correlativa no está aprobada, la apruebo
-            if (nuevoProgreso[codigo] != materiaUtils.estadosPosibles[2]) {
-                nuevoProgreso[codigo] = materiaUtils.estadosPosibles[2]
+            if (nuevoProgreso[codigo] != materiasUtils.estadosPosibles[2]) {
+                nuevoProgreso[codigo] = materiasUtils.estadosPosibles[2]
                 // Agrego la materia a materias Modificadas
                 materiasModificadas.push(codigo)
                 //Reviso también para aprobar sus correlativas si es que tiene
@@ -144,19 +144,19 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
 
     //Función para poder actualizar el estado individual de cada materia
     const actualizarEstado = (estadoMateria) => {
-        const posEstado = materiaUtils.estadosPosibles.indexOf(estadoMateria)
+        const posEstado = materiasUtils.estadosPosibles.indexOf(estadoMateria)
         if (posEstado === 0) {
             //Si está disponible -> regular
-            return materiaUtils.estadosPosibles[posEstado + 1]
-        } else if (estadoMateria === materiaUtils.bloquear) {
+            return materiasUtils.estadosPosibles[posEstado + 1]
+        } else if (estadoMateria === materiasUtils.bloquear) {
             //Si está bloqueado -> regular
-            return materiaUtils.estadosPosibles[1]
-        } else if (posEstado === (materiaUtils.estadosPosibles.length - 1)) {
+            return materiasUtils.estadosPosibles[1]
+        } else if (posEstado === (materiasUtils.estadosPosibles.length - 1)) {
             //Si está aprobado -> disponible
-            return materiaUtils.estadosPosibles[0]
+            return materiasUtils.estadosPosibles[0]
         } else {
             //Si está regular -> aprobado
-            return materiaUtils.estadosPosibles[2]
+            return materiasUtils.estadosPosibles[2]
         }
 
 
@@ -188,13 +188,13 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
             aprobarHastaCuatri(cuatrimestre, nuevoProgreso, materiasModificadas)
         } else {
             //4 casos posibles:
-            if ((estadoInicial === materiaUtils.bloquear || estadoInicial === materiaUtils.estadosPosibles[0]) && estadoNuevo === materiaUtils.estadosPosibles[1]) {
+            if ((estadoInicial === materiasUtils.bloquear || estadoInicial === materiasUtils.estadosPosibles[0]) && estadoNuevo === materiasUtils.estadosPosibles[1]) {
                 // 1. Bloqueado -> Regular || 2. disponible -> regular
                 //Solo si tiene correlativas
                 if (materiaActual.correlativas.length > 0) {
                     regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
                 }
-            } else if (estadoInicial === materiaUtils.estadosPosibles[1] && estadoNuevo === materiaUtils.estadosPosibles[2]) {
+            } else if (estadoInicial === materiasUtils.estadosPosibles[1] && estadoNuevo === materiasUtils.estadosPosibles[2]) {
                 //(caso extra, si se necesita tener todas aprobadas entonces es la tesina)
 
                 //3. regular -> aprobado
@@ -202,7 +202,7 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
                 if (materiaActual.correlativas.length > 0) {
                     aprobarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas)
                 }
-            } else if (estadoInicial === materiaUtils.estadosPosibles[2] && estadoNuevo === materiaUtils.estadosPosibles[0]) {
+            } else if (estadoInicial === materiasUtils.estadosPosibles[2] && estadoNuevo === materiasUtils.estadosPosibles[0]) {
                 //4. aprobado -> disponible
                 bloquearDependencias(codigoMateria, nuevoProgreso)
             } else {

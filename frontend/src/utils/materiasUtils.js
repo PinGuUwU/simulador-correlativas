@@ -2,7 +2,7 @@
 const obtenerEstiloPorEstado = (estado) => {
     switch (estado) {
         case "Aprobado":
-            return { icon: "fa-check-double", accent: "green", colorText: "text-green-500" }
+            return { icon: "fa-circle-check", accent: "green", colorText: "text-green-500" }
         case "Disponible":
             return { icon: "fa-unlock", accent: "cyan", colorText: "text-cyan-500" }
         case "Regular":
@@ -14,21 +14,10 @@ const obtenerEstiloPorEstado = (estado) => {
 }
 
 //Obtener las materias Correlativas Disponibles
-const buscarMateriasCorrelativasDisponibles = (codigosCorrelativas, materias, progreso) => {
+const buscarMateriasCorrelativas = (codigosCorrelativas, materias, progreso) => {
     let materiasEncontradas = []
     materias.forEach((m) => {
-        if (codigosCorrelativas.includes(m.codigo) && progreso[m.codigo] === estadosPosibles[0]) {
-
-            materiasEncontradas.push(m)
-        }
-    })
-    return materiasEncontradas
-}
-//Obtener las materias Correlativas Regulares
-const buscarMateriasCorrelativasRegulares = (codigosCorrelativas, materias, progreso) => {
-    let materiasEncontradas = []
-    materias.forEach((m) => {
-        if (codigosCorrelativas.includes(m.codigo) && progreso[m.codigo] === estadosPosibles[1]) {
+        if (codigosCorrelativas.includes(m.codigo)) {
 
             materiasEncontradas.push(m)
         }
@@ -42,8 +31,7 @@ const numsRomanos = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX",
 
 export default {
     estadosPosibles,
-    buscarMateriasCorrelativasDisponibles,
-    buscarMateriasCorrelativasRegulares,
+    buscarMateriasCorrelativas,
     obtenerEstiloPorEstado,
     bloquear
 }

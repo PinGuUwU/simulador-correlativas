@@ -11,7 +11,6 @@ function MateriasList({ progreso, setProgreso, materias }) {
     const [mostrarSwitchFlotante, setMostrarSwitchFlotante] = useState(false)
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias)
 
-
     // Observador para saber si el switch principal se ve
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -150,7 +149,11 @@ function MateriasList({ progreso, setProgreso, materias }) {
 
             {/* Drawer de info de las materiasd */}
             <DetalleMateriaModal
-
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+                infoMateria={infoMateria}
+                materias={materias}
+                progreso={progreso}
             />
 
         </div >

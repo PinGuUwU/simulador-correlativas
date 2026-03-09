@@ -1,5 +1,5 @@
 import { Card, CardBody, CardFooter, CardHeader } from '@heroui/card'
-import { Progress } from '@heroui/react'
+import { Button, Popover, PopoverContent, PopoverTrigger, Progress } from '@heroui/react'
 import React from 'react'
 
 function MateriasProgreso({ progreso, materias }) {
@@ -12,6 +12,8 @@ function MateriasProgreso({ progreso, materias }) {
             color: "success",
             icon: "fa-check-double",
             accent: "green",
+            tittle: "Materias aprobadas",
+            text: "Un peso menos",
             bg: "bg-green-50/50"
         },
         {
@@ -20,6 +22,8 @@ function MateriasProgreso({ progreso, materias }) {
             color: "primary",
             icon: "fa-unlock",
             accent: "cyan",
+            tittle: "Materias disponibles",
+            text: "Son las materias que podes cursar en el cuatrimestre correspondiente",
             bg: "bg-blue-50/50"
         },
         {
@@ -28,6 +32,8 @@ function MateriasProgreso({ progreso, materias }) {
             color: "warning",
             icon: "fa-clock",
             accent: "amber",
+            tittle: "Materias regulares",
+            text: "Tenes que rendir exámen final",
             bg: "bg-amber-50/50"
         },
         {
@@ -36,6 +42,8 @@ function MateriasProgreso({ progreso, materias }) {
             color: "default",
             icon: "fa-lock",
             accent: "slate",
+            tittle: "Materias bloqueadas",
+            text: "Tenes que regularizar las materias correlativas para cursarlas",
             bg: "bg-slate-50/50"
         }
     ]
@@ -49,10 +57,21 @@ function MateriasProgreso({ progreso, materias }) {
                     key={index}
                     className={`border-none shadow-sm hover:shadow-md transition-shadow duration-300 ${stat.bg}`}
                 >
-                    <CardHeader className="pb-0 pt-4 px-5 flex-col items-start">
+                    <CardHeader className="pb-0 pt-4 px-5 items-center flex justify-between text-center">
                         <p className="text-tiny uppercase font-bold text-slate-400 tracking-wider">
                             {stat.label}
                         </p>
+                        <Popover placement='bottom' showArrow={true}>
+                            <PopoverTrigger>
+                                <Button className='rounded-4xl'>?</Button>
+                            </PopoverTrigger>
+                            <PopoverContent>
+                                <div className="px-1 py-2">
+                                    <div className="text-small font-bold">{stat.tittle}</div>
+                                    <div className="text-tiny">{stat.text}</div>
+                                </div>
+                            </PopoverContent>
+                        </Popover>
                     </CardHeader>
 
                     <CardBody className="py-4 px-5 flex flex-row items-center justify-between overflow-visible">

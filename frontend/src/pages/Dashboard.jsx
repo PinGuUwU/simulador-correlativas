@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import MateriasList from '../components/MateriasList';
 import MateriasProgreso from '../components/MateriasProgreso';
 import ProgresoTotal from '../components/ProgresoTotal';
-import NavBar from '../components/NavBar';
 import { Spinner } from '@heroui/react';
 
 

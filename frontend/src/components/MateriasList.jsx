@@ -4,7 +4,7 @@ import { Chip, Switch, useDisclosure } from '@heroui/react'
 import DetalleMateriaModal from './modals/DetalleMateriaModal.jsx'
 import useProgresoMaterias from '../hooks/useProgresoMaterias.jsx'
 
-function MateriasList({ progreso, setProgreso, materias }) {
+function MateriasList({ progreso, setProgreso, materias, isProgressSticky }) {
     const [modo, setModo] = useState(false) //Para saber si se está editando el estado o no
     const [infoMateria, setInfoMateria] = useState()
     const topSwitchRef = useRef(null)
@@ -65,8 +65,8 @@ function MateriasList({ progreso, setProgreso, materias }) {
                 </Switch>
             </div>
             {/* Switch Flotante en la parte inferior derecha */}
-            {mostrarSwitchFlotante && (
-                <div className="fixed top-4 right-4 z-50 bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-slate-200">
+            {mostrarSwitchFlotante && isProgressSticky && (
+                <div className="fixed top-30 right-4 z-50 bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-slate-200">
                     <Switch
                         color="success"
                         isSelected={modo}

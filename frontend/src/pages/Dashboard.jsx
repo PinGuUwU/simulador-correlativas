@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MateriasList from '../components/MateriasList';
 import MateriasProgreso from '../components/MateriasProgreso';
 import ProgresoTotal from '../components/ProgresoTotal';
@@ -18,6 +18,10 @@ function Dashboard() {
     //Simulacion del plan elegido
     const plan = "17.13"
     //Busca las materias desde la base de datos, en base al plan seleccionado
+
+    //El sticky del progreso total
+    const headerRef = useRef(null)
+    const [isSticky, setIsSticky] = useState(false)
     useEffect(() => {
         const fetchMaterias = async () => {
             try {
@@ -68,11 +72,14 @@ function Dashboard() {
             )}
             {!cargando && (
                 <div>
-                    <NavBar />
                     <ProgresoTotal
                         carrera={carrera}
                         progress={progress}
-                        progreso={progreso} materias={materias}
+                        progreso={progreso}
+                        materias={materias}
+                        isSticky={isSticky}
+                        headerRef={headerRef}
+                        setIsSticky={setIsSticky}
                     />
                     <div className='mx-5 md:mx-10 lg:mx-15'>
                         <MateriasProgreso progreso={progreso} materias={materias} />
@@ -81,6 +88,7 @@ function Dashboard() {
                             setProgreso={setProgreso}
                             materias={materias}
                             cargando={cargando}
+                            isProgressSticky={isSticky}
                         />
                     </div>
                 </div>

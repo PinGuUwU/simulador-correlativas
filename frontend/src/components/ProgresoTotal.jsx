@@ -1,9 +1,7 @@
 import { Progress } from '@heroui/react'
 import { useEffect, useRef, useState } from 'react'
 
-function ProgresoTotal({ carrera, progress }) {
-    const [isSticky, setIsSticky] = useState(false)
-    const headerRef = useRef(null)
+function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) {
 
     useEffect(() => {
         const observer = new IntersectionObserver(

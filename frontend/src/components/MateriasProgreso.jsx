@@ -7,16 +7,6 @@ function MateriasProgreso({ progreso, materias }) {
     const materiasTotales = materias.length
     const stats = [
         {
-            label: "Aprobadas",
-            count: materias.filter(m => progreso[m.codigo] === "Aprobado").length,
-            color: "success",
-            icon: "fa-check-double",
-            accent: "green",
-            tittle: "Materias aprobadas",
-            text: "Un peso menos",
-            bg: "bg-green-50/50"
-        },
-        {
             label: "Disponibles",
             count: materias.filter(m => progreso[m.codigo] === "Disponible").length,
             color: "primary",
@@ -35,6 +25,16 @@ function MateriasProgreso({ progreso, materias }) {
             tittle: "Materias regulares",
             text: "Tenes que rendir exámen final",
             bg: "bg-amber-50/50"
+        },
+        {
+            label: "Aprobadas",
+            count: materias.filter(m => progreso[m.codigo] === "Aprobado").length,
+            color: "success",
+            icon: "fa-check-double",
+            accent: "green",
+            tittle: "Materias aprobadas",
+            text: "Un peso menos",
+            bg: "bg-green-50/50"
         },
         {
             label: "Bloqueadas",

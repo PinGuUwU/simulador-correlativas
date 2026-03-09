@@ -4,6 +4,7 @@ import MateriasList from '../components/MateriasList';
 import MateriasProgreso from '../components/MateriasProgreso';
 import ProgresoTotal from '../components/ProgresoTotal';
 import NavBar from '../components/NavBar';
+import { Spinner } from '@heroui/react';
 
 
 function Dashboard() {
@@ -60,21 +61,30 @@ function Dashboard() {
     const progress = Math.round((totalProgreso() * 100) / materias.length)
     return (
         <div className="overflow-hidden bg-gray-100">
-            <NavBar />
-            <ProgresoTotal
-                carrera={carrera}
-                progress={progress}
-                progreso={progreso} materias={materias}
-            />
-            <div className='mx-5 md:mx-10 lg:mx-15'>
-                <MateriasProgreso progreso={progreso} materias={materias} />
-                <MateriasList
-                    progreso={progreso}
-                    setProgreso={setProgreso}
-                    materias={materias}
-                    cargando={cargando}
-                />
-            </div>
+            {cargando && (
+                <div className='flex justify-center items-center h-screen'>
+                    < Spinner />
+                </div>
+            )}
+            {!cargando && (
+                <div>
+                    <NavBar />
+                    <ProgresoTotal
+                        carrera={carrera}
+                        progress={progress}
+                        progreso={progreso} materias={materias}
+                    />
+                    <div className='mx-5 md:mx-10 lg:mx-15'>
+                        <MateriasProgreso progreso={progreso} materias={materias} />
+                        <MateriasList
+                            progreso={progreso}
+                            setProgreso={setProgreso}
+                            materias={materias}
+                            cargando={cargando}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

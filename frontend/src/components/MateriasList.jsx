@@ -69,6 +69,7 @@ function MateriasList({ progreso, setProgreso, materias }) {
                 <div className="fixed top-4 right-4 z-50 bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-slate-200">
                     <Switch
                         color="success"
+                        isSelected={modo}
                         onChange={() => setModo(!modo)}
                         endContent={<span className="text-xs">OFF</span>}
                         startContent={<span className="text-xs">ON</span>}

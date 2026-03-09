@@ -1,8 +1,27 @@
 import { Progress } from '@heroui/react'
+import { useEffect, useRef, useState } from 'react'
 
 function ProgresoTotal({ carrera, progress }) {
+    const [isSticky, setIsSticky] = useState(false)
+    const headerRef = useRef(null)
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsSticky(!entry.isIntersecting)
+            }, {
+            threshold: 0,
+            rootMargin: "-80px 0px 0px 0px"
+        }
+        )
+        if (headerRef.current) {
+            observer.observe(headerRef.current)
+        }
+        return () => observer.disconnect()
+    }, [])
+
     return (
-        <header className="bg-white border border-slate-100 shadow-sm rounded-2xl p-6 md:p-8 flex flex-col gap-6 transition-all hover:shadow-md">
+        <header ref={headerRef} className="bg-white border border-slate-100 shadow-sm rounded-2xl p-6 md:p-8 flex flex-col gap-6 transition-all hover:shadow-md">
             {/* Sección Superior: Logo y Títulos */}
             <div className="flex flex-col md:flex-row md:items-center gap-5">
                 {/* Icono/Logo Estilizado */}
@@ -28,26 +47,37 @@ function ProgresoTotal({ carrera, progress }) {
             </div>
 
             {/* Sección Inferior: Barra de Progreso */}
-            <div className="w-full pt-6 border-t border-slate-50">
-                <div className="flex justify-between items-end mb-3">
-                    <div className="space-y-1">
-                        <span className="text-slate-400 text-xs uppercase tracking-widest font-bold">Estado Actual</span>
-                        <p className="text-slate-700 font-semibold">Progreso de la carrera</p>
-                    </div>
-                    <div className="text-right">
-                        <span className="text-2xl font-black text-secondary">{progress}%</span>
-                        <span className="text-slate-400 text-sm ml-1 font-medium">completado</span>
+            {/* Sección Inferior: Barra de Progreso */}
+            {/* Contenedor envolvente para evitar saltos de layout cuando se vuelve fixed */}
+            <div className={`${isSticky ? "h-[80px]" : "pt-6 border-t border-slate-50"}`}>
+                <div className={
+                    isSticky
+                        ? "fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md z-50 p-4 md:px-12 shadow-md border-b border-slate-200 animate-in slide-in-from-top duration-300"
+                        : "w-full"
+                }>
+                    <div className={`${isSticky ? "max-w-7xl mx-auto" : ""}`}>
+                        <div className="flex justify-between items-end mb-3">
+                            <div className="space-y-1">
+                                <span className="text-slate-400 text-xs uppercase tracking-widest font-bold">Estado Actual</span>
+                                <p className="text-slate-700 font-semibold">Progreso de la carrera</p>
+                            </div>
+                            <div className="text-right">
+                                <span className="text-2xl font-black text-secondary">{progress}%</span>
+                                <span className="text-slate-400 text-sm ml-1 font-medium">completado</span>
+                            </div>
+                        </div>
+
+                        <Progress
+                            value={progress}
+                            aria-label="Progreso total de la carrera"
+                            color="secondary"
+                            className="h-3 shadow-sm"
+                            showValueLabel={false}
+                        />
                     </div>
                 </div>
-
-                <Progress
-                    value={progress}
-                    aria-label="Progreso total de la carrera"
-                    color="secondary"
-                    className="h-3 shadow-sm"
-                    showValueLabel={false}
-                />
             </div>
+
         </header>
     )
 }

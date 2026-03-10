@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import NavBar from './components/NavBar'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import Dashboard from './pages/Dashboard'
+import Dashboard from './pages/Correlativas'
 import IniciarSesion from './pages/IniciarSesion'
 import Registrarse from './pages/Registrarse'
 import Tabla from './pages/Tabla'
+import Rutas from './routes/Rutas'
 
 function App() {
     const [count, setCount] = useState(0)
@@ -13,15 +14,12 @@ function App() {
 
     return (
         <BrowserRouter>
-            <NavBar carrera={carrera} />
-            <main>
-                <Routes>
-                    <Route path='/' element={<Dashboard />} />
-                    <Route path='/login' element={<IniciarSesion />} />
-                    <Route path='/register' element={<Registrarse />} />
-                    <Route path='/simulador' element={<Tabla />} />
-                </Routes>
-            </main>
+            <div className='flex'>
+                <NavBar />
+                <main>
+                    <Rutas />
+                </main>
+            </div>
         </BrowserRouter>
     )
 }

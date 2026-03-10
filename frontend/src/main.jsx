@@ -6,9 +6,7 @@ import App from './App.jsx'
 import './main.css'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <HeroUIProvider>
-      <App />
-    </HeroUIProvider>
-  </StrictMode>,
+  <HeroUIProvider>
+    <App />
+  </HeroUIProvider>
 )

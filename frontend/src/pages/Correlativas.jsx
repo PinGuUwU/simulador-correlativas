@@ -6,13 +6,13 @@ import ProgresoTotal from '../components/ProgresoTotal';
 import { Spinner } from '@heroui/react';
 
 
-function Dashboard() {
+function Correlativas() {
     //Estados para guardar las materias y para mostrar una imagen de cargando, además para contabilizar el progreso
     const [materias, setMaterias] = useState([])
     const [progreso, setProgreso] = useState([])
     const [cargando, setCargando] = useState(true)
     const estadosPosibles = ['Disponible', 'Regular', 'Aprobado']
-    //Simulo la carrera, en el futuro debo hacer el fetch de plan en el dashboard y  de ahi pasar todo
+    //Simulo la carrera, en el futuro debo hacer el fetch de plan en el Correlativas y  de ahi pasar todo
     const carrera = "Licenciatura en Sistemas de Información"
     //Simulacion del plan elegido
     const plan = "17.13"
@@ -96,4 +96,4 @@ function Dashboard() {
     );
 }
 
-export default Dashboard;
+export default Correlativas;

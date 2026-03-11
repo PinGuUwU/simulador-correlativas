@@ -47,21 +47,22 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
             {/* Sección Inferior: Barra de Progreso */}
             {/* Sección Inferior: Barra de Progreso */}
             {/* Contenedor envolvente para evitar saltos de layout cuando se vuelve fixed */}
-            <div className={`${isSticky ? "h-[80px]" : "pt-6 border-t border-slate-50"}`}>
+            <div className={isSticky ? "" : "pt-6 border-t"}>
                 <div className={
                     isSticky
-                        ? "fixed lg:flex-1 top-0 lg:right-0 left-0 w-full lg:w-[85%] xl:w-[90%] xl:ml-[12%] lg:ml-[15%] bg-white/90 backdrop-blur-md z-30 p-4 md:px-12 shadow-md border-b border-slate-200 animate-in slide-in-from-top duration-300"
+                        ? "fixed top-0 right-0 z-30  backdrop-blur-md p-4 bg-white/95 shadow-md border-b border-slate-200 animate-in slide-in-from-top duration-300 left-0 "
                         : "w-full"
                 }>
-                    <div className={`${isSticky ? "max-w-7xl mx-auto" : ""}`}>
-                        <div className="flex justify-between items-end mb-3">
+                    <div className={isSticky ? "max-w-7xl mx-auto lg:pl-64" : ""}>
+                        <div className="flex justify-between items-end mb-3 md:px-12">
                             <div className="space-y-1">
                                 <span className="text-slate-400 text-xs uppercase tracking-widest font-bold">Estado Actual</span>
                                 <p className="text-slate-700 font-semibold">Progreso de la carrera</p>
                             </div>
-                            <div className="text-right pr-[8%]">
-                                <span className="text-2xl font-black text-secondary pr-[20%] sm:p-0">{progress}%</span>
-                                <span className="text-slate-400 text-sm ml-1 font-medium hidden sm:flex">completado</span>
+                            <div className="text-right">
+                                {/* Eliminé los pr-[8%] y pr-[20%] manuales para usar un layout más fluido */}
+                                <span className="text-2xl font-black text-secondary">{progress}%</span>
+                                <span className="text-slate-400 text-sm ml-1 font-medium hidden sm:inline-block">completado</span>
                             </div>
                         </div>
 

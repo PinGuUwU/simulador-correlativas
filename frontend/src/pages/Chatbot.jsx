@@ -1,9 +1,9 @@
 import React from 'react'
 
-function Chatbot() {
+function ChatBot() {
     return (
-        <div>Chatbot</div>
+        <div>ChatBot</div>
     )
 }
 
-export default Chatbot
+export default ChatBot

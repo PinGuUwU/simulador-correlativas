@@ -1,22 +1,22 @@
 import React from 'react'
 import { useRoutes } from 'react-router-dom'
 import Correlativas from '../pages/Correlativas'
-import Equivalencias from '../components/Equivalencias'
-import ChatBot from '../components/ChatBot'
+import Equivalencias from '../pages/Equivalencias'
+import ChatBot from '../pages/Chatbot'
 
-const Rutas = () => {
+const Rutas = ({ plan }) => {
     const componentesRutas = useRoutes([
         {
             path: "/correlativas",
-            element: <Correlativas />
+            element: <Correlativas plan={plan} />
         },
         {
             path: "/equivalencias",
-            element: <Equivalencias />,
+            element: <Equivalencias plan={plan} />,
         },
         {
             path: "/chatbot",
-            element: <ChatBot />
+            element: <ChatBot plan={plan} />
         }
     ])
     return componentesRutas

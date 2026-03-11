@@ -1,12 +1,12 @@
 
 import { useEffect, useRef, useState } from 'react';
-import MateriasList from '../components/MateriasList';
-import MateriasProgreso from '../components/MateriasProgreso';
-import ProgresoTotal from '../components/ProgresoTotal';
+import MateriasList from '../components/Correlativas/MateriasList';
+import MateriasProgreso from '../components/Correlativas/MateriasProgreso';
+import ProgresoTotal from '../components/Correlativas/ProgresoTotal';
 import { Spinner } from '@heroui/react';
 
 
-function Correlativas() {
+function Correlativas({ plan }) {
     //Estados para guardar las materias y para mostrar una imagen de cargando, además para contabilizar el progreso
     const [materias, setMaterias] = useState([])
     const [progreso, setProgreso] = useState([])
@@ -14,13 +14,10 @@ function Correlativas() {
     const estadosPosibles = ['Disponible', 'Regular', 'Aprobado']
     //Simulo la carrera, en el futuro debo hacer el fetch de plan en el Correlativas y  de ahi pasar todo
     const carrera = "Licenciatura en Sistemas de Información"
-    //Simulacion del plan elegido
-    const plan = "17.13"
-    //Busca las materias desde la base de datos, en base al plan seleccionado
-
-    //El sticky del progreso total
     const headerRef = useRef(null)
+    //El sticky del progreso total
     const [isSticky, setIsSticky] = useState(false)
+    //Busca las materias desde la base de datos, en base al plan seleccionado
     useEffect(() => {
         const fetchMaterias = async () => {
             try {
@@ -49,7 +46,7 @@ function Correlativas() {
             }
         }
         fetchMaterias()
-    }, [])//Array vacío para que se ejecute una única vez
+    }, [plan])//Array vacío para que se ejecute una única vez
 
     //Calcular el progreso total para pasarselo al componente
     const totalProgreso = () => {

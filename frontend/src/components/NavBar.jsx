@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Drawer, DrawerContent, useDisclosure } from '@heroui/react';
+import { Button, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, useDisclosure } from '@heroui/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const NavLinks = () => {
@@ -50,7 +50,7 @@ const NavLinks = () => {
     )
 };
 
-export default function NavBar() {
+export default function NavBar({ setPlan, plan }) {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     return (
@@ -83,10 +83,36 @@ export default function NavBar() {
                 <NavLinks />
 
                 {/* Footer del Sidebar (Opcional, queda muy pro) */}
-                <div className="mt-auto p-4 border-t border-slate-50">
-                    <div className="bg-slate-50 rounded-2xl p-4">
-                        <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Usuario</p>
-                        <p className="text-sm font-bold text-slate-700 truncate">Estudiante LSI</p>
+                <div className="mt-auto p-4 border-t border-slate-100">
+                    <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200/60">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase mb-3 px-1 tracking-wider">
+                            Plan de Estudios
+                        </p>
+
+                        <div className="flex bg-slate-200/50 p-1 rounded-xl gap-1">
+                            <button
+                                onClick={() => setPlan("17.14")}
+                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === "17.14"
+                                    ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200"
+                                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70"
+                                    }`}
+                            >
+                                17.14
+                            </button>
+                            <button
+                                onClick={() => setPlan("17.13")}
+                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === "17.13"
+                                    ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200"
+                                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70"
+                                    }`}
+                            >
+                                17.13
+                            </button>
+                        </div>
+
+                        <p className="text-[9px] text-slate-400 mt-3 px-1 text-center italic">
+                            * Cambiar el plan reseteará los filtros
+                        </p>
                     </div>
                 </div>
             </aside>
@@ -96,20 +122,54 @@ export default function NavBar() {
                 isOpen={isOpen}
                 onOpenChange={onOpenChange}
                 placement="left"
-                className="bg-white"
                 backdrop="blur"
+                // Eliminamos bg-white de aquí si queremos que lo maneje el contenido
+                classNames={{
+                    base: "bg-white", // Forma correcta de pasar estilos al contenedor base en NextUI
+                }}
             >
                 <DrawerContent>
                     {(onClose) => (
-                        <div className="h-full bg-white">
-                            <div className="p-6 border-b border-slate-100 flex items-center gap-3">
-                                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                    <i className="fa-solid fa-graduation-cap text-white"></i>
+                        <> {/* Usamos un fragment para no meter divs innecesarios que rompan el flex */}
+                            <DrawerHeader className="p-0"> {/* Quitamos padding por defecto para control total */}
+                                <div className="w-full p-6 border-b border-slate-100 flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                        <i className="fa-solid fa-graduation-cap text-white"></i>
+                                    </div>
+                                    <span className="font-bold text-slate-800 text-lg">Menú</span>
                                 </div>
-                                <span className="font-bold text-slate-800 text-lg">Menú</span>
-                            </div>
-                            <NavLinks />
-                        </div>
+                            </DrawerHeader>
+
+                            <DrawerBody className="py-4">
+                                {/* Pasamos onClose a NavLinks para que se cierre al hacer click */}
+                                <NavLinks onItemClick={onClose} />
+                            </DrawerBody>
+
+                            <DrawerFooter className="p-0 block"> {/* block para que el footer no use flexbox por defecto */}
+                                <div className="p-4 border-t border-slate-100">
+                                    <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200/60">
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase mb-3 px-1 tracking-wider">
+                                            Plan de Estudios
+                                        </p>
+
+                                        <div className="flex bg-slate-200/50 p-1 rounded-xl gap-1">
+                                            {["17.14", "17.13"].map((id) => (
+                                                <button
+                                                    key={id}
+                                                    onClick={() => setPlan(id)}
+                                                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === id
+                                                            ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200"
+                                                            : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70"
+                                                        }`}
+                                                >
+                                                    {id}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </DrawerFooter>
+                        </>
                     )}
                 </DrawerContent>
             </Drawer>

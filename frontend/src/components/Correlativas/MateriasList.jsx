@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import MateriaCard from '../MateriaCard.jsx'
-import { Button, Card, CardBody, Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tab, Tabs, useDisclosure } from '@heroui/react'
+import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tab, Tabs, useDisclosure } from '@heroui/react'
 import DetalleMateriaModal from '../modals/DetalleMateriaModal.jsx'
 import useProgresoMaterias from '../../hooks/useProgresoMaterias.jsx'
 
-function MateriasList({ progreso, setProgreso, materias, isProgressSticky }) {
+function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan }) {
     const [modo, setModo] = useState(false) //Para saber si se está editando el estado o no
     const [infoMateria, setInfoMateria] = useState()
     const topSwitchRef = useRef(null)
     const [mostrarSwitchFlotante, setMostrarSwitchFlotante] = useState(false)
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias)
-
     // Observador para saber si el switch principal se ve
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -33,8 +32,9 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky }) {
     // Para el Drawer/Info de la materia
     const {
         isOpen: isDetailOpen,
-        onOpenChange: onDetailOpenChange,
-        onOpen: onDetailOpen
+        onOpen: onDetailOpen,
+        onClose: onDetailClose,
+        onOpenChange: onDetailOpenChange
     } = useDisclosure()
 
     // Para el Modal de confirmación de borrado
@@ -49,7 +49,27 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky }) {
     const abrirInfo = (materia) => {
         setInfoMateria(materia)
         onDetailOpen()
+
+        window.history.pushState({ modalOpen: true }, "")
     }
+    //Manejo el evento de que en celu haga para atrás, que cierre el modal y no se saque la página
+    useEffect(() => {
+        const handlePopState = () => {
+            // Si el usuario vuelve atrás, cerramos el modal
+            // (Asegúrate de tener acceso a la función que lo cierra aquí)
+            onDetailClose()
+        }
+
+        // Solo activamos el "escuchador" si el modal está abierto
+        if (isDetailOpen) {
+            window.addEventListener("popstate", handlePopState)
+        }
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState)
+        }
+    }, [isDetailOpen, onDetailClose])
+
     //Para cambiar el tamaño de la barra de progreso
     const getProgressBar = () => {
         const sizeProgressBar = window.innerWidth
@@ -101,8 +121,13 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky }) {
         onResetOpen()
     }
 
+    //Manejar el cambio de estado
+    const handleCambioDeEstado = (codigo) => {
+        cambioDeEstado(codigo, plan)
+    }
+
     return (
-        <div>
+        <div className='pb-50'>
             {/* Modal para confirmar reset */}
             <Modal
                 isOpen={isResetOpen}
@@ -190,91 +215,94 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky }) {
 
 
             {/* Sección materias */}
-            <Tabs aria-label="Filtos por año" items={tabs}>
-                {(item) => (
-                    <Tab key={item.id} title={item.label}>
-                        <div className="space-y-12 ">
-                            {item.content.map((valor) => {
-                                let materiasParaMostrar
-                                //Si el valor es taller
-                                if (valor === "taller") {
-                                    materiasParaMostrar = talleres
-                                } else {
-                                    // Me quedo con las materias de este año
-                                    materiasParaMostrar = materias.filter((m) => Number(m.anio) === valor)
-                                }
+            <div >
 
-                                // Si no hay materias en este año, podríamos evitar renderizarlo (opcional)
-                                if (materiasParaMostrar.length === 0) return null
+                <Tabs aria-label="Filtos por año" items={tabs} className=' w-full mask-[linear-gradient(to_right,black_85%,transparent_100%)] pl-[3%] md:mask-none'>
+                    {(item) => (
+                        <Tab key={item.id} title={item.label} className=''>
+                            <div className="space-y-12 ">
+                                {item.content.map((valor) => {
+                                    let materiasParaMostrar
+                                    //Si el valor es taller
+                                    if (valor === "taller") {
+                                        materiasParaMostrar = talleres
+                                    } else {
+                                        // Me quedo con las materias de este año
+                                        materiasParaMostrar = materias.filter((m) => Number(m.anio) === valor)
+                                    }
 
-                                return (
-                                    <section key={valor} className="flex flex-col gap-6">
-                                        {/* Cabecera del Año */}
-                                        <div className="flex items-center gap-3 border-b border-slate-200 pb-2">
-                                            <div className="w-1.5 h-8 bg-blue-600 rounded-full shadow-sm"></div>
-                                            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
-                                                {valor === "taller" ? "Talleres" : `${valor}° Año`}
-                                            </h2>
-                                        </div>
+                                    // Si no hay materias en este año, podríamos evitar renderizarlo (opcional)
+                                    if (materiasParaMostrar.length === 0) return null
 
-                                        {/* Contenedor de Cuatrimestres */}
-                                        <div className="flex flex-col gap-8 pl-2 sm:pl-4">
-                                            {[1, 2].map((cuatri) => {
-                                                // Me quedo con las materias de este cuatrimestre
-                                                const materiasCuatri = materiasParaMostrar.filter(
-                                                    (m) => (Number(m.cuatrimestre) % 2 === 0 ? 2 : 1) === cuatri
-                                                )
+                                    return (
+                                        <section key={valor} className="flex flex-col gap-6">
+                                            {/* Cabecera del Año */}
+                                            <div className="flex items-center gap-3 border-b border-slate-200 pb-2">
+                                                <div className="w-1.5 h-8 bg-blue-600 rounded-full shadow-sm"></div>
+                                                <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+                                                    {valor === "taller" ? "Talleres" : `${valor}° Año`}
+                                                </h2>
+                                            </div>
 
-                                                if (materiasCuatri.length === 0) return null
+                                            {/* Contenedor de Cuatrimestres */}
+                                            <div className="flex flex-col gap-8 pl-2 sm:pl-4">
+                                                {[1, 2].map((cuatri) => {
+                                                    // Me quedo con las materias de este cuatrimestre
+                                                    const materiasCuatri = materiasParaMostrar.filter(
+                                                        (m) => (Number(m.cuatrimestre) % 2 === 0 ? 2 : 1) === cuatri
+                                                    )
 
-                                                return (
-                                                    <div key={cuatri} className="flex flex-col gap-4">
-                                                        {/* Cabecera del Cuatrimestre */}
-                                                        <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 shadow-sm">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-1 h-5 bg-slate-400 rounded-full"></div>
-                                                                <h3 className="text-lg font-semibold text-slate-700">
-                                                                    {cuatri}° Cuatrimestre
-                                                                </h3>
+                                                    if (materiasCuatri.length === 0) return null
+
+                                                    return (
+                                                        <div key={cuatri} className="flex flex-col gap-4">
+                                                            {/* Cabecera del Cuatrimestre */}
+                                                            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 shadow-sm">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-1 h-5 bg-slate-400 rounded-full"></div>
+                                                                    <h3 className="text-lg font-semibold text-slate-700">
+                                                                        {cuatri}° Cuatrimestre
+                                                                    </h3>
+                                                                </div>
+                                                                <Chip size="sm" variant="flat" className="bg-white border border-slate-200 text-slate-600 font-medium shadow-sm">
+                                                                    {materiasCuatri.length} {materiasCuatri.length === 1 ? 'Materia' : 'Materias'}
+                                                                </Chip>
                                                             </div>
-                                                            <Chip size="sm" variant="flat" className="bg-white border border-slate-200 text-slate-600 font-medium shadow-sm">
-                                                                {materiasCuatri.length} {materiasCuatri.length === 1 ? 'Materia' : 'Materias'}
-                                                            </Chip>
-                                                        </div>
 
-                                                        {/* Grilla de Materias */}
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                                                            {materiasCuatri.map((materia, index) => (
-                                                                <MateriaCard
-                                                                    key={materia.codigo !== "N/A" ? materia.codigo : `${materia.codigo}-${index}`}
-                                                                    materia={materia}
-                                                                    estado={progreso[materia.codigo]}
-                                                                    actualizarEstados={cambioDeEstado}
-                                                                    modo={modo}
-                                                                    abrirInfo={() => abrirInfo(materia)}
-                                                                />
-                                                            ))}
+                                                            {/* Grilla de Materias */}
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                                                                {materiasCuatri.map((materia, index) => (
+                                                                    <MateriaCard
+                                                                        key={materia.codigo !== "N/A" ? materia.codigo : `${materia.codigo}-${index}`}
+                                                                        materia={materia}
+                                                                        estado={progreso[materia.codigo]}
+                                                                        actualizarEstados={() => handleCambioDeEstado(materia.codigo)}
+                                                                        modo={modo}
+                                                                        abrirInfo={() => abrirInfo(materia)}
+                                                                    />
+                                                                ))}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    </section>
-                                )
-                            })}
-                        </div>
-                    </Tab>
-                )}
-            </Tabs>
+                                                    )
+                                                })}
+                                            </div>
+                                        </section>
+                                    )
+                                })}
+                            </div>
+                        </Tab>
+                    )}
+                </Tabs>
+            </div>
 
 
             {/* Drawer de info de las materiasd */}
             <DetalleMateriaModal
                 isOpen={isDetailOpen}
-                onOpenChange={onDetailOpenChange}
                 infoMateria={infoMateria}
                 materias={materias}
                 progreso={progreso}
+                onOpenChange={onDetailOpenChange}
             />
 
         </div >

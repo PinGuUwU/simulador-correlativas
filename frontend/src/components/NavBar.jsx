@@ -52,6 +52,10 @@ const NavLinks = () => {
 
 export default function NavBar({ setPlan, plan }) {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const navigate = useNavigate()
+    const redirigirInicio = () => {
+        navigate("/")
+    }
 
     return (
         <>
@@ -71,7 +75,7 @@ export default function NavBar({ setPlan, plan }) {
             {/* Sidebar Persistente para Escritorio (Estilo White/Slate) */}
             <aside className="hidden lg:flex flex-col w-64 h-screen sticky left-0 top-0 bg-white border-r border-slate-200 z-40">
                 <div className="p-6 mb-2 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
+                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 cursor-pointer" onClick={() => redirigirInicio()}>
                         <i className="fa-solid fa-graduation-cap text-white text-xl"></i>
                     </div>
                     <div className="flex flex-col">
@@ -158,8 +162,8 @@ export default function NavBar({ setPlan, plan }) {
                                                     key={id}
                                                     onClick={() => setPlan(id)}
                                                     className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === id
-                                                            ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200"
-                                                            : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70"
+                                                        ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200"
+                                                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70"
                                                         }`}
                                                 >
                                                     {id}

@@ -121,8 +121,6 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
                 //Creo que acá no necesito hacer recursividad como en otras funciones, con una pasada es suficiente
             }
         })
-
-
     }
 
     const aprobarCorrelativas = (codigosCorrelativas, nuevoProgreso, materiasModificadas) => {
@@ -162,7 +160,7 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
 
     }
 
-    const cambioDeEstado = (codigoMateria) => {
+    const cambioDeEstado = (codigoMateria, plan) => {
 
         //Busco el estado actual de la materia, si no existe la inicializo
         const materiaActual = materias.find((materia) => materia.codigo === codigoMateria)
@@ -210,16 +208,17 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
                 //No existe, es "actualizarCorrelativas()" que hace esta transición solo a partir de las materias modificadas
             }
         }
-
+        console.log(materiasModificadas);
         //Desbloqueo dependencias
-        if (materiasModificadas.length > 1) {
+        if (materiasModificadas.length > 0) {
             materiasModificadas.forEach((codigoMateria) => {
                 desbloquearDependencias(codigoMateria, nuevoProgreso)
             })
         }
         setProgreso(nuevoProgreso)
+        const nombreStorage = "progreso+" + plan
 
-
+        localStorage.setItem(nombreStorage, JSON.stringify(nuevoProgreso))
     }
 
 

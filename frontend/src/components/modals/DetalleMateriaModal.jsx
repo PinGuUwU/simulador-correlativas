@@ -1,7 +1,7 @@
 import { Card, CardFooter, CardHeader, Chip, Divider, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from "@heroui/react";
 import materiasUtils from "../../utils/materiasUtils";
 
-function DetalleMateriaModal({ isOpen, onOpenChange, infoMateria, materias, progreso }) {
+function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, onOpenChange }) {
     const estiloEstado = (estado) => {
         switch (estado) {
             case "Aprobado": return "success"

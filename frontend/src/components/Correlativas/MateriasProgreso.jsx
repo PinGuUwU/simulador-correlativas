@@ -1,13 +1,16 @@
 import { Card, CardBody, CardFooter, CardHeader } from '@heroui/card'
-import { Button, Popover, PopoverContent, PopoverTrigger, Progress } from '@heroui/react'
-import React from 'react'
+import { Button, Popover, PopoverContent, PopoverTrigger, Progress, useDisclosure } from '@heroui/react'
+import React, { useState } from 'react'
+import FiltroMateriasModal from '../modals/FiltroMateriasModal'
 
 function MateriasProgreso({ progreso, materias }) {
+    const [seleccionada, setSeleccionada] = useState()
     // 1. Cálculos de datos (Lógica optimizada)
     const materiasTotales = materias.length
     const stats = [
         {
             label: "Disponibles",
+            estado: "Disponible",
             count: materias.filter(m => progreso[m.codigo] === "Disponible").length,
             color: "primary",
             icon: "fa-solid fa-unlock",
@@ -18,6 +21,7 @@ function MateriasProgreso({ progreso, materias }) {
         },
         {
             label: "Regulares",
+            estado: "Regular",
             count: materias.filter(m => progreso[m.codigo] === "Regular").length,
             color: "warning",
             icon: "fa-regular fa-clock",
@@ -28,6 +32,7 @@ function MateriasProgreso({ progreso, materias }) {
         },
         {
             label: "Aprobadas",
+            estado: "Aprobado",
             count: materias.filter(m => progreso[m.codigo] === "Aprobado").length,
             color: "success",
             icon: "fa-regular fa-circle-check",
@@ -38,6 +43,7 @@ function MateriasProgreso({ progreso, materias }) {
         },
         {
             label: "Bloqueadas",
+            estado: "Bloqueado",
             count: materias.filter(m => progreso[m.codigo] === "Bloqueado").length,
             color: "default",
             icon: "fa-solid fa-lock",
@@ -49,29 +55,34 @@ function MateriasProgreso({ progreso, materias }) {
     ]
 
     const calcularPorcentaje = (cant) => (materiasTotales > 0 ? (cant * 100) / materiasTotales : 0)
+    const { isOpen, onOpen, onOpenChange } = useDisclosure()
+    const {
+        isOpen: isDetailOpen,
+        onOpen: onDetailOpen,
+        onOpenChange: onDetailOpenChange,
+        onClose: onDetailClose
+    } = useDisclosure()
+    const [titulo, setTitulo] = useState()
+    const handleClick = (estado, titulo) => {
+        console.log("click");
+        setSeleccionada(estado)
+        setTitulo(titulo)
+        onOpen()
+    }
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 my-8">
             {stats.map((stat, index) => (
                 <Card
+                    isPressable
                     key={index}
-                    className={`${stat.accent} shadow-sm hover:shadow-md transition-shadow duration-300 ${stat.bg}`}
+                    className={`${stat.accent} cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 ${stat.bg}`}
+                    onClick={() => handleClick(stat.estado, stat.label)}
                 >
                     <CardHeader className="pb-0 pt-4 px-5 items-center flex justify-between text-center">
                         <p className="text-tiny uppercase font-bold text-default-400 tracking-wider">
                             {stat.label}
                         </p>
-                        <Popover placement='bottom' showArrow={true} >
-                            <PopoverTrigger>
-                                <Button className={`rounded-4xl ${stat.accent} h-min min-w-min`}>?</Button>
-                            </PopoverTrigger>
-                            <PopoverContent>
-                                <div className="px-1 py-2">
-                                    <div className="text-small font-bold">{stat.tittle}</div>
-                                    <div className="text-tiny">{stat.text}</div>
-                                </div>
-                            </PopoverContent>
-                        </Popover>
                     </CardHeader>
 
                     <CardBody className="py-4 px-5 flex flex-row items-center justify-between overflow-visible">
@@ -102,6 +113,19 @@ function MateriasProgreso({ progreso, materias }) {
                     </CardFooter>
                 </Card>
             ))}
+
+            <FiltroMateriasModal
+                estado={seleccionada}
+                materias={materias}
+                progreso={progreso}
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+                titulo={titulo}
+                isDetailOpen={isDetailOpen}
+                onDetailOpen={onDetailOpen}
+                onDetailOpenChange={onDetailOpenChange}
+                onDetailClose={onDetailClose}
+            />
         </div>
     )
 }

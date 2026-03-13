@@ -31,10 +31,19 @@ function Correlativas({ plan }) {
                 setMaterias(data)
 
                 //Inicializo acá mismo el progreso
-                const progresoInicial = {}
-                data.forEach(m => {
-                    progresoInicial[m.codigo] = (m.correlativas.length > 0 ? 'Bloqueado' : estadosPosibles[0])
-                })
+                let progresoInicial = {}
+                const storageKey = `progreso+${plan}`;
+                const storageData = localStorage.getItem(storageKey);
+                
+                if (!storageData) {
+                    data.forEach(m => {
+                        progresoInicial[m.codigo] = (m.correlativas.length > 0 ? 'Bloqueado' : estadosPosibles[0])
+                    })
+                    localStorage.setItem(storageKey, JSON.stringify(progresoInicial))
+                } else {
+                    progresoInicial = JSON.parse(storageData)
+                }
+
                 setProgreso(progresoInicial)
 
 
@@ -80,6 +89,7 @@ function Correlativas({ plan }) {
                     <div className='mx-5 md:mx-10 lg:mx-15'>
                         <MateriasProgreso progreso={progreso} materias={materias} />
                         <MateriasList
+                            plan={plan}
                             progreso={progreso}
                             setProgreso={setProgreso}
                             materias={materias}

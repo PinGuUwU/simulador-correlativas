@@ -1,6 +1,6 @@
 import { Card, CardFooter, CardHeader, Chip, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@heroui/react'
 import React, { useEffect, useState } from 'react'
-import materiasUtils from '../../utils/materiasUtils';
+import materiasUtils from '../../../utils/materiasUtils';
 import DetalleMateriaModal from './DetalleMateriaModal';
 
 function FiltroMateriasModal({ estado, materias, progreso, isOpen, onOpenChange, titulo, isDetailOpen, onDetailOpen, onDetailOpenChange, onDetailClose }) {

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import MateriaCard from '../MateriaCard.jsx'
+import MateriaCard from './MateriaCard.jsx'
 import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tab, Tabs, useDisclosure } from '@heroui/react'
-import DetalleMateriaModal from '../modals/DetalleMateriaModal.jsx'
+import DetalleMateriaModal from './modals/DetalleMateriaModal.jsx'
 import useProgresoMaterias from '../../hooks/useProgresoMaterias.jsx'
 import materiasUtils from '../../utils/materiasUtils.js'
-import ConfirmarCambioModal from '../modals/ConfirmarCambioModal.jsx'
+import ConfirmarCambioModal from './modals/ConfirmarCambioModal.jsx'
 import { useNavigate } from 'react-router-dom'
 
 function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan }) {
@@ -213,8 +213,8 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                 <Button
                     size='sm'
                     variant="flat"
-                    color="warning"
-                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-amber-800"
+                    color="success"
+                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-green-800"
                     onPress={() => navigate("/simulador")}
                 > Ir a Simular Avance</Button>
 

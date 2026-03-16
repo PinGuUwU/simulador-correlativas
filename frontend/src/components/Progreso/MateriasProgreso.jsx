@@ -1,7 +1,7 @@
 import { Card, CardBody, CardFooter, CardHeader } from '@heroui/card'
 import { Button, Popover, PopoverContent, PopoverTrigger, Progress, useDisclosure } from '@heroui/react'
 import React, { useState } from 'react'
-import FiltroMateriasModal from '../modals/FiltroMateriasModal'
+import FiltroMateriasModal from './modals/FiltroMateriasModal'
 
 function MateriasProgreso({ progreso, materias }) {
     const [seleccionada, setSeleccionada] = useState()

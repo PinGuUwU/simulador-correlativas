@@ -1,18 +1,18 @@
 
 import { useEffect, useRef, useState } from 'react';
-import MateriasList from '../components/Correlativas/MateriasList';
-import MateriasProgreso from '../components/Correlativas/MateriasProgreso';
-import ProgresoTotal from '../components/Correlativas/ProgresoTotal';
+import MateriasList from '../components/Progreso/MateriasList';
+import MateriasProgreso from '../components/Progreso/MateriasProgreso';
+import ProgresoTotal from '../components/Progreso/ProgresoTotal';
 import { Spinner } from '@heroui/react';
 
 
-function Correlativas({ plan }) {
+function Progreso({ plan }) {
     //Estados para guardar las materias y para mostrar una imagen de cargando, además para contabilizar el progreso
     const [materias, setMaterias] = useState([])
     const [progreso, setProgreso] = useState([])
     const [cargando, setCargando] = useState(true)
     const estadosPosibles = ['Disponible', 'Regular', 'Aprobado']
-    //Simulo la carrera, en el futuro debo hacer el fetch de plan en el Correlativas y  de ahi pasar todo
+    //Simulo la carrera, en el futuro debo hacer el fetch de plan en el Progreso y  de ahi pasar todo
     const carrera = "Licenciatura en Sistemas de Información"
     const headerRef = useRef(null)
     //El sticky del progreso total
@@ -34,7 +34,7 @@ function Correlativas({ plan }) {
                 let progresoInicial = {}
                 const storageKey = `progreso+${plan}`;
                 const storageData = localStorage.getItem(storageKey);
-                
+
                 if (!storageData) {
                     data.forEach(m => {
                         progresoInicial[m.codigo] = (m.correlativas.length > 0 ? 'Bloqueado' : estadosPosibles[0])
@@ -103,4 +103,4 @@ function Correlativas({ plan }) {
     );
 }
 
-export default Correlativas;
+export default Progreso;

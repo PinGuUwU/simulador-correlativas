@@ -3,6 +3,8 @@ import MateriaCard from '../MateriaCard.jsx'
 import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tab, Tabs, useDisclosure } from '@heroui/react'
 import DetalleMateriaModal from '../modals/DetalleMateriaModal.jsx'
 import useProgresoMaterias from '../../hooks/useProgresoMaterias.jsx'
+import materiasUtils from '../../utils/materiasUtils.js'
+import ConfirmarCambioModal from '../modals/ConfirmarCambioModal.jsx'
 
 function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan }) {
     const [modo, setModo] = useState(false) //Para saber si se está editando el estado o no
@@ -10,6 +12,8 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
     const topSwitchRef = useRef(null)
     const [mostrarSwitchFlotante, setMostrarSwitchFlotante] = useState(false)
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias)
+    const [confirmacion, setConfirmacion] = useState(false)
+    const [mostrar, setMostrar] = useState(true)
     // Observador para saber si el switch principal se ve
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -43,6 +47,14 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
         onOpen: onResetOpen,
         onOpenChange: onResetOpenChange,
         onClose: onResetClose
+    } = useDisclosure()
+
+    //Para el modal de Confirmar regular una materia bloqueada
+    const {
+        isOpen: isConfirmationOpen,
+        onOpen: onConfirmationOpen,
+        onOpenChange: onConfirmationOpenChange,
+        onClose: onConfirmationClose
     } = useDisclosure()
 
     //Abrir la info de una materia con Drawer de HeroUI
@@ -123,8 +135,23 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
 
     //Manejar el cambio de estado
     const handleCambioDeEstado = (codigo) => {
-        cambioDeEstado(codigo, plan)
+        if (progreso[codigo] === materiasUtils.bloquear && mostrar) {
+            onConfirmationOpen()
+            setCodigoMateria(codigo)
+        } else {
+            cambioDeEstado(codigo, plan)
+        }
     }
+    const [codigoMateria, setCodigoMateria] = useState()
+
+    useEffect(() => {
+        console.log("entro");
+        if (confirmacion === true) {
+            cambioDeEstado(codigoMateria, plan)
+            setConfirmacion(false)
+        }
+
+    }, [onConfirmationClose, isConfirmationOpen])
 
     return (
         <div className='pb-50'>
@@ -303,6 +330,15 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                 materias={materias}
                 progreso={progreso}
                 onOpenChange={onDetailOpenChange}
+            />
+
+            {/* Modal para confirmar el cambio de estado de una materia bloqueada */}
+            <ConfirmarCambioModal
+                setConfirmacion={setConfirmacion}
+                setMostrar={setMostrar}
+                isOpen={isConfirmationOpen}
+                onOpenChange={onConfirmationOpenChange}
+                onClose={onConfirmationClose}
             />
 
         </div >

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import NavBar from './components/NavBar'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Rutas from './routes/Rutas'
+import { ToastProvider } from '@heroui/react'
 
 function App() {
     const [plan, setPlan] = useState("17.14")
@@ -9,6 +10,7 @@ function App() {
 
     return (
         <BrowserRouter>
+            <ToastProvider />
             <div className='flex'>
                 <NavBar setPlan={setPlan} plan={plan} />
                 <main className='w-full'>

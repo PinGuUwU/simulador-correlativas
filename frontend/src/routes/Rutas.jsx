@@ -1,6 +1,6 @@
 import React from 'react'
 import { useRoutes } from 'react-router-dom'
-import Correlativas from '../pages/Correlativas'
+import Progreso from '../pages/Progreso'
 import Equivalencias from '../pages/Equivalencias'
 import ChatBot from '../pages/Chatbot'
 import Inicio from '../pages/Inicio'
@@ -12,8 +12,8 @@ const Rutas = ({ plan }) => {
             element: <Inicio />
         },
         {
-            path: "/correlativas",
-            element: <Correlativas plan={plan} />
+            path: "/progreso",
+            element: <Progreso plan={plan} />
         },
         {
             path: "/equivalencias",

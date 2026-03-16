@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, useDisclosure } from '@heroui/react';
+import { addToast, Button, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, useDisclosure } from '@heroui/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const NavLinks = () => {
@@ -8,10 +8,12 @@ const NavLinks = () => {
     const navigate = useNavigate()
 
     const menuItems = [
-        { name: 'Correlativas', icon: 'fa-chart-line', path: '/correlativas' },
-        { name: 'Equivalencias', icon: 'fa-graduation-cap', path: '/equivalencias' },
-        { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot' },
+        { name: 'Progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
+        { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
+        { name: 'Equivalencias entre planes', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: true },
+        { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot', isDeactivated: true },
     ]
+
 
     const handleClick = (path) => {
         navigate(path)
@@ -25,26 +27,40 @@ const NavLinks = () => {
 
             {menuItems.map((item) => {
                 const isActive = location.pathname === item.path;
+                if (isActive || !item.isDeactivated) {
+                    return (
+                        <button
+                            key={item.path}
+                            onClick={() => handleClick(item.path)}
+                            className={`flex items-center gap-3 p-3 rounded-xl transition-all group ${isActive
+                                ? "bg-blue-50 text-blue-600 font-bold shadow-sm border border-blue-100"
+                                : "text-slate-500 hover:bg-slate-50 hover:text-blue-600"
+                                }`}
+                        >
+                            <i className={`fa-solid ${item.icon} w-5 text-lg ${isActive ? "text-blue-600" : "group-hover:scale-110 transition-transform"
+                                }`}></i>
+                            <span className="text-sm font-medium">{item.name}</span>
 
-                return (
-                    <button
-                        key={item.path}
-                        onClick={() => handleClick(item.path)}
-                        className={`flex items-center gap-3 p-3 rounded-xl transition-all group ${isActive
-                            ? "bg-blue-50 text-blue-600 font-bold shadow-sm border border-blue-100"
-                            : "text-slate-500 hover:bg-slate-50 hover:text-blue-600"
-                            }`}
-                    >
-                        <i className={`fa-solid ${item.icon} w-5 text-lg ${isActive ? "text-blue-600" : "group-hover:scale-110 transition-transform"
-                            }`}></i>
-                        <span className="text-sm font-medium">{item.name}</span>
+                            {/* Indicador visual extra para el activo (Opcional) */}
+                            {isActive && !item.isDeactivated && (
+                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.6)]"></div>
+                            )}
+                        </button>
+                    )
+                } else if (item.isDeactivated) {
+                    return (
+                        <button
+                            key={item.path}
+                            onClick={() => addToast({ title: "En progreso", description: "Esta página aún no está disponible", color: "warning" })}
+                            className={`flex items-center gap-3 p-3 rounded-xl transition-all group bg-gray-200 text-gray-500`}
+                        >
+                            <i className={`fa-solid ${item.icon} w-5 text-lg ${isActive ? "text-blue-600" : "group-hover:scale-110 transition-transform"
+                                }`}></i>
+                            <span className="text-sm font-medium">{item.name}</span>
+                        </button>
+                    )
+                }
 
-                        {/* Indicador visual extra para el activo (Opcional) */}
-                        {isActive && (
-                            <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.6)]"></div>
-                        )}
-                    </button>
-                )
             })}
         </nav>
     )
@@ -100,6 +116,7 @@ export default function NavBar({ setPlan, plan }) {
                                     ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200"
                                     : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70"
                                     }`}
+
                             >
                                 17.14
                             </button>

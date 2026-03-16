@@ -45,7 +45,6 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
             </div>
 
             {/* Sección Inferior: Barra de Progreso */}
-            {/* Sección Inferior: Barra de Progreso */}
             {/* Contenedor envolvente para evitar saltos de layout cuando se vuelve fixed */}
             <div className={isSticky ? "" : "pt-6 border-t"}>
                 <div className={
@@ -54,7 +53,7 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
                         : "w-full"
                 }>
                     <div className={isSticky ? "max-w-7xl mx-auto lg:pl-64" : ""}>
-                        <div className="flex justify-between items-end mb-3 md:px-12">
+                        <div className="flex px-10 sm:p-0 justify-between items-end mb-3">
                             <div className="space-y-1">
                                 <span className="text-slate-400 text-xs uppercase tracking-widest font-bold">Estado Actual</span>
                                 <p className="text-slate-700 font-semibold">Progreso de la carrera</p>

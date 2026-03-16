@@ -4,6 +4,7 @@ import MateriasList from '../components/Progreso/MateriasList';
 import MateriasProgreso from '../components/Progreso/MateriasProgreso';
 import ProgresoTotal from '../components/Progreso/ProgresoTotal';
 import { Spinner } from '@heroui/react';
+import LeyendaEstados from '../components/Progreso/LeyendaEstados';
 
 
 function Progreso({ plan }) {
@@ -99,6 +100,9 @@ function Progreso({ plan }) {
                     </div>
                 </div>
             )}
+
+            {/* Breve descripción de lo que significa cada estado posible */}
+            <LeyendaEstados />
         </div>
     );
 }

@@ -5,6 +5,7 @@ import DetalleMateriaModal from '../modals/DetalleMateriaModal.jsx'
 import useProgresoMaterias from '../../hooks/useProgresoMaterias.jsx'
 import materiasUtils from '../../utils/materiasUtils.js'
 import ConfirmarCambioModal from '../modals/ConfirmarCambioModal.jsx'
+import { useNavigate } from 'react-router-dom'
 
 function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan }) {
     const [modo, setModo] = useState(false) //Para saber si se está editando el estado o no
@@ -14,6 +15,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias)
     const [confirmacion, setConfirmacion] = useState(false)
     const [mostrar, setMostrar] = useState(true)
+    const navigate = useNavigate()
     // Observador para saber si el switch principal se ve
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -207,12 +209,23 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                 >
                     Reestablecer
                 </Button>
+
+                <Button
+                    size='sm'
+                    variant="flat"
+                    color="warning"
+                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-amber-800"
+                    onPress={() => navigate("/simulador")}
+                > Ir a Simular Avance</Button>
+
+                {/* Switch para intercambiar el modo edición */}
                 <Switch
+
                     isSelected={modo}
                     color="success"
                     onChange={() => setModo(!modo)}
-                    endContent={<span className="text-xs">OFF</span>}
-                    startContent={<span className="text-xs">ON</span>}
+                    endContent={<span className="text-xs">off</span>}
+                    startContent={<span className="text-xs">on</span>}
                     size={currentSize}
                     classNames={{
                         label: "text-slate-600 font-medium"

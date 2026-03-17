@@ -18,10 +18,10 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
             backdrop="blur"
             classNames={{
                 base: "sm:rounded-3xl rounded-t-3xl border-0 shadow-2xl max-h-[90vh]",
-                header: "border-b border-slate-100 p-6",
+                header: "border-b border-default-100 p-6",
                 body: "p-4 sm:p-6 gap-6",
-                footer: "border-t border-slate-100 p-6",
-                closeButton: "hover:bg-slate-100 active:bg-slate-200 transition-colors",
+                footer: "border-t border-default-100 p-6",
+                closeButton: "hover:bg-default-100 active:bg-default-200 transition-colors",
             }}
         >
             <ModalContent>
@@ -29,15 +29,15 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                     <>
                         <ModalHeader className='flex flex-col gap-1'>
                             <div className='flex items-center gap-3'>
-                                {/* Icono azul consistente con tus status cards */}
-                                <div className='bg-blue-500 text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30'>
+                                {/* Icono con color primary consistente */}
+                                <div className='bg-primary text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30'>
                                     <i className='fa-solid fa-sliders text-lg' />
                                 </div>
                                 <div className='flex flex-col'>
-                                    <h2 className='text-xl font-bold text-slate-900'>
+                                    <h2 className='text-xl font-bold text-foreground'>
                                         Configurar Simulación
                                     </h2>
-                                    <p className='text-[12px] font-medium text-slate-400 uppercase tracking-wider'>
+                                    <p className='text-[12px] font-medium text-default-400 uppercase tracking-wider'>
                                         Parámetros Iniciales
                                     </p>
                                 </div>
@@ -47,8 +47,8 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                         <ModalBody>
                             {/* Sección: Fecha de Inicio */}
                             <div className="flex flex-col gap-4">
-                                <div className="flex items-center gap-2 text-slate-800">
-                                    <div className="w-1 h-5 bg-blue-500 rounded-full"></div> {/* Indicador lateral como en tu dashboard */}
+                                <div className="flex items-center gap-2 text-foreground">
+                                    <div className="w-1 h-5 bg-primary rounded-full"></div> {/* Indicador lateral */}
                                     <h3 className="font-bold text-md">Fecha de Inicio</h3>
                                 </div>
 
@@ -58,8 +58,8 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                                         variant="flat"
                                         defaultSelectedKeys={["2026"]}
                                         classNames={{
-                                            trigger: "bg-slate-50 border border-slate-100 rounded-2xl shadow-sm h-14",
-                                            label: "text-slate-500 font-medium"
+                                            trigger: "bg-default-50 border border-default-100 rounded-2xl shadow-sm h-14",
+                                            label: "text-default-500 font-medium"
                                         }}
                                     >
                                         {selectUtils.anios.map((anio) => (
@@ -74,8 +74,8 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                                         variant="flat"
                                         defaultSelectedKeys={["1"]}
                                         classNames={{
-                                            trigger: "bg-slate-50 border border-slate-100 rounded-2xl shadow-sm h-14",
-                                            label: "text-slate-500 font-medium"
+                                            trigger: "bg-default-50 border border-default-100 rounded-2xl shadow-sm h-14",
+                                            label: "text-default-500 font-medium"
                                         }}
                                     >
                                         {selectUtils.cuatris.map((cuatri) => (
@@ -89,8 +89,8 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
 
                             {/* Sección: Modo de Simulación */}
                             <div className="flex flex-col gap-4">
-                                <div className="flex items-center gap-2 text-slate-800">
-                                    <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
+                                <div className="flex items-center gap-2 text-foreground">
+                                    <div className="w-1 h-5 bg-primary rounded-full"></div>
                                     <h3 className="font-bold text-md">Modo de simulación</h3>
                                 </div>
 
@@ -101,9 +101,9 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                                     <Radio
                                         value="avanzado"
                                         classNames={{
-                                            base: "inline-flex m-0 bg-white hover:bg-blue-50/30 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-slate-100 shadow-sm transition-all data-[selected=true]:border-blue-500 data-[selected=true]:bg-blue-50/50",
-                                            label: "text-slate-900 font-bold text-sm",
-                                            description: "text-slate-500 text-[11px] leading-tight",
+                                            base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
+                                            label: "text-foreground font-bold text-sm",
+                                            description: "text-default-500 text-[11px] leading-tight",
                                         }}
                                         description="Cargá tus materias aprobadas y regulares automáticamente."
                                     >
@@ -112,9 +112,9 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                                     <Radio
                                         value="nuevo"
                                         classNames={{
-                                            base: "inline-flex m-0 bg-white hover:bg-blue-50/30 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-slate-100 shadow-sm transition-all data-[selected=true]:border-blue-500 data-[selected=true]:bg-blue-50/50",
-                                            label: "text-slate-900 font-bold text-sm",
-                                            description: "text-slate-500 text-[11px] leading-tight",
+                                            base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
+                                            label: "text-foreground font-bold text-sm",
+                                            description: "text-default-500 text-[11px] leading-tight",
                                         }}
                                         description="Iniciá una planificación limpia desde el primer año."
                                     >
@@ -127,7 +127,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                         <ModalFooter className="flex-col sm:flex-row gap-3">
                             <Button
                                 color="primary"
-                                className="w-full sm:w-auto rounded-2xl font-bold h-12 shadow-lg shadow-blue-500/30"
+                                className="w-full sm:w-auto rounded-2xl font-bold h-12 shadow-lg shadow-primary/30"
                                 onPress={() => handleConfigurar()}
                             >
                                 Comenzar Simulación
@@ -135,7 +135,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                             <Button
                                 variant="light"
                                 onPress={onClose}
-                                className="w-full sm:w-auto rounded-2xl font-semibold h-12 text-slate-400"
+                                className="w-full sm:w-auto rounded-2xl font-semibold h-12 text-default-400"
                             >
                                 Cancelar
                             </Button>

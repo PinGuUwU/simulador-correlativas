@@ -2,14 +2,14 @@
 const obtenerEstiloPorEstado = (estado) => {
     switch (estado) {
         case "Aprobado":
-            return { icon: "fa-circle-check", accent: "green", colorText: "text-green-500" }
+            return { icon: "fa-circle-check", accent: "success", colorText: "text-success" }
         case "Disponible":
-            return { icon: "fa-unlock", accent: "cyan", colorText: "text-cyan-500" }
+            return { icon: "fa-unlock", accent: "primary", colorText: "text-primary" }
         case "Regular":
-            return { icon: "fa-clock", accent: "amber", colorText: "text-amber-500" }
+            return { icon: "fa-clock", accent: "warning", colorText: "text-warning" }
         case "Bloqueado":
         default:
-            return { icon: "fa-lock", accent: "slate", colorText: "text-slate-400" }
+            return { icon: "fa-lock", accent: "default", colorText: "text-default-400" }
     }
 }
 

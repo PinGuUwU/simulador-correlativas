@@ -70,7 +70,7 @@ function Progreso({ plan }) {
     }
     const progress = Math.round((totalProgreso() * 100) / materias.length)
     return (
-        <div className="overflow-hidden bg-gray-100">
+        <div className="overflow-hidden bg-default-100">
             {cargando && (
                 <div className='flex justify-center items-center h-screen'>
                     < Spinner />

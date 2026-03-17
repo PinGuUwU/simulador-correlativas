@@ -198,10 +198,10 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                                 </div>
                             </ModalHeader>
                             <ModalBody>
-                                <p className="text-slate-600">
+                                <p className="text-default-600">
                                     ¿Estás seguro de que quieres <b>reestablecer todo tu progreso</b>?
                                 </p>
-                                <p className="text-sm text-slate-500 italic">
+                                <p className="text-sm text-default-500 italic">
                                     Esta acción volverá todas las materias a su estado inicial (Disponible/Bloqueado) y no se puede deshacer.
                                 </p>
                             </ModalBody>
@@ -238,7 +238,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                     size='sm'
                     variant="flat"
                     color="success"
-                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-green-800"
+                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-success-800"
                     onPress={() => navigate("/simulador")}
                 > Ir a Simular Avance</Button>
 
@@ -247,7 +247,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                     size='sm'
                     variant="flat"
                     color="warning"
-                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-yellow-800"
+                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-warning-800"
                     onPress={() => handleMostrarTodo()}
                 >
                     {isAnioOpen.length > 0 ? "Mostrar todos" : "Ocultar todos"}
@@ -263,7 +263,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                     startContent={<span className="text-xs">on</span>}
                     size={currentSize}
                     classNames={{
-                        label: "text-slate-600 font-medium"
+                        label: "text-default-600 font-medium"
                     }}
                 >
                     Modo Edición
@@ -271,7 +271,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
             </div>
             {/* Switch Flotante en la parte inferior derecha */}
             {mostrarSwitchFlotante && isProgressSticky && (
-                <div className="fixed top-30 right-4 z-50 bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-slate-200">
+                <div className="fixed top-30 right-4 z-50 bg-background/90 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-default-200">
                     <Switch
                         color="success"
                         isSelected={modo}
@@ -280,7 +280,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                         startContent={<span className="text-xs">ON</span>}
                         size={currentSize}
                         classNames={{
-                            label: "text-slate-800 font-bold"
+                            label: "text-foreground font-bold"
                         }}
                     >
                         Modo Edición
@@ -313,9 +313,9 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                                         <section key={valor} className={`flex flex-col gap-6`}>
                                             {/* Cabecera del Año */}
                                             <div className="flex justify-between ">
-                                                <div className='flex items-center gap-3 border-b border-slate-200 pb-2'>
-                                                    <div className="w-1.5 h-8 bg-blue-600 rounded-full shadow-sm"></div>
-                                                    <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+                                                <div className='flex items-center gap-3 border-b border-default-200 pb-2'>
+                                                    <div className="w-1.5 h-8 bg-primary rounded-full shadow-sm"></div>
+                                                    <h2 className="text-2xl font-bold text-foreground tracking-tight">
                                                         {valor === "taller" ? "Talleres" : `${valor}° Año`}
                                                     </h2>
                                                 </div>
@@ -335,14 +335,14 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                                                     return (
                                                         <div key={cuatri} className="flex flex-col gap-4">
                                                             {/* Cabecera del Cuatrimestre */}
-                                                            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 shadow-sm">
+                                                            <div className="flex items-center justify-between bg-default-50 border border-default-200 rounded-lg px-4 py-3 shadow-sm">
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="w-1 h-5 bg-slate-400 rounded-full"></div>
-                                                                    <h3 className="text-lg font-semibold text-slate-700">
+                                                                    <div className="w-1 h-5 bg-default-400 rounded-full"></div>
+                                                                    <h3 className="text-lg font-semibold text-default-700">
                                                                         {cuatri}° Cuatrimestre
                                                                     </h3>
                                                                 </div>
-                                                                <Chip size="sm" variant="flat" className="bg-white border border-slate-200 text-slate-600 font-medium shadow-sm">
+                                                                <Chip size="sm" variant="flat" className="bg-background border border-default-200 text-default-600 font-medium shadow-sm">
                                                                     {materiasCuatri.length} {materiasCuatri.length === 1 ? 'Materia' : 'Materias'}
                                                                 </Chip>
                                                             </div>

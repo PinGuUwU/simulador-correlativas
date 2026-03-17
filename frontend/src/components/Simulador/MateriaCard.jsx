@@ -3,9 +3,9 @@ import { useState } from "react"
 
 function MateriaCard({ materia }) {
     const estados = [
-        { name: "Sin Cursar", color: "warning", icon: "fa-regular fa-clock text-yellow-400", background: "bg-yellow-50 border-2 border-yellow-200" },
-        { name: "Regular", color: "primary", icon: "fa-regular fa-file-lines text-blue-400", background: "bg-blue-50 border-2 border-blue-200" },
-        { name: "Aprobado", color: "success", icon: "fa-regular fa-circle-check text-green-400", background: "bg-green-50 border-2 border-green-200" },
+        { name: "Sin Cursar", color: "warning", icon: "fa-regular fa-clock text-warning", background: "bg-warning/10 border-2 border-warning/30" },
+        { name: "Regular", color: "primary", icon: "fa-regular fa-file-lines text-primary", background: "bg-primary/10 border-2 border-primary/30" },
+        { name: "Aprobado", color: "success", icon: "fa-regular fa-circle-check text-success", background: "bg-success/10 border-2 border-success/30" },
     ]
     //Guardo el estado actual seleccionado
     const [selectedValue, setSelectedValue] = useState(estados[0])

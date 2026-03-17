@@ -10,18 +10,18 @@ function LeyendaEstados() {
         { name: "Bloqueado", desc: "Faltan correlativas" },
     ]
 
-    // Mapeo para los fondos suaves basado en el "accent" que devuelve tu función
+    // Mapeo para los fondos suaves basado en el "accent" semántico de HeroUI
     const bgMap = {
-        green: "bg-green-100",
-        cyan: "bg-cyan-100",
-        amber: "bg-amber-100",
-        slate: "bg-slate-100"
+        success: "bg-success/20",
+        primary: "bg-primary/20",
+        warning: "bg-warning/20",
+        default: "bg-default-100"
     }
 
     return (
         <div className='p-5'>
-            <Card className="shadow-sm border border-slate-100">
-                <CardHeader className='font-bold text-slate-800 px-6 pt-6 text-lg'>
+            <Card className="shadow-sm border border-default-100">
+                <CardHeader className='font-bold text-foreground px-6 pt-6 text-lg'>
                     Leyenda de Estados
                 </CardHeader>
                 <CardBody className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6'>
@@ -31,7 +31,7 @@ function LeyendaEstados() {
 
                         return (
                             <div key={index} className="flex items-center gap-4">
-                                {/* Contenedor del ícono usando estilo.accent */}
+                                {/* Contenedor del ícono usando estilo.accent semántico */}
                                 <div className={`${bgMap[estilo.accent]} w-12 h-12 rounded-2xl flex items-center justify-center transition-transform hover:scale-105`}>
                                     <i className={`fa-solid ${estilo.icon} ${estilo.colorText} text-xl`}></i>
                                 </div>
@@ -41,7 +41,7 @@ function LeyendaEstados() {
                                     <span className={`text-sm font-bold ${estilo.colorText} leading-tight`}>
                                         {estado.name}
                                     </span>
-                                    <span className="text-xs text-slate-400 font-medium">
+                                    <span className="text-xs text-default-400 font-medium">
                                         {estado.desc}
                                     </span>
                                 </div>

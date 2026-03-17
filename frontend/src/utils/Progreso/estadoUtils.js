@@ -1,21 +1,21 @@
 const ESTADO_CONFIG = {
     Bloqueado: {
-        estilo: "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-400",
+        estilo: "bg-default-50 border-default-200 hover:bg-default-100 hover:border-default-400",
         color: "default",
         icono: "fa-solid fa-lock",
     },
     Disponible: {
-        estilo: "bg-blue-100 border-blue-300 hover:bg-blue-200 hover:border-blue-400",
+        estilo: "bg-primary/10 border-primary/30 hover:bg-primary/20 hover:border-primary/40",
         color: "primary",
         icono: "fa-solid fa-lock-open",
     },
     Regular: {
-        estilo: "bg-yellow-50 border-yellow-200 hover:bg-yellow-200 hover:border-yellow-400",
+        estilo: "bg-warning/10 border-warning/30 hover:bg-warning/20 hover:border-warning/40",
         color: "warning",
         icono: "fa-regular fa-clock",
     },
     Aprobado: {
-        estilo: "bg-green-100 border-green-500 hover:bg-green-200 hover:border-green-400",
+        estilo: "bg-success/10 border-success/50 hover:bg-success/20 hover:border-success/40",
         color: "success",
         icono: "fa-regular fa-circle-check",
     },

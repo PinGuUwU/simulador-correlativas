@@ -51,24 +51,24 @@ function FiltroMateriasModal({ estado, materias, progreso, isOpen, onOpenChange,
                                 {materiasFiltradas && (() => {
                                     if (materiasFiltradas.length > 0) {
                                         return (
-                                            < div >
+                                            <div >
 
                                                 {
                                                     materiasFiltradas.length > 0 &&
                                                     materiasFiltradas.map((m, index) => {
                                                         const estilo = materiasUtils.obtenerEstiloPorEstado(estado)
                                                         return (
-                                                            <Card className='mb-3 border-2 border-gray-200 w-full' key={index}
+                                                            <Card className='mb-3 border-2 border-default-200 w-full' key={index}
                                                                 isPressable onPress={() => handleClick(m)}>
                                                                 <CardHeader>
                                                                     <div className='flex justify-between items-center w-full'>
-                                                                        <div className="font-semibold text-slate-700">
+                                                                        <div className="font-semibold text-default-700">
                                                                             {m.nombre}
                                                                         </div>
 
                                                                         {/* Aquí aplicamos el ícono con los colores dinámicos */}
                                                                         <Chip variant="flat" className="w-8 h-8" color={estiloEstado(progreso[m.codigo])}>
-                                                                            <i className={`fa-solid ${estilo.icon} text-${estilo.accent}-400 text-sm `}></i>
+                                                                            <i className={`fa-solid ${estilo.icon} ${estilo.colorText} text-sm `}></i>
                                                                         </Chip>
                                                                     </div>
                                                                 </CardHeader>
@@ -89,7 +89,7 @@ function FiltroMateriasModal({ estado, materias, progreso, isOpen, onOpenChange,
                                         )
                                     } else {
                                         return (
-                                            <div className='text-slate-500 italic mt-2 bg-gray-100 px-3 py-1 rounded-lg'>
+                                            <div className='text-default-500 italic mt-2 bg-default-100 px-3 py-1 rounded-lg'>
                                                 No requiere correlativas previas
                                             </div>
                                         )

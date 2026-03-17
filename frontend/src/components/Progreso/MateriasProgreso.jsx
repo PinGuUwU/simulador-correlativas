@@ -17,7 +17,7 @@ function MateriasProgreso({ progreso, materias }) {
             accent: "bg-primary-300 border-primary-400/50 shadow-primary",
             tittle: "Materias disponibles",
             text: "Son las materias que podes cursar en el cuatrimestre correspondiente",
-            bg: "bg-blue-50/50"
+            bg: "bg-primary/5"
         },
         {
             label: "Regulares",

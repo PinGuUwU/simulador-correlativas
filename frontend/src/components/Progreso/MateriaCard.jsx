@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardBody, CardFooter, Chip } from "@heroui/react"
-import estadoUtils from "../../utils/estadoUtils";
+import estadoUtils from "../../utils/Progreso/estadoUtils";
 
 
 function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {

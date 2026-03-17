@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import materiasUtils from "../utils/materiasUtils"
+import materiasUtils from "../utils/Progreso/materiasUtils"
 
 const useProgresoMaterias = (progreso, setProgreso, materias) => {
     //Por la situación especial de las optativas, debo tener un useEffect para que cuando se actualice el progreso, revisar si hay que actualizar las optativas

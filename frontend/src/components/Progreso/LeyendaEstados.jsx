@@ -1,5 +1,5 @@
 import { Card, CardBody, CardHeader } from '@heroui/card'
-import materiasUtils from '../../utils/materiasUtils'
+import materiasUtils from '../../utils/Progreso/materiasUtils'
 
 function LeyendaEstados() {
     // Los nombres deben coincidir exactamente con los "case" de tu switch

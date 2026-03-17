@@ -3,9 +3,9 @@ import MateriaCard from './MateriaCard.jsx'
 import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tab, Tabs, useDisclosure } from '@heroui/react'
 import DetalleMateriaModal from './modals/DetalleMateriaModal.jsx'
 import useProgresoMaterias from '../../hooks/useProgresoMaterias.jsx'
-import materiasUtils from '../../utils/materiasUtils.js'
 import ConfirmarCambioModal from './modals/ConfirmarCambioModal.jsx'
 import { useNavigate } from 'react-router-dom'
+import materiasUtils from '../../utils/Progreso/materiasUtils.js'
 
 function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan }) {
     const [modo, setModo] = useState(false) //Para saber si se está editando el estado o no

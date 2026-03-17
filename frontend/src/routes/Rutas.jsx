@@ -4,6 +4,7 @@ import Progreso from '../pages/Progreso'
 import Equivalencias from '../pages/Equivalencias'
 import ChatBot from '../pages/Chatbot'
 import Inicio from '../pages/Inicio'
+import Simulador from '../pages/Simulador'
 
 const Rutas = ({ plan }) => {
     const componentesRutas = useRoutes([
@@ -14,6 +15,10 @@ const Rutas = ({ plan }) => {
         {
             path: "/progreso",
             element: <Progreso plan={plan} />
+        },
+        {
+            path: "/simulador",
+            element: <Simulador />
         },
         {
             path: "/equivalencias",

@@ -64,11 +64,30 @@ function MateriasProgreso({ progreso, materias }) {
     } = useDisclosure()
     const [titulo, setTitulo] = useState()
     const handleClick = (estado, titulo) => {
-        console.log("click");
         setSeleccionada(estado)
         setTitulo(titulo)
         onOpen()
+
+        // Agrego una entrada al historial para que el botón "atrás" cierre el modal
+        window.history.pushState({ modalOpen: true }, "")
     }
+
+    // Manejo el evento de que en celu haga para atrás, que cierre el modal y no se salga de la página
+    React.useEffect(() => {
+        const handlePopState = () => {
+            // Si el usuario vuelve atrás, cerramos el modal
+            onOpenChange(false)
+        }
+
+        // Solo activamos el "escuchador" si el modal está abierto
+        if (isOpen) {
+            window.addEventListener("popstate", handlePopState)
+        }
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState)
+        }
+    }, [isOpen, onOpenChange])
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 my-8">

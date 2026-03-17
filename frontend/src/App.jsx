@@ -11,7 +11,6 @@ function App() {
 
     return (
         <BrowserRouter>
-            <ToastProvider />
             <div className='flex'>
                 <NavBar setPlan={setPlan} plan={plan} />
                 <main className='w-full'>

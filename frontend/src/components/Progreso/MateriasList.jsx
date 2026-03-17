@@ -15,6 +15,8 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias)
     const [confirmacion, setConfirmacion] = useState(false)
     const [mostrar, setMostrar] = useState(true)
+    //Logica para mostrar u ocultar las materias de un año
+    const [isAnioOpen, setIsAnioOpen] = useState([])
     const navigate = useNavigate()
     // Observador para saber si el switch principal se ve
     useEffect(() => {
@@ -147,13 +149,24 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
     const [codigoMateria, setCodigoMateria] = useState()
 
     useEffect(() => {
-        console.log("entro");
         if (confirmacion === true) {
             cambioDeEstado(codigoMateria, plan)
             setConfirmacion(false)
         }
 
     }, [onConfirmationClose, isConfirmationOpen])
+
+    //Manejo los años para saber si están o no mostrandose
+    const handleMostrar = (id) => {
+        if (isAnioOpen.includes(id)) {
+            //Solo guardo todas las id que no sean la que acaba de cambiar de estado
+            setIsAnioOpen(isAnioOpen.filter(a => a !== id))
+        } else {
+            //Guardo lo mismo más el id que acaba de cambiar de estado
+            setIsAnioOpen([...isAnioOpen, id])
+        }
+    }
+
 
     return (
         <div className='pb-50'>
@@ -275,17 +288,20 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                                     if (materiasParaMostrar.length === 0) return null
 
                                     return (
-                                        <section key={valor} className="flex flex-col gap-6">
+                                        <section key={valor} className={`flex flex-col gap-6`}>
                                             {/* Cabecera del Año */}
-                                            <div className="flex items-center gap-3 border-b border-slate-200 pb-2">
-                                                <div className="w-1.5 h-8 bg-blue-600 rounded-full shadow-sm"></div>
-                                                <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
-                                                    {valor === "taller" ? "Talleres" : `${valor}° Año`}
-                                                </h2>
+                                            <div className="flex justify-between ">
+                                                <div className='flex items-center gap-3 border-b border-slate-200 pb-2'>
+                                                    <div className="w-1.5 h-8 bg-blue-600 rounded-full shadow-sm"></div>
+                                                    <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+                                                        {valor === "taller" ? "Talleres" : `${valor}° Año`}
+                                                    </h2>
+                                                </div>
+                                                <Button onPress={() => handleMostrar(valor)}>{isAnioOpen.includes(valor) ? "Mostrar más" : "Mostrar menos"}</Button>
                                             </div>
 
                                             {/* Contenedor de Cuatrimestres */}
-                                            <div className="flex flex-col gap-8 pl-2 sm:pl-4">
+                                            <div className={`flex flex-col gap-8 pl-2 sm:pl-4 ${isAnioOpen.includes(valor) ? " hidden" : ""}`}>
                                                 {[1, 2].map((cuatri) => {
                                                     // Me quedo con las materias de este cuatrimestre
                                                     const materiasCuatri = materiasParaMostrar.filter(

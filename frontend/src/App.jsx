@@ -3,6 +3,7 @@ import NavBar from './components/NavBar'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Rutas from './routes/Rutas'
 import { ToastProvider } from '@heroui/react'
+import Footer from './components/Footer'
 
 function App() {
     const [plan, setPlan] = useState("17.14")
@@ -15,6 +16,7 @@ function App() {
                 <NavBar setPlan={setPlan} plan={plan} />
                 <main className='w-full'>
                     <Rutas plan={plan} />
+                    <Footer />
                 </main>
             </div>
         </BrowserRouter>

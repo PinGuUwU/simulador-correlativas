@@ -62,7 +62,7 @@ const NavLinks = ({ onItemClick }) => {
 
     const menuItems = [
         { name: 'Progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
-        { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
+        { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: true },
         { name: 'Equivalencias entre planes', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: true },
         { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot', isDeactivated: true },
     ]
@@ -141,7 +141,10 @@ export default function NavBar({ setPlan, plan }) {
             {/* Sidebar Persistente para Escritorio */}
             <aside className="hidden lg:flex flex-col w-64 h-screen sticky left-0 top-0 bg-background border-r border-default-200 z-40">
                 <div className="p-6 mb-2 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 cursor-pointer" onClick={() => redirigirInicio()}>
+                    <div
+                        className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 cursor-pointer"
+                        onClick={() => redirigirInicio()}
+                    >
                         <i className="fa-solid fa-graduation-cap text-white text-xl"></i>
                     </div>
                     <div className="flex flex-col">
@@ -205,7 +208,10 @@ export default function NavBar({ setPlan, plan }) {
                         <>
                             <DrawerHeader className="p-0">
                                 <div className="w-full p-6 border-b border-default-200 flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                                    <div
+                                        className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center cursor-pointer"
+                                        onClick={() => redirigirInicio()}
+                                    >
                                         <i className="fa-solid fa-graduation-cap text-white"></i>
                                     </div>
                                     <span className="font-bold text-foreground text-lg">Menú</span>

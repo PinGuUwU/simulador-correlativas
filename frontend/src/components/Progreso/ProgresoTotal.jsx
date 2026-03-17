@@ -35,11 +35,11 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
                     </div>
 
                     <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-                        Simulador de Correlativas
+                        Mi Progreso Académico
                     </h1>
 
                     <p className="text-default-500 text-base max-w-2xl leading-relaxed">
-                        Gestioná tu progreso académico de la <span className="text-default-700 font-medium">Licenciatura en Sistemas de Información</span> y planificá tu carrera con precisión.
+                        Gestioná tu progreso académico de la <span className="text-default-700 font-medium">Licenciatura en Sistemas de Información</span> llevando el control de tus materias aprobadas y regulares.
                     </p>
                 </div>
             </div>

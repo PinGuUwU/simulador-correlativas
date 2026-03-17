@@ -221,13 +221,15 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                     )}
                 </ModalContent>
             </Modal>
-            <div ref={topSwitchRef} className="flex justify-between mb-8 px-4">
+
+            {/* Sección de botones */}
+            <div ref={topSwitchRef} className="grid grid-cols-2 sm:flex sm:justify-between mb-8 gap-2">
                 {/* Botón de Reestablecer - Solo visible en modo edición */}
                 <Button
                     size="sm"
                     variant="flat"
                     color="danger"
-                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2"
+                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300"
                     startContent={<i className="fa-solid fa-trash-can"></i>}
                     onPress={() => handleBorrado()}
                 >
@@ -238,16 +240,16 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                     size='sm'
                     variant="flat"
                     color="success"
-                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-success-800"
+                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 text-success-800"
                     onPress={() => navigate("/simulador")}
-                > Ir a Simular Avance</Button>
+                >Simular Avance</Button>
 
                 {/* Ocular o mostrar todos los años */}
                 <Button
                     size='sm'
                     variant="flat"
                     color="warning"
-                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-warning-800"
+                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 text-warning-800"
                     onPress={() => handleMostrarTodo()}
                 >
                     {isAnioOpen.length > 0 ? "Mostrar todos" : "Ocultar todos"}

@@ -167,6 +167,17 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
         }
     }
 
+    const handleMostrarTodo = () => {
+        // Si ya hay algo abierto, cerramos todo (vaciamos el array)
+        if (isAnioOpen.length > 0) {
+            setIsAnioOpen([]);
+        } else {
+            // IMPORTANTE: Creamos un nuevo array con todos los años de una
+            // Usamos .map() para extraer solo los identificadores o el objeto año
+            const todosLosAnios = anios.map(anio => anio);
+            setIsAnioOpen(todosLosAnios);
+        }
+    };
 
     return (
         <div className='pb-50'>
@@ -230,6 +241,17 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                     className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-green-800"
                     onPress={() => navigate("/simulador")}
                 > Ir a Simular Avance</Button>
+
+                {/* Ocular o mostrar todos los años */}
+                <Button
+                    size='sm'
+                    variant="flat"
+                    color="warning"
+                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 mx-2 text-yellow-800"
+                    onPress={() => handleMostrarTodo()}
+                >
+                    {isAnioOpen.length > 0 ? "Mostrar todos" : "Ocultar todos"}
+                </Button>
 
                 {/* Switch para intercambiar el modo edición */}
                 <Switch

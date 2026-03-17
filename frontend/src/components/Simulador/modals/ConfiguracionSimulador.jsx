@@ -1,8 +1,11 @@
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Select, SelectItem } from '@heroui/react'
-import React from 'react'
-import selectUtils from '../../../utils/Simulador/selectUtils'
+import selectUtils from '../../../utils/Simulador/selectUtils.js'
 
-function ConfiguracionSimulador({ isOpen, onOpenChange }) {
+function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
+
+    const handleConfigurar = () => {
+        onClose()
+    }
 
     return (
         <Modal
@@ -125,7 +128,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange }) {
                             <Button
                                 color="primary"
                                 className="w-full sm:w-auto rounded-2xl font-bold h-12 shadow-lg shadow-blue-500/30"
-                                onPress={() => console.log("Simulación Iniciada")}
+                                onPress={() => handleConfigurar()}
                             >
                                 Comenzar Simulación
                             </Button>

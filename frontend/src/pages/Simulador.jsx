@@ -3,7 +3,7 @@ import HeaderSimulador from '../components/Simulador/HeaderSimulador'
 import MateriasSimulador from '../components/Simulador/MateriasSimulador'
 import MateriaCard from '../components/Simulador/MateriaCard'
 import ConfiguracionSimulador from '../components/Simulador/modals/ConfiguracionSimulador'
-import { Button, useDisclosure } from '@heroui/react'
+import { Button, Spinner, useDisclosure } from '@heroui/react'
 
 function Simulador() {
 
@@ -12,6 +12,9 @@ function Simulador() {
     const [progreso, setProgreso] = useState([])
     const [cargando, setCargando] = useState(true)
     const [plan, setPlan] = useState("17.14")
+    const [cuatri, setCuatri] = useState()
+    const [anio, setAnio] = useState()
+    const [modo, setModo] = useState()
     const {
         isOpen: isConfiguracionOpen,
         onClose: onConfiguracionClose,
@@ -67,13 +70,23 @@ function Simulador() {
             <ConfiguracionSimulador
                 isOpen={isConfiguracionOpen}
                 onOpenChange={onConfiguracionOpenChange}
+                onClose={onConfiguracionClose}
+                setModo={setModo}
+                setAnio={setAnio}
+                setCuatri={setCuatri}
             />
             <Button onPress={() => onConfiguracionOpen()}>Abrir Modal de Configuración</Button>
             <HeaderSimulador />
-            <MateriasSimulador />
             {!cargando &&
-                <MateriaCard materia={materias[0]} />
-
+                <MateriasSimulador
+                    anio={anio}
+                    cuatri={cuatri}
+                    materias={materias}
+                    progreso={progreso}
+                />
+            }
+            {cargando &&
+                <Spinner />
             }
             {/* Acá va la lógica para ir hacia adelante y hacia atrás en el avance */}
         </div>

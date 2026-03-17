@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardBody, CardFooter, Chip, Listbox, ListboxItem } from "@heroui/react"
+import { Card, CardHeader, CardBody, CardFooter, Chip } from "@heroui/react"
 import { useState } from "react"
 
 function MateriaCard({ materia }) {

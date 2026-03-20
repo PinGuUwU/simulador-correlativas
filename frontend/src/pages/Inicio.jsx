@@ -159,7 +159,7 @@ function Inicio() {
                             <div className="w-full">
                                 <Input
                                     isRequired
-                                    name="nombre"
+                                    name="user_name"
                                     label="Nombre"
                                     placeholder="Tu nombre completo"
                                     labelPlacement="outside"
@@ -173,7 +173,7 @@ function Inicio() {
                             <div className="w-full">
                                 <Input
                                     isRequired
-                                    name="email"
+                                    name="user_email"
                                     type="email"
                                     label="Email"
                                     placeholder="tu@email.com"
@@ -189,7 +189,7 @@ function Inicio() {
                             <div className="w-full">
                                 <Textarea
                                     isRequired
-                                    name="mensaje"
+                                    name="message"
                                     label="Mensaje"
                                     placeholder="Escribe tu mensaje o reporte de error detallado aquí..."
                                     labelPlacement="outside"

@@ -18,7 +18,7 @@ const Rutas = ({ plan }) => {
         },
         {
             path: "/simulador",
-            element: <Simulador />
+            element: <Simulador plan={plan} />
         },
         {
             path: "/equivalencias",

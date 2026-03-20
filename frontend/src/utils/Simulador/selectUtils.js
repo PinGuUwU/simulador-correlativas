@@ -17,7 +17,13 @@ const cuatris = [
     { key: "2", label: "2° Cuatrimestre" },
 ]
 
+const plans = [
+    { key: "17.14", label: "17.14" },
+    { key: "17.13", label: "17.13" },
+]
+
 export default {
     anios,
-    cuatris
+    cuatris,
+    plans
 }

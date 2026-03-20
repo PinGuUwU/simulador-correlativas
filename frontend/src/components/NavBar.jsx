@@ -62,7 +62,7 @@ const NavLinks = ({ onItemClick }) => {
 
     const menuItems = [
         { name: 'Progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
-        { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: true },
+        { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
         { name: 'Equivalencias entre planes', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: true },
         { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot', isDeactivated: true },
     ]

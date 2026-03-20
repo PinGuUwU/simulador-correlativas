@@ -1,9 +1,21 @@
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Select, SelectItem } from '@heroui/react'
 import selectUtils from '../../../utils/Simulador/selectUtils.js'
+import { useState } from 'react'
 
-function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
+function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setModo, setCuatri, setPlan }) {
+
+    const [confiPlan, setConfiPlan] = useState("17.14")
+    const [confiAnio, setConfiAnio] = useState("2026")
+    const [confiCuatri, setConfiCuatri] = useState("1")
+    const [confiModo, setConfiModo] = useState("viejo")
 
     const handleConfigurar = () => {
+        setAnio(confiAnio)
+        setPlan(confiPlan)
+        setCuatri(confiCuatri)
+        setModo(confiModo)
+        console.log(confiModo, confiAnio, confiCuatri, confiPlan);
+        // Cierro el modal al terminar de configurar
         onClose()
     }
 
@@ -14,6 +26,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
             // En móvil se pega abajo como un "drawer", en desktop va al centro
             placement="bottom-center"
             size="md"
+            disableAnimation
             scrollBehavior="inside"
             backdrop="blur"
             classNames={{
@@ -45,8 +58,31 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                         </ModalHeader>
 
                         <ModalBody>
-                            {/* Sección: Fecha de Inicio */}
+                            {/* Sección: Fecha de Inicio y plan */}
                             <div className="flex flex-col gap-4">
+                                <div className="flex items-center gap-2 text-foreground">
+                                    <div className="w-1 h-5 bg-primary rounded-full"></div>
+                                    <h3 className="font-bold text-md">Plan</h3>
+                                </div>
+
+                                <Select
+                                    label="Plan de estudio"
+                                    variant="flat"
+                                    defaultSelectedKeys={["17.14"]}
+                                    onSelectionChange={(keys) => setConfiPlan(Array.from(keys)[0])}
+                                    classNames={{
+                                        trigger: "bg-default-50 border border-default-100 rounded-2xl shadow-sm h-14",
+                                        label: "text-default-500 font-medium"
+                                    }}
+                                >
+                                    {selectUtils.plans.map((anio) => (
+                                        <SelectItem key={anio.key} textValue={anio.label}>
+                                            {anio.label}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+
+
                                 <div className="flex items-center gap-2 text-foreground">
                                     <div className="w-1 h-5 bg-primary rounded-full"></div> {/* Indicador lateral */}
                                     <h3 className="font-bold text-md">Fecha de Inicio</h3>
@@ -57,6 +93,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                                         label="Año de inicio"
                                         variant="flat"
                                         defaultSelectedKeys={["2026"]}
+                                        onSelectionChange={(keys) => setConfiAnio(Array.from(keys)[0])}
                                         classNames={{
                                             trigger: "bg-default-50 border border-default-100 rounded-2xl shadow-sm h-14",
                                             label: "text-default-500 font-medium"
@@ -73,6 +110,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                                         label="Cuatrimestre"
                                         variant="flat"
                                         defaultSelectedKeys={["1"]}
+                                        onSelectionChange={(keys) => setConfiCuatri(Array.from(keys)[0])}
                                         classNames={{
                                             trigger: "bg-default-50 border border-default-100 rounded-2xl shadow-sm h-14",
                                             label: "text-default-500 font-medium"
@@ -95,11 +133,12 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose }) {
                                 </div>
 
                                 <RadioGroup
-                                    defaultValue="avanzado"
+                                    defaultValue={"viejo"}
+                                    onValueChange={setConfiModo}
                                     classNames={{ wrapper: "gap-3" }}
                                 >
                                     <Radio
-                                        value="avanzado"
+                                        value="viejo"
                                         classNames={{
                                             base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
                                             label: "text-foreground font-bold text-sm",

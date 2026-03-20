@@ -9,7 +9,7 @@ function Inicio() {
 
     const buttonItems = [
         { name: 'Ver mi progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
-        { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: true },
+        { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
         { name: 'Consultar Equivalencias', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: true },
     ]
 
@@ -119,7 +119,7 @@ function Inicio() {
             </section>
 
             {/* Contact Form Section */}
-            <section className="flex flex-col items-center gap-10 mb-10 w-full hidden">
+            <section className="flex flex-col items-center gap-10 mb-10 w-full">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
                         ¿Dudas, sugerencias o problemas?

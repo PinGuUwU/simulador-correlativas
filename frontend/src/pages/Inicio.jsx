@@ -1,11 +1,14 @@
 import { Button, Input, Textarea, Form, addToast } from '@heroui/react'
 import { Card, CardBody, CardHeader } from '@heroui/card'
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import emailjs from '@emailjs/browser'
 
 function Inicio() {
     const navigate = useNavigate()
     const [action, setAction] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
+    const form = useRef()
 
     const buttonItems = [
         { name: 'Ver mi progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
@@ -44,14 +47,30 @@ function Inicio() {
 
     const onSubmit = (e) => {
         e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        const data = Object.fromEntries(formData.entries())
-        console.log("Formulario enviado:", data)
-        setAction("¡Mensaje enviado con éxito!")
-        e.currentTarget.reset()
+        setIsLoading(true)
 
-        // Ocultar mensaje de éxito luego de 3 segundos
-        setTimeout(() => setAction(null), 3000)
+        // Configuración de EmailJS (Reemplazar con tus credenciales)
+        emailjs.sendForm(
+            import.meta.env.VITE_EMAILJS_SERVICE_ID || import.meta.env.EMAILJS_SERVICE_ID,
+            import.meta.env.VITE_EMAILJS_TEMPLATE_ID || import.meta.env.EMAILJS_TEMPLATE_ID,
+            form.current,
+            { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || import.meta.env.EMAILJS_PUBLIC_KEY }
+        )
+            .then(
+                () => {
+                    console.log("¡Mensaje enviado con éxito!")
+                    setAction("¡Mensaje enviado con éxito!")
+                    e.target.reset()
+                    setTimeout(() => setAction(null), 3000)
+                },
+                (error) => {
+                    console.error("Error al enviar formulario:", error.text || error.message || error)
+                    addToast({ title: "Error", description: "Hubo un problema al enviar el mensaje. Inténtalo de nuevo más tarde.", color: "danger" })
+                }
+            )
+            .finally(() => {
+                setIsLoading(false)
+            })
     }
 
     return (
@@ -132,6 +151,7 @@ function Inicio() {
                 <Card className="w-full max-w-xl shadow-xl border border-default-100 bg-background/60 backdrop-blur-xl">
                     <CardBody className="p-8 md:p-10">
                         <Form
+                            ref={form}
                             onSubmit={onSubmit}
                             className="flex flex-col gap-6 w-full"
                             validationBehavior="native"
@@ -185,10 +205,11 @@ function Inicio() {
                                     type="submit"
                                     color="primary"
                                     size="lg"
+                                    isLoading={isLoading}
                                     className="w-full font-bold shadow-lg shadow-primary/40 text-md"
-                                    endContent={<i className="fa-solid fa-paper-plane ml-2"></i>}
+                                    endContent={!isLoading && <i className="fa-solid fa-paper-plane ml-2"></i>}
                                 >
-                                    Enviar mensaje
+                                    {isLoading ? "Enviando..." : "Enviar mensaje"}
                                 </Button>
 
                                 {/* Mensaje de éxito */}

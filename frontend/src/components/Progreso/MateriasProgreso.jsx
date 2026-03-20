@@ -99,15 +99,15 @@ function MateriasProgreso({ progreso, materias }) {
                     onClick={() => handleClick(stat.estado, stat.label)}
                 >
                     <CardHeader className="pb-0 pt-4 px-5 items-center flex justify-between text-center">
-                        <p className="text-tiny uppercase font-bold text-default-400 tracking-wider">
+                        <p className="text-tiny uppercase font-bold text-default-600 tracking-wider">
                             {stat.label}
                         </p>
                     </CardHeader>
 
                     <CardBody className="py-4 px-5 flex flex-row items-center justify-between overflow-visible">
-                        <h4 className="font-black text-4xl text-default-800">
+                        <p className="font-black text-4xl text-default-800">
                             {stat.count}
-                        </h4>
+                        </p>
 
                         {/* Contenedor del Icono Estilo "Neon" del prototipo */}
                         <div className={`${stat.accent} flex items-center justify-center w-12 h-12 rounded-full border-2 shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.4)]`}>
@@ -117,7 +117,7 @@ function MateriasProgreso({ progreso, materias }) {
 
                     <CardFooter className="px-5 pb-5">
                         <div className="flex flex-col w-full gap-2">
-                            <div className="flex justify-between items-center text-[10px] font-bold text-default-400 uppercase">
+                            <div className="flex justify-between items-center text-[10px] font-bold text-default-600 uppercase">
                                 <span>Avance</span>
                                 <span>{Math.round(calcularPorcentaje(stat.count))}%</span>
                             </div>

@@ -7,4 +7,7 @@ export default defineConfig({
     react(),
     tailwindcss(), // 2. Lo agregamos a la lista
   ],
+  build: {
+    sourcemap: true,
+  }
 })

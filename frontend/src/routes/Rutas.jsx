@@ -2,7 +2,7 @@ import React from 'react'
 import { useRoutes } from 'react-router-dom'
 import Progreso from '../pages/Progreso'
 import Equivalencias from '../pages/Equivalencias'
-import ChatBot from '../pages/Chatbot'
+import ChatBot from '../pages/ChatBot'
 import Inicio from '../pages/Inicio'
 import Simulador from '../pages/Simulador'
 

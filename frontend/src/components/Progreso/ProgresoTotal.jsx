@@ -55,7 +55,7 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
                     <div className={isSticky ? "max-w-7xl mx-auto lg:pl-64" : ""}>
                         <div className="flex px-10 sm:p-0 justify-between items-end mb-3">
                             <div className="space-y-1">
-                                <span className="text-default-400 text-xs uppercase tracking-widest font-bold">Estado Actual</span>
+                                <span className="text-default-600 text-xs uppercase tracking-widest font-bold">Estado Actual</span>
                                 <p className="text-default-700 font-semibold">Progreso de la carrera</p>
                             </div>
                             <div className="text-right">

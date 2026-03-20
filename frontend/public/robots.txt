@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://simulador-unlu-sistemas.netlify.app/sitemap.xml

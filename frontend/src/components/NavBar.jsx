@@ -133,6 +133,7 @@ export default function NavBar({ setPlan, plan }) {
                     variant="shadow"
                     onPress={onOpen}
                     className="bg-background text-primary border border-default-200"
+                    aria-label="Abrir menú principal"
                 >
                     <i className="fa-solid fa-bars"></i>
                 </Button>

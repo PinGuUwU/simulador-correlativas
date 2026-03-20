@@ -34,7 +34,7 @@ function Footer() {
                 
                 {/* Panel de Redes Sociales y Enlaces */}
                 <CardFooter className="flex flex-wrap justify-center items-center gap-3 py-6 border-t border-default-100/60 bg-default-50/30">
-                    <span className="text-default-400 font-bold text-xs uppercase tracking-wider mr-2 w-full sm:w-auto text-center mb-2 sm:mb-0">
+                    <span className="text-default-600 font-bold text-xs uppercase tracking-wider mr-2 w-full sm:w-auto text-center mb-2 sm:mb-0">
                         Contáctame:
                     </span>
                     

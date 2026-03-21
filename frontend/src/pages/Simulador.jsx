@@ -47,11 +47,19 @@ function Simulador() {
                 return true;
             };
 
-            const computedBgColor = getComputedStyle(document.documentElement).getPropertyValue('--nextui-background') || getComputedStyle(document.body).backgroundColor;
+            const isDark = document.documentElement.className.includes('dark');
+            const fallbackBg = isDark ? '#000000' : '#ffffff';
 
             const dataUrl = await toPng(element, {
                 pixelRatio: 1.5,
-                backgroundColor: computedBgColor !== 'rgba(0, 0, 0, 0)' && computedBgColor !== 'transparent' ? computedBgColor : '#ffffff',
+                backgroundColor: fallbackBg,
+                width: element.offsetWidth,
+                height: element.offsetHeight,
+                style: {
+                    margin: '0',
+                    maxWidth: 'none',
+                    width: element.offsetWidth + 'px'
+                },
                 filter: filterNodes,
                 cacheBust: true,
                 skipFonts: true // Previene los securityErrors de las fuentes remotas en Chrome
@@ -345,7 +353,7 @@ function Simulador() {
                         <div className="mt-8 flex flex-col pt-4 relative">
                             {/* HISTORIAL ACADÉMICO */}
                             {historialSemestres.length > 0 && (
-                                <div id="historial-container" className="flex flex-col mb-8 relative pl-6 pb-2 bg-background">
+                                <div id="historial-container" className={`flex flex-col mb-8 relative px-6 md:px-10 pb-4 bg-background border border-default-100/50 rounded-3xl m-0 ${descargandoPDF ? 'w-[800px] max-w-none mx-0' : 'w-full max-w-5xl mx-auto'}`}>
                                     {descargandoPDF && (
                                         <div className="w-full text-center py-6 mb-4 border-b-2 border-primary/20">
                                             <h1 className="text-3xl font-black text-foreground tracking-tight">Registro de Avance Universitario</h1>
@@ -436,7 +444,7 @@ function Simulador() {
                                                                 </div>
                                                             }
                                                         >
-                                                            <div className={`grid grid-cols-1 md:grid-cols-2 ${descargandoPDF ? "" : "lg:grid-cols-3"} gap-3 px-2 pb-4`}>
+                                                            <div className={`grid ${descargandoPDF ? "grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"} gap-3 px-2 pb-4`}>
                                                                 {item.materiasDelSemestre.map((materia) => (
                                                                     <Card key={materia.codigo} className={`p-3 border ${item.progresoSnapshot[materia.codigo] === "Cursado" ? "border-success/30 bg-success/5" : "border-warning/30 bg-warning/5"} shadow-none`}>
                                                                         <div className="flex items-center gap-3">

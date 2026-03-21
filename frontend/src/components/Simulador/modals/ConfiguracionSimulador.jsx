@@ -1,6 +1,6 @@
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Select, SelectItem } from '@heroui/react'
 import selectUtils from '../../../utils/Simulador/selectUtils.js'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setModo, setCuatri, setPlan }) {
 
@@ -14,16 +14,41 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
         setPlan(confiPlan)
         setCuatri(confiCuatri)
         setModo(confiModo)
-        console.log(confiModo, confiAnio, confiCuatri, confiPlan);
-        // Cierro el modal al terminar de configurar
         onClose()
     }
+
+    // Elimina aria-hidden de los popovers de HeroUI mientras el modal está abierto,
+    // evitando el warning "Blocked aria-hidden on an element because its descendant retained focus".
+    // No se usa inert porque bloquearía los eventos del mouse en el dropdown.
+    useEffect(() => {
+        if (!isOpen) return
+
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach(({ target, attributeName }) => {
+                if (
+                    attributeName === 'aria-hidden' &&
+                    target instanceof Element &&
+                    target.getAttribute('data-slot') === 'popover' &&
+                    target.getAttribute('aria-hidden') === 'true'
+                ) {
+                    target.removeAttribute('aria-hidden')
+                }
+            })
+        })
+
+        observer.observe(document.body, {
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['aria-hidden'],
+        })
+
+        return () => observer.disconnect()
+    }, [isOpen])
 
     return (
         <Modal
             isOpen={isOpen}
             onOpenChange={onOpenChange}
-            // En móvil se pega abajo como un "drawer", en desktop va al centro
             placement="bottom-center"
             size="md"
             disableAnimation
@@ -42,7 +67,6 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                     <>
                         <ModalHeader className='flex flex-col gap-1'>
                             <div className='flex items-center gap-3'>
-                                {/* Icono con color primary consistente */}
                                 <div className='bg-primary text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30'>
                                     <i className='fa-solid fa-sliders text-lg' />
                                 </div>
@@ -58,7 +82,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                         </ModalHeader>
 
                         <ModalBody>
-                            {/* Sección: Fecha de Inicio y plan */}
+                            {/* Sección: Plan */}
                             <div className="flex flex-col gap-4">
                                 <div className="flex items-center gap-2 text-foreground">
                                     <div className="w-1 h-5 bg-primary rounded-full"></div>
@@ -66,7 +90,6 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                 </div>
 
                                 <Select
-                                    disableAnimation
                                     label="Plan de estudio"
                                     aria-label="Seleccionar Plan de estudio"
                                     variant="flat"
@@ -77,22 +100,20 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                         label: "text-foreground/80 font-medium"
                                     }}
                                 >
-                                    {selectUtils.plans.map((anio) => (
-                                        <SelectItem key={anio.key} textValue={anio.label}>
-                                            {anio.label}
+                                    {selectUtils.plans.map((plan) => (
+                                        <SelectItem key={plan.key} textValue={plan.label}>
+                                            {plan.label}
                                         </SelectItem>
                                     ))}
                                 </Select>
 
-
                                 <div className="flex items-center gap-2 text-foreground">
-                                    <div className="w-1 h-5 bg-primary rounded-full"></div> {/* Indicador lateral */}
+                                    <div className="w-1 h-5 bg-primary rounded-full"></div>
                                     <h3 className="font-bold text-md">Fecha de Inicio</h3>
                                 </div>
 
                                 <div className='flex flex-col sm:flex-row gap-3'>
                                     <Select
-                                        disableAnimation
                                         label="Año de inicio"
                                         aria-label="Año de inicio de la simulación"
                                         variant="flat"
@@ -111,7 +132,6 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                     </Select>
 
                                     <Select
-                                        disableAnimation
                                         label="Cuatrimestre"
                                         aria-label="Cuatrimestre de inicio"
                                         variant="flat"

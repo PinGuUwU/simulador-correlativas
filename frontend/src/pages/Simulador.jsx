@@ -425,22 +425,21 @@ function Simulador() {
                                                             key={String(idx)}
                                                             aria-label={`Completado ${item.cuatri}º Cuatrimestre`}
                                                             title={
-                                                                <div className="flex justify-between w-full items-center mr-2">
-                                                                    <div className="flex flex-col pl-2">
-                                                                        <span className="text-xs text-foreground/60 font-medium">Completado</span>
-                                                                        <span className="font-bold text-foreground text-sm md:text-base">
-                                                                            {item.cuatri}º Cuatrimestre - Año {item.anioActual}
+                                                                <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 mr-2 py-0.5 w-full">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="font-bold text-foreground text-sm sm:text-lg tracking-tight">
+                                                                            {item.cuatri}º Cuatrimestre <span className="text-foreground/30 mx-1">•</span> Año {item.anioActual}
                                                                         </span>
-                                                                        {(horasTotalesDelSemestre > 0 || horasSemanalesDelSemestre > 0) && (
-                                                                            <div className="flex gap-3 text-[11px] font-medium text-foreground/80 mt-1">
-                                                                                {horasTotalesDelSemestre > 0 && <span><i data-html2canvas-ignore className="fa-regular fa-clock"></i> {horasTotalesDelSemestre}h totales</span>}
-                                                                                {horasSemanalesDelSemestre > 0 && <span><i data-html2canvas-ignore className="fa-solid fa-calendar-week"></i> {horasSemanalesDelSemestre}h/sem</span>}
-                                                                            </div>
-                                                                        )}
                                                                     </div>
-                                                                    <span className="text-xs md:text-sm text-foreground/80 font-medium bg-default-100 px-3 py-1 rounded-full whitespace-nowrap">
-                                                                        {materiasCursadasReales.length} de {totalSemestre} cursadas
+                                                                    <span className="text-[10px] sm:text-xs text-foreground/80 font-bold bg-default-200/50 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap">
+                                                                        {materiasCursadasReales.length} de {totalSemestre}
                                                                     </span>
+                                                                    {(horasTotalesDelSemestre > 0 || horasSemanalesDelSemestre > 0) && (
+                                                                        <div className="w-full flex gap-3 text-[11px] sm:text-xs font-medium text-foreground/50 mt-0.5">
+                                                                            {horasTotalesDelSemestre > 0 && <span className="flex items-center gap-1 whitespace-nowrap"><i data-html2canvas-ignore className="fa-regular fa-clock"></i> {horasTotalesDelSemestre}h totales</span>}
+                                                                            {horasSemanalesDelSemestre > 0 && <span className="flex items-center gap-1 whitespace-nowrap"><i data-html2canvas-ignore className="fa-solid fa-calendar-week"></i> {horasSemanalesDelSemestre}h/sem</span>}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             }
                                                         >
@@ -467,21 +466,16 @@ function Simulador() {
                             )}
 
                             {/* ESTADO ACTUAL O FINALZADO */}
-                            <div className="relative pl-6">
-                                <div className="absolute -left-px top-6 bg-primary text-primary w-5 h-5 rounded-full shadow-md ring-4 ring-background z-10 flex items-center justify-center">
-                                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                                </div>
-                                <div className="absolute top-0 left-[11px] w-[2px] h-12 bg-default-200"></div>
-
+                            <div>
                                 {simulacionTerminada ? (
-                                    <div className="flex flex-col gap-6 w-full">
+                                    <div className="flex flex-col gap-4 sm:gap-6 w-full">
                                         <Card className='bg-linear-to-r from-success to-emerald-500 text-white shadow-lg border-none rounded-2xl w-full'>
-                                            <CardBody className="p-8 text-center flex flex-col items-center justify-center space-y-4">
-                                                <div className="bg-white/20 p-5 rounded-full backdrop-blur-md">
-                                                    <i className="fa-solid fa-graduation-cap text-5xl"></i>
+                                            <CardBody className="p-6 sm:p-8 text-center flex flex-col items-center justify-center space-y-2 sm:space-y-4">
+                                                <div className="bg-white/20 p-4 sm:p-5 rounded-full backdrop-blur-md">
+                                                    <i className="fa-solid fa-graduation-cap text-4xl sm:text-5xl"></i>
                                                 </div>
-                                                <h2 className="text-3xl font-extrabold tracking-tight">¡Carrera Finalizada!</h2>
-                                                <p className="text-white/90 text-sm max-w-sm">
+                                                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">¡Carrera Finalizada!</h2>
+                                                <p className="text-white/90 text-xs sm:text-sm max-w-sm">
                                                     Has completado todas las materias del plan de estudios exitosamente en tu simulación.
                                                 </p>
                                             </CardBody>
@@ -618,7 +612,8 @@ function Simulador() {
                         </div>
                     )}
                 </div>
-            )}
+            )
+            }
 
             <Modal isOpen={isGuardarOpen} onOpenChange={onGuardarOpenChange}>
                 <ModalContent>
@@ -648,7 +643,7 @@ function Simulador() {
                     )}
                 </ModalContent>
             </Modal>
-        </div>
+        </div >
     )
 }
 

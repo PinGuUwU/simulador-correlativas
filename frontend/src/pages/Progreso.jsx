@@ -8,6 +8,9 @@ import LeyendaEstados from '../components/Progreso/LeyendaEstados';
 import TutorialTour from '../components/Tutorial/TutorialTour';
 
 
+import { fetchWithFallback } from '../utils/fetchWithFallback';
+
+
 function Progreso({ plan }) {
     //Estados para guardar las materias y para mostrar una imagen de cargando, además para contabilizar el progreso
     const [materias, setMaterias] = useState([])
@@ -32,9 +35,10 @@ function Progreso({ plan }) {
     useEffect(() => {
         const fetchMaterias = async () => {
             try {
-                //Hago la petición al backend
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/${plan}`)
-                if (!response) {
+                // Hago la petición usando la utilidad con fallback
+                const response = await fetchWithFallback(`/${plan}`);
+                
+                if (!response.ok) {
                     throw new Error("Error en la respuesta del servidor")
                 }
 

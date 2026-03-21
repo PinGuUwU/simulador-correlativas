@@ -28,7 +28,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, onOpenCh
                                     {/* Contenido principal del Header (estilizado según image_2.png) */}
                                     <div className="flex flex-col px-1 pt-3">
                                         {/* 1. Ícono (libro) y Código inline */}
-                                        <div className="flex items-center gap-2 text-default-500 mb-1">
+                                        <div className="flex items-center gap-2 text-foreground/80 mb-1">
                                             <i className="fa-solid fa-book-open text-base" />
                                             <span className="text-sm font-medium tracking-wide">{infoMateria.codigo}</span>
                                         </div>
@@ -112,7 +112,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, onOpenCh
                                                     )
                                                 } else {
                                                     return (
-                                                        <div className='text-default-500 italic mt-2 bg-default-100 px-3 py-1 rounded-lg'>
+                                                        <div className='text-foreground/80 italic mt-2 bg-default-100 px-3 py-1 rounded-lg'>
                                                             No requiere correlativas previas
                                                         </div>
                                                     )

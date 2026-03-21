@@ -89,7 +89,7 @@ function FiltroMateriasModal({ estado, materias, progreso, isOpen, onOpenChange,
                                         )
                                     } else {
                                         return (
-                                            <div className='text-default-500 italic mt-2 bg-default-100 px-3 py-1 rounded-lg'>
+                                            <div className='text-foreground/80 italic mt-2 bg-default-100 px-3 py-1 rounded-lg'>
                                                 No requiere correlativas previas
                                             </div>
                                         )

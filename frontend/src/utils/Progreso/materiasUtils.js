@@ -9,7 +9,7 @@ const obtenerEstiloPorEstado = (estado) => {
             return { icon: "fa-clock", accent: "warning", colorText: "text-warning" }
         case "Bloqueado":
         default:
-            return { icon: "fa-lock", accent: "default", colorText: "text-default-400" }
+            return { icon: "fa-lock", accent: "default", colorText: "text-foreground/60" }
     }
 }
 

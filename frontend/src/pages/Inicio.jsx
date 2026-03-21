@@ -83,7 +83,7 @@ function Inicio() {
                         sin errores ni sorpresas
                     </span>
                 </h1>
-                <p className="text-xl md:text-2xl text-default-500 max-w-3xl leading-relaxed">
+                <p className="text-xl md:text-2xl text-foreground/80 max-w-3xl leading-relaxed">
                     Visualizá tu progreso, simula correlatividades automáticamente y tomá decisiones informadas sobre tu futuro académico.
                 </p>
 
@@ -110,22 +110,22 @@ function Inicio() {
                     <h2 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
                         ¿Cómo te ayuda esta herramienta?
                     </h2>
-                    <p className="text-default-500 text-lg max-w-2xl mx-auto">
+                    <p className="text-foreground/80 text-lg max-w-2xl mx-auto">
                         Resolvemos los problemas más comunes que enfrentan los estudiantes al planificar su carrera universitaria.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {infoItems.map((item, index) => (
                         <Card
                             key={index}
                             className={`shadow-sm border border-default-200 transition-all duration-300 hover:-translate-y-2 ${item.color}`}
                         >
-                            <CardHeader className="flex gap-4 px-6 pt-8">
-                                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-background shadow-sm shadow-default-200">
+                            <CardHeader className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 px-4 xl:px-6 pt-8">
+                                <div className="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center bg-background shadow-sm shadow-default-200">
                                     <i className={`${item.icon} text-2xl`}></i>
                                 </div>
-                                <h3 className="text-xl font-bold text-foreground">
+                                <h3 className="text-lg xl:text-xl font-bold text-foreground leading-tight">
                                     {item.title}
                                 </h3>
                             </CardHeader>
@@ -143,7 +143,7 @@ function Inicio() {
                     <h2 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
                         ¿Dudas, sugerencias o problemas?
                     </h2>
-                    <p className="text-default-500 text-lg max-w-2xl mx-auto">
+                    <p className="text-foreground/80 text-lg max-w-2xl mx-auto">
                         Ayudanos a mejorar la herramienta o reportá un error enviando un mensaje directo.
                     </p>
                 </div>
@@ -166,7 +166,7 @@ function Inicio() {
                                     variant="faded"
                                     radius="lg"
                                     classNames={{ label: "font-semibold mb-1" }}
-                                    startContent={<i className="fa-solid fa-user text-default-400"></i>}
+                                    startContent={<i className="fa-solid fa-user text-foreground/60"></i>}
                                 />
                             </div>
 
@@ -182,7 +182,7 @@ function Inicio() {
                                     radius="lg"
                                     classNames={{ label: "font-semibold mb-1" }}
                                     errorMessage="Por favor, ingresa un correo electrónico válido."
-                                    startContent={<i className="fa-solid fa-envelope text-default-400"></i>}
+                                    startContent={<i className="fa-solid fa-envelope text-foreground/60"></i>}
                                 />
                             </div>
 

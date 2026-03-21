@@ -50,7 +50,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                     <h2 className='text-xl font-bold text-foreground'>
                                         Configurar Simulación
                                     </h2>
-                                    <p className='text-[12px] font-medium text-default-400 uppercase tracking-wider'>
+                                    <p className='text-[12px] font-medium text-foreground/60 uppercase tracking-wider'>
                                         Parámetros Iniciales
                                     </p>
                                 </div>
@@ -72,7 +72,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                     onSelectionChange={(keys) => setConfiPlan(Array.from(keys)[0])}
                                     classNames={{
                                         trigger: "bg-default-50 border border-default-100 rounded-2xl shadow-sm h-14",
-                                        label: "text-default-500 font-medium"
+                                        label: "text-foreground/80 font-medium"
                                     }}
                                 >
                                     {selectUtils.plans.map((anio) => (
@@ -96,7 +96,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                         onSelectionChange={(keys) => setConfiAnio(Array.from(keys)[0])}
                                         classNames={{
                                             trigger: "bg-default-50 border border-default-100 rounded-2xl shadow-sm h-14",
-                                            label: "text-default-500 font-medium"
+                                            label: "text-foreground/80 font-medium"
                                         }}
                                     >
                                         {selectUtils.anios.map((anio) => (
@@ -113,7 +113,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                         onSelectionChange={(keys) => setConfiCuatri(Array.from(keys)[0])}
                                         classNames={{
                                             trigger: "bg-default-50 border border-default-100 rounded-2xl shadow-sm h-14",
-                                            label: "text-default-500 font-medium"
+                                            label: "text-foreground/80 font-medium"
                                         }}
                                     >
                                         {selectUtils.cuatris.map((cuatri) => (
@@ -142,7 +142,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                         classNames={{
                                             base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
                                             label: "text-foreground font-bold text-sm",
-                                            description: "text-default-500 text-[11px] leading-tight",
+                                            description: "text-foreground/80 text-[11px] leading-tight",
                                         }}
                                         description="Cargá tus materias aprobadas y regulares automáticamente."
                                     >
@@ -153,12 +153,25 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                         classNames={{
                                             base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
                                             label: "text-foreground font-bold text-sm",
-                                            description: "text-default-500 text-[11px] leading-tight",
+                                            description: "text-foreground/80 text-[11px] leading-tight",
                                         }}
                                         description="Iniciá una planificación limpia desde el primer año."
                                     >
                                         Empezar desde cero
                                     </Radio>
+                                    {localStorage.getItem(`simulacion+${confiPlan}`) && (
+                                        <Radio
+                                            value="guardado"
+                                            classNames={{
+                                                base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
+                                                label: "text-foreground font-bold text-sm",
+                                                description: "text-foreground/80 text-[11px] leading-tight",
+                                            }}
+                                            description="Continuá tu simulación exactamente donde la dejaste."
+                                        >
+                                            Cargar simulación guardada
+                                        </Radio>
+                                    )}
                                 </RadioGroup>
                             </div>
                         </ModalBody>
@@ -174,7 +187,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                             <Button
                                 variant="light"
                                 onPress={onClose}
-                                className="w-full sm:w-auto rounded-2xl font-semibold h-12 text-default-400"
+                                className="w-full sm:w-auto rounded-2xl font-semibold h-12 text-foreground/60"
                             >
                                 Cancelar
                             </Button>

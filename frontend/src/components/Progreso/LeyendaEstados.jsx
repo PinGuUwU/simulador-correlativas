@@ -41,7 +41,7 @@ function LeyendaEstados() {
                                     <span className={`text-sm font-bold ${estilo.colorText} leading-tight`}>
                                         {estado.name}
                                     </span>
-                                    <span className="text-xs text-default-400 font-medium">
+                                    <span className="text-xs text-foreground/60 font-medium">
                                         {estado.desc}
                                     </span>
                                 </div>

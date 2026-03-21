@@ -74,7 +74,7 @@ const NavLinks = ({ onItemClick }) => {
 
     return (
         <nav className="flex flex-col gap-2 p-4">
-            <div className="text-default-400 font-bold text-[10px] uppercase tracking-[0.15em] mb-2 px-3">
+            <div className="text-foreground/60 font-bold text-[10px] uppercase tracking-[0.15em] mb-2 px-3">
                 Menú Principal
             </div>
 
@@ -87,7 +87,7 @@ const NavLinks = ({ onItemClick }) => {
                             onClick={() => handleClick(item.path)}
                             className={`flex items-center gap-3 p-3 rounded-xl transition-all group ${isActive
                                 ? "bg-primary/10 text-primary font-bold shadow-sm border border-primary/20"
-                                : "text-default-500 hover:bg-default-100 hover:text-primary"
+                                : "text-foreground/80 hover:bg-default-100 hover:text-primary"
                                 }`}
                         >
                             <i className={`fa-solid ${item.icon} w-5 text-lg ${isActive ? "text-primary" : "group-hover:scale-110 transition-transform"
@@ -104,7 +104,7 @@ const NavLinks = ({ onItemClick }) => {
                         <button
                             key={item.path}
                             onClick={() => addToast({ title: "En progreso", description: "Esta página aún no está disponible", color: "warning" })}
-                            className={`flex items-center gap-3 p-3 rounded-xl transition-all group bg-default-200/50 text-default-400`}
+                            className={`flex items-center gap-3 p-3 rounded-xl transition-all group bg-default-200/50 text-foreground/60`}
                         >
                             <i className={`fa-solid ${item.icon} w-5 text-lg group-hover:scale-110 transition-transform`}></i>
                             <span className="text-sm font-medium">{item.name}</span>
@@ -162,34 +162,38 @@ export default function NavBar({ setPlan, plan }) {
                         {/* ACÁ PONEMOS EL SELECTOR DE TEMAS */}
                         <ThemeSwitcher />
 
-                        <p className="text-[10px] text-default-500 font-bold uppercase mb-3 px-1 tracking-wider">
-                            Plan de Estudios
-                        </p>
+                        {location.pathname === '/progreso' && (
+                            <div className="mt-4 border-t border-default-200/50 pt-4">
+                                <p className="text-[10px] text-foreground/80 font-bold uppercase mb-3 px-1 tracking-wider">
+                                    Plan de Estudios
+                                </p>
 
-                        <div className="flex bg-default-200/50 p-1 rounded-xl gap-1">
-                            <button
-                                onClick={() => setPlan("17.14")}
-                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === "17.14"
-                                    ? "bg-background text-primary shadow-sm ring-1 ring-default-200"
-                                    : "text-default-500 hover:text-foreground hover:bg-default-200"
-                                    }`}
-                            >
-                                17.14
-                            </button>
-                            <button
-                                onClick={() => setPlan("17.13")}
-                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === "17.13"
-                                    ? "bg-background text-primary shadow-sm ring-1 ring-default-200"
-                                    : "text-default-500 hover:text-foreground hover:bg-default-200"
-                                    }`}
-                            >
-                                17.13
-                            </button>
-                        </div>
+                                <div className="flex bg-default-200/50 p-1 rounded-xl gap-1">
+                                    <button
+                                        onClick={() => setPlan("17.14")}
+                                        className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === "17.14"
+                                            ? "bg-background text-primary shadow-sm ring-1 ring-default-200"
+                                            : "text-foreground/80 hover:text-foreground hover:bg-default-200"
+                                            }`}
+                                    >
+                                        17.14
+                                    </button>
+                                    <button
+                                        onClick={() => setPlan("17.13")}
+                                        className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === "17.13"
+                                            ? "bg-background text-primary shadow-sm ring-1 ring-default-200"
+                                            : "text-foreground/80 hover:text-foreground hover:bg-default-200"
+                                            }`}
+                                    >
+                                        17.13
+                                    </button>
+                                </div>
 
-                        <p className="text-[9px] text-default-400 mt-3 px-1 text-center italic">
-                            * Cambiar el plan reseteará los filtros
-                        </p>
+                                <p className="text-[9px] text-foreground/60 mt-3 px-1 text-center italic">
+                                    * Cambiar el plan reseteará los filtros
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </aside>
@@ -229,24 +233,28 @@ export default function NavBar({ setPlan, plan }) {
                                         {/* ACÁ PONEMOS EL SELECTOR DE TEMAS EN VERSIÓN MÓVIL */}
                                         <ThemeSwitcher />
 
-                                        <p className="text-[10px] text-default-500 font-bold uppercase mb-3 px-1 tracking-wider">
-                                            Plan de Estudios
-                                        </p>
+                                        {location.pathname === '/progreso' && (
+                                            <div className="mt-4 border-t border-default-200/50 pt-4">
+                                                <p className="text-[10px] text-foreground/80 font-bold uppercase mb-3 px-1 tracking-wider">
+                                                    Plan de Estudios
+                                                </p>
 
-                                        <div className="flex bg-default-200/50 p-1 rounded-xl gap-1">
-                                            {["17.14", "17.13"].map((id) => (
-                                                <button
-                                                    key={id}
-                                                    onClick={() => setPlan(id)}
-                                                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === id
-                                                        ? "bg-background text-primary shadow-sm ring-1 ring-default-200"
-                                                        : "text-default-500 hover:text-foreground hover:bg-default-200"
-                                                        }`}
-                                                >
-                                                    {id}
-                                                </button>
-                                            ))}
-                                        </div>
+                                                <div className="flex bg-default-200/50 p-1 rounded-xl gap-1">
+                                                    {["17.14", "17.13"].map((id) => (
+                                                        <button
+                                                            key={id}
+                                                            onClick={() => setPlan(id)}
+                                                            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === id
+                                                                ? "bg-background text-primary shadow-sm ring-1 ring-default-200"
+                                                                : "text-foreground/80 hover:text-foreground hover:bg-default-200"
+                                                                }`}
+                                                        >
+                                                            {id}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </DrawerFooter>

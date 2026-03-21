@@ -201,7 +201,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                                 <p className="text-default-600">
                                     ¿Estás seguro de que quieres <b>reestablecer todo tu progreso</b>?
                                 </p>
-                                <p className="text-sm text-default-500 italic">
+                                <p className="text-sm text-foreground/80 italic">
                                     Esta acción volverá todas las materias a su estado inicial (Disponible/Bloqueado) y no se puede deshacer.
                                 </p>
                             </ModalBody>

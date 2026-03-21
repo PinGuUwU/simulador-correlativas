@@ -31,14 +31,14 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
                     <div className="flex items-center gap-2 justify-center md:justify-normal">
                         <span className="text-primary font-bold text-sm tracking-wider lg:hidden">UNLu</span>
                         <span className="text-default-300 lg:hidden">|</span>
-                        <span className="text-default-500 font-medium text-sm">{carrera}</span>
+                        <span className="text-foreground/80 font-medium text-sm">{carrera}</span>
                     </div>
 
                     <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
                         Mi Progreso Académico
                     </h1>
 
-                    <p className="text-default-500 text-base max-w-2xl leading-relaxed">
+                    <p className="text-foreground/80 text-base max-w-2xl leading-relaxed">
                         Gestioná tu progreso académico de la <span className="text-default-700 font-medium">Licenciatura en Sistemas de Información</span> llevando el control de tus materias aprobadas y regulares.
                     </p>
                 </div>
@@ -61,7 +61,7 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
                             <div className="text-right">
                                 {/* Eliminé los pr-[8%] y pr-[20%] manuales para usar un layout más fluido */}
                                 <span className="text-2xl font-black text-secondary">{progress}%</span>
-                                <span className="text-default-400 text-sm ml-1 font-medium hidden sm:inline-block">completado</span>
+                                <span className="text-foreground/60 text-sm ml-1 font-medium hidden sm:inline-block">completado</span>
                             </div>
                         </div>
 

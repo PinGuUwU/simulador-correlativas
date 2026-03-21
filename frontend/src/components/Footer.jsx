@@ -25,7 +25,7 @@ function Footer() {
                         <h3 className="text-3xl font-black text-foreground drop-shadow-sm tracking-tight text-center md:text-left">
                             Priscila Redondo
                         </h3>
-                        <p className="text-default-500 text-sm font-medium text-center md:text-left leading-relaxed">
+                        <p className="text-foreground/80 text-sm font-medium text-center md:text-left leading-relaxed">
                             Licenciatura en Sistemas de Información. <br className="hidden md:block"/>
                             Apasionada por crear interfaces digitales estéticas, funcionales y que aporten valor real.
                         </p>

@@ -5,6 +5,7 @@ import Rutas from './routes/Rutas'
 import { ToastProvider } from '@heroui/react'
 import Footer from './components/Footer'
 import ScrollToTop from './components/Shared/ScrollToTop'
+import AutoScrollTop from './components/Shared/AutoScrollTop'
 
 function App() {
     const [plan, setPlan] = useState("17.14")
@@ -12,6 +13,7 @@ function App() {
 
     return (
         <BrowserRouter>
+            <AutoScrollTop />
             <div className='flex'>
                 <NavBar setPlan={setPlan} plan={plan} />
                 <main className='w-full'>

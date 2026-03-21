@@ -16,7 +16,17 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
     const [confirmacion, setConfirmacion] = useState(false)
     const [mostrar, setMostrar] = useState(true)
     //Logica para mostrar u ocultar las materias de un año
-    const [isAnioOpen, setIsAnioOpen] = useState([])
+    const [isAnioOpen, setIsAnioOpen] = useState(() => {
+        const guardado = localStorage.getItem('materias_isAnioOpen');
+        if (guardado) {
+            try { return JSON.parse(guardado); } catch (e) { return []; }
+        }
+        return [];
+    });
+
+    useEffect(() => {
+        localStorage.setItem('materias_isAnioOpen', JSON.stringify(isAnioOpen));
+    }, [isAnioOpen]);
     const navigate = useNavigate()
     // Observador para saber si el switch principal se ve
     useEffect(() => {
@@ -225,16 +235,18 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
             {/* Sección de botones */}
             <div ref={topSwitchRef} className="grid grid-cols-2 sm:flex sm:justify-between mb-8 gap-2">
                 {/* Botón de Reestablecer - Solo visible en modo edición */}
-                <Button
-                    size="sm"
-                    variant="flat"
-                    color="danger"
-                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300"
-                    startContent={<i className="fa-solid fa-trash-can"></i>}
-                    onPress={() => handleBorrado()}
-                >
-                    Reestablecer
-                </Button>
+                <div id="wrapper-btn-reset-progreso" className="flex flex-col">
+                    <Button
+                        size="sm"
+                        variant="flat"
+                        color="danger"
+                        className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 w-full"
+                        startContent={<i className="fa-solid fa-trash-can"></i>}
+                        onPress={() => handleBorrado()}
+                    >
+                        Reestablecer
+                    </Button>
+                </div>
 
                 <Button
                     size='sm'
@@ -245,31 +257,34 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                 >Simular Avance</Button>
 
                 {/* Ocular o mostrar todos los años */}
-                <Button
-                    size='sm'
-                    variant="flat"
-                    color="warning"
-                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 text-warning-800"
-                    onPress={() => handleMostrarTodo()}
-                >
-                    {isAnioOpen.length > 0 ? "Mostrar todos" : "Ocultar todos"}
-                </Button>
+                <div id="wrapper-btn-mostrar-todos" className="flex flex-col">
+                    <Button
+                        size='sm'
+                        variant="flat"
+                        color="warning"
+                        className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 text-warning-800 w-full"
+                        onPress={() => handleMostrarTodo()}
+                    >
+                        {isAnioOpen.length > 0 ? "Mostrar todos" : "Ocultar todos"}
+                    </Button>
+                </div>
 
                 {/* Switch para intercambiar el modo edición */}
-                <Switch
-
-                    isSelected={modo}
-                    color="success"
-                    onChange={() => setModo(!modo)}
-                    endContent={<span className="text-xs">off</span>}
-                    startContent={<span className="text-xs">on</span>}
-                    size={currentSize}
-                    classNames={{
-                        label: "text-default-600 font-medium"
-                    }}
-                >
-                    Modo Edición
-                </Switch>
+                <div id="wrapper-switch-modo-edicion" className="flex items-center justify-center relative">
+                    <Switch
+                        isSelected={modo}
+                        color="success"
+                        onChange={() => setModo(!modo)}
+                        endContent={<span className="text-xs">off</span>}
+                        startContent={<span className="text-xs">on</span>}
+                        size={currentSize}
+                        classNames={{
+                            label: "text-default-600 font-medium"
+                        }}
+                    >
+                        Modo Edición
+                    </Switch>
+                </div>
             </div>
             {/* Switch Flotante en la parte inferior derecha */}
             {mostrarSwitchFlotante && isProgressSticky && (
@@ -292,8 +307,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
 
 
             {/* Sección materias */}
-            <div >
-
+            <div id="tabs-filtro-anio" className="relative">
                 <Tabs aria-label="Filtos por año" items={tabs} className=' w-full mask-[linear-gradient(to_right,black_85%,transparent_100%)] pl-[3%] md:mask-none'>
                     {(item) => (
                         <Tab key={item.id} title={item.label} className=''>
@@ -349,18 +363,21 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                                                                 </Chip>
                                                             </div>
 
-                                                            {/* Grilla de Materias */}
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                                                                {materiasCuatri.map((materia, index) => (
-                                                                    <MateriaCard
-                                                                        key={materia.codigo !== "N/A" ? materia.codigo : `${materia.codigo}-${index}`}
-                                                                        materia={materia}
-                                                                        estado={progreso[materia.codigo]}
-                                                                        actualizarEstados={() => handleCambioDeEstado(materia.codigo)}
-                                                                        modo={modo}
-                                                                        abrirInfo={() => abrirInfo(materia)}
-                                                                    />
-                                                                ))}
+                                                                {materiasCuatri.map((materia, index) => {
+                                                                    const esElPrimero = materia.codigo === materias[0]?.codigo;
+                                                                    return (
+                                                                        <div key={materia.codigo !== "N/A" ? materia.codigo : `${materia.codigo}-${index}`} id={esElPrimero ? 'materia-card-ejemplo' : undefined}>
+                                                                            <MateriaCard
+                                                                                materia={materia}
+                                                                                estado={progreso[materia.codigo]}
+                                                                                actualizarEstados={() => handleCambioDeEstado(materia.codigo)}
+                                                                                modo={modo}
+                                                                                abrirInfo={() => abrirInfo(materia)}
+                                                                            />
+                                                                        </div>
+                                                                    )
+                                                                })}
                                                             </div>
                                                         </div>
                                                     )

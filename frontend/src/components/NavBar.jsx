@@ -65,11 +65,13 @@ const NavLinks = ({ onItemClick }) => {
         { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
         { name: 'Equivalencias entre planes', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: true },
         { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot', isDeactivated: true },
+        { name: 'Cómo usar', icon: 'fa-circle-question', path: '/como-usar', isDeactivated: false, id: 'btn-como-usar' },
     ]
 
     const handleClick = (path) => {
         navigate(path)
         if (onItemClick) onItemClick(); // Cierra el menú en móvil
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Hace scroll hacia arriba
     }
 
     return (
@@ -84,6 +86,7 @@ const NavLinks = ({ onItemClick }) => {
                     return (
                         <button
                             key={item.path}
+                            id={item.id}  // ID para poder apuntarlo desde el tutorial
                             onClick={() => handleClick(item.path)}
                             className={`flex items-center gap-3 p-3 rounded-xl transition-all group ${isActive
                                 ? "bg-primary/10 text-primary font-bold shadow-sm border border-primary/20"
@@ -132,6 +135,7 @@ export default function NavBar({ setPlan, plan }) {
                     radius="full"
                     variant="shadow"
                     onPress={onOpen}
+                    id="btn-menu-mobile"
                     className="bg-background text-primary border border-default-200"
                     aria-label="Abrir menú principal"
                 >
@@ -140,7 +144,7 @@ export default function NavBar({ setPlan, plan }) {
             </div>
 
             {/* Sidebar Persistente para Escritorio */}
-            <aside className="hidden lg:flex flex-col w-64 h-screen sticky left-0 top-0 bg-background border-r border-default-200 z-40">
+            <aside className="hidden lg:flex flex-col w-64 h-screen sticky left-0 top-0 bg-background border-r border-default-200 z-40 overflow-y-auto">
                 <div className="p-6 mb-2 flex items-center gap-3">
                     <div
                         className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 cursor-pointer"
@@ -160,10 +164,12 @@ export default function NavBar({ setPlan, plan }) {
                 <div className="mt-auto p-4 border-t border-divider">
                     <div className="bg-default-50 rounded-2xl p-3 border border-default-200">
                         {/* ACÁ PONEMOS EL SELECTOR DE TEMAS */}
-                        <ThemeSwitcher />
+                        <div id="selector-tema-desktop">
+                            <ThemeSwitcher />
+                        </div>
 
                         {location.pathname === '/progreso' && (
-                            <div className="mt-4 border-t border-default-200/50 pt-4">
+                            <div id="selector-plan-desktop" className="mt-4 border-t border-default-200/50 pt-4">
                                 <p className="text-[12px] text-foreground/80 font-bold uppercase mb-3 px-1 tracking-wider">
                                     Plan de Estudios
                                 </p>
@@ -192,6 +198,20 @@ export default function NavBar({ setPlan, plan }) {
                                 <p className="text-[12px] text-foreground/60 mt-3 px-1 text-center italic">
                                     * Cambiar el plan reseteará los filtros
                                 </p>
+
+                                <div className="mt-3">
+                                    <Button
+                                        id="btn-ver-tutorial-desktop"
+                                        size="sm"
+                                        variant="flat"
+                                        color="primary"
+                                        className="w-full font-bold uppercase tracking-wider text-[10px]"
+                                        startContent={<i className="fa-solid fa-circle-question"></i>}
+                                        onPress={() => window.dispatchEvent(new CustomEvent('start-tutorial'))}
+                                    >
+                                        Repetir Tutorial
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -231,10 +251,12 @@ export default function NavBar({ setPlan, plan }) {
                                 <div className="p-4 border-t border-default-200">
                                     <div className="bg-default-50 rounded-2xl p-3 border border-default-200">
                                         {/* ACÁ PONEMOS EL SELECTOR DE TEMAS EN VERSIÓN MÓVIL */}
-                                        <ThemeSwitcher />
+                                        <div id="selector-tema-mobile">
+                                            <ThemeSwitcher />
+                                        </div>
 
                                         {location.pathname === '/progreso' && (
-                                            <div className="mt-4 border-t border-default-200/50 pt-4">
+                                            <div id="selector-plan-mobile" className="mt-4 border-t border-default-200/50 pt-4">
                                                 <p className="text-[10px] text-foreground/80 font-bold uppercase mb-3 px-1 tracking-wider">
                                                     Plan de Estudios
                                                 </p>
@@ -253,6 +275,9 @@ export default function NavBar({ setPlan, plan }) {
                                                         </button>
                                                     ))}
                                                 </div>
+                                                <p className="text-[10px] text-foreground/60 mt-3 px-1 text-center italic">
+                                                    * Cambiar el plan reseteará los filtros
+                                                </p>
                                             </div>
                                         )}
                                     </div>

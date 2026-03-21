@@ -5,6 +5,7 @@ import Equivalencias from '../pages/Equivalencias'
 import ChatBot from '../pages/ChatBot'
 import Inicio from '../pages/Inicio'
 import Simulador from '../pages/Simulador'
+import ComoUsar from '../pages/ComoUsar'
 
 const Rutas = ({ plan }) => {
     const componentesRutas = useRoutes([
@@ -27,6 +28,10 @@ const Rutas = ({ plan }) => {
         {
             path: "/chatbot",
             element: <ChatBot />
+        },
+        {
+            path: "/como-usar",
+            element: <ComoUsar />
         }
     ])
     return componentesRutas

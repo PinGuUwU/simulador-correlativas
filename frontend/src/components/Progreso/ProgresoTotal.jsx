@@ -47,7 +47,7 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
             {/* Sección Inferior: Barra de Progreso */}
             {/* Contenedor envolvente para evitar saltos de layout cuando se vuelve fixed */}
             <div className={isSticky ? "" : "pt-6 border-t"}>
-                <div className={
+                <div id="progreso-total" className={
                     isSticky
                         ? "fixed top-0 right-0 z-30 backdrop-blur-md p-4 bg-background/95 shadow-md border-b border-default-200 animate-in slide-in-from-top duration-300 left-0 "
                         : "w-full"

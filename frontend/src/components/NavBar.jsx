@@ -164,7 +164,7 @@ export default function NavBar({ setPlan, plan }) {
 
                         {location.pathname === '/progreso' && (
                             <div className="mt-4 border-t border-default-200/50 pt-4">
-                                <p className="text-[10px] text-foreground/80 font-bold uppercase mb-3 px-1 tracking-wider">
+                                <p className="text-[12px] text-foreground/80 font-bold uppercase mb-3 px-1 tracking-wider">
                                     Plan de Estudios
                                 </p>
 
@@ -189,7 +189,7 @@ export default function NavBar({ setPlan, plan }) {
                                     </button>
                                 </div>
 
-                                <p className="text-[9px] text-foreground/60 mt-3 px-1 text-center italic">
+                                <p className="text-[12px] text-foreground/60 mt-3 px-1 text-center italic">
                                     * Cambiar el plan reseteará los filtros
                                 </p>
                             </div>

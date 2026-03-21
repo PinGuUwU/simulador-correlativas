@@ -66,7 +66,9 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                 </div>
 
                                 <Select
+                                    disableAnimation
                                     label="Plan de estudio"
+                                    aria-label="Seleccionar Plan de estudio"
                                     variant="flat"
                                     defaultSelectedKeys={["17.14"]}
                                     onSelectionChange={(keys) => setConfiPlan(Array.from(keys)[0])}
@@ -90,7 +92,9 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
 
                                 <div className='flex flex-col sm:flex-row gap-3'>
                                     <Select
+                                        disableAnimation
                                         label="Año de inicio"
+                                        aria-label="Año de inicio de la simulación"
                                         variant="flat"
                                         defaultSelectedKeys={["2026"]}
                                         onSelectionChange={(keys) => setConfiAnio(Array.from(keys)[0])}
@@ -107,7 +111,9 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                     </Select>
 
                                     <Select
+                                        disableAnimation
                                         label="Cuatrimestre"
+                                        aria-label="Cuatrimestre de inicio"
                                         variant="flat"
                                         defaultSelectedKeys={["1"]}
                                         onSelectionChange={(keys) => setConfiCuatri(Array.from(keys)[0])}
@@ -134,6 +140,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
 
                                 <RadioGroup
                                     defaultValue={"viejo"}
+                                    aria-label="Modo de simulación"
                                     onValueChange={setConfiModo}
                                     classNames={{ wrapper: "gap-3" }}
                                 >

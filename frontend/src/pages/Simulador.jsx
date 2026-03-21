@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import HeaderSimulador from '../components/Simulador/HeaderSimulador'
 import MateriasSimulador from '../components/Simulador/MateriasSimulador'
 import ConfiguracionSimulador from '../components/Simulador/modals/ConfiguracionSimulador'
+import useSimuladorEstado from '../hooks/Simulador/useSimuladorEstado'
 import useSimuladorMaterias from '../hooks/Simulador/useSimuladorMaterias'
 import { Button, Spinner, useDisclosure, Card, CardBody, Accordion, AccordionItem, addToast, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/react'
 import { toPng } from 'html-to-image'
@@ -14,17 +15,21 @@ function Simulador() {
     const [progresoSimulado, setProgresoSimulado] = useState(null)
     const [progresoBase, setProgresoBase] = useState(null)
     const [cargando, setCargando] = useState(false)
-    const [cuatri, setCuatri] = useState()
-    const [anio, setAnio] = useState()
+    // Cuatrimestre y año ACTUALES de la simulación (avanzan con siguiente/anterior)
+    const [cuatri, setCuatri] = useState("1")
+    const [anioActual, setAnioActual] = useState(new Date().getFullYear())
+    // Cuatrimestre y año de INICIO configurados en el modal (no cambian durante la simulación)
+    const [anioInicio, setAnioInicio] = useState()
+    const [cuatriInicio, setCuatriInicio] = useState()
     const [modo, setModo] = useState()
-
-    const [anioActual, setAnioActual] = useState(1)
     const [historialSemestres, setHistorialSemestres] = useState([])
     const [estadoAnterior, setEstadoAnterior] = useState(false)
     const [estadoSiguiente, setEstadoSiguiente] = useState(true)
     const [simulacionTerminada, setSimulacionTerminada] = useState(false)
-    const [openedAccordions, setOpenedAccordions] = useState(new Set([]))
+    const [openedAccordions, setOpenedAccordions] = useState(new Set())
     const [descargandoPDF, setDescargandoPDF] = useState(false)
+
+    const { handleSiguiente, handleAnterior } = useSimuladorEstado()
 
     const handleDownloadPDF = async () => {
         try {
@@ -139,14 +144,28 @@ function Simulador() {
                 let progresoInicial = storageData ? JSON.parse(storageData) : null
                 let nuevoProgreso = {}
 
-                if (modo === "nuevo" || modo === "guardado" || !progresoInicial) {
+                if (modo === "guardado") {
+                    const saved = JSON.parse(localStorage.getItem(`simulacion+${plan}`));
+                    if (saved) {
+                        setHistorialSemestres(saved.historialSemestres || []);
+                        setProgresoSimulado(saved.progresoSimulado || {});
+                        setProgresoBase(saved.progresoBase || {});
+                        setAnioActual(saved.anioActual || 1);
+                        setCuatri(saved.cuatri || "1");
+                        setSimulacionTerminada(saved.simulacionTerminada || false);
+                        setCargando(false);
+                        return; // Sale temprano
+                    }
+                }
+
+                if (modo === "nuevo" || !progresoInicial) {
                     data.forEach(m => {
                         nuevoProgreso[m.codigo] = "No Cursado"
                     })
                     setProgresoSimulado(nuevoProgreso)
                     setProgresoBase(nuevoProgreso)
-                    setAnioActual(1)
-                    setCuatri("1")
+                    setAnioActual(Number(anioInicio) || new Date().getFullYear())
+                    setCuatri(cuatriInicio || "1")
                     setHistorialSemestres([])
                     setSimulacionTerminada(false)
                 } else {
@@ -166,6 +185,17 @@ function Simulador() {
                         }
                     });
 
+                    let currentY = Number(anioInicio) || new Date().getFullYear();
+                    let currentC = Number(cuatriInicio) || 1;
+
+                    let pastDates = [];
+                    for (let i = 0; i < maxSemestre; i++) {
+                        if (currentC === 1) { currentC = 2; currentY--; }
+                        else { currentC = 1; }
+                        pastDates.push({ y: currentY, c: currentC });
+                    }
+                    pastDates.reverse();
+
                     const fakeHistorial = [];
                     let acumulado = {};
                     data.forEach(m => acumulado[m.codigo] = "No Cursado");
@@ -181,12 +211,11 @@ function Simulador() {
                         });
 
                         const progresoSnapshot = { ...acumulado };
-                        const anioIdx = Math.floor((i - 1) / 2) + 1;
-                        const cuatriStr = i % 2 === 0 ? "2" : "1";
+                        const pd = pastDates[i - 1];
 
                         fakeHistorial.push({
-                            anioActual: anioIdx,
-                            cuatri: cuatriStr,
+                            anioActual: pd.y,
+                            cuatri: String(pd.c),
                             materiasDelSemestre,
                             progresoSnapshot,
                             progresoBaseSnapshot
@@ -197,14 +226,8 @@ function Simulador() {
                     setProgresoSimulado({ ...acumulado });
                     setProgresoBase({ ...acumulado });
 
-                    if (maxSemestre > 0) {
-                        const nextSemestre = maxSemestre + 1;
-                        setAnioActual(Math.floor((nextSemestre - 1) / 2) + 1);
-                        setCuatri(nextSemestre % 2 === 0 ? "2" : "1");
-                    } else {
-                        setAnioActual(1)
-                        setCuatri("1")
-                    }
+                    setAnioActual(Number(anioInicio) || new Date().getFullYear());
+                    setCuatri(cuatriInicio || "1");
 
                     const cursadas = data.filter(m => acumulado[m.codigo] === "Cursado").length;
                     setSimulacionTerminada(cursadas === data.length && data.length > 0);
@@ -217,10 +240,10 @@ function Simulador() {
             }
         }
         fetchMaterias()
-    }, [plan, modo])
+    }, [plan, modo, anioInicio, cuatriInicio])
 
     useEffect(() => {
-        if (anioActual === 1 && cuatri === "1" && historialSemestres.length === 0) {
+        if (historialSemestres.length === 0) {
             setEstadoAnterior(false)
         } else {
             setEstadoAnterior(true)
@@ -233,60 +256,6 @@ function Simulador() {
         }
     }, [anioActual, cuatri, historialSemestres, simulacionTerminada])
 
-    const handleAnterior = () => {
-        if (historialSemestres.length > 0) {
-            const last = historialSemestres[historialSemestres.length - 1]
-
-            setAnioActual(last.anioActual)
-            setCuatri(last.cuatri)
-            setProgresoSimulado(last.progresoSnapshot)
-            setProgresoBase(last.progresoBaseSnapshot)
-            setSimulacionTerminada(false)
-
-            setHistorialSemestres(prev => prev.slice(0, -1))
-        }
-    }
-
-    const handleSiguiente = () => {
-        if (!progresoSimulado || !materias.length) return;
-
-        // Comprobamos si el usuario no hizo ningún cambio en las materias mostradas
-        const algunCambio = materiasCursables.some(
-            m => progresoSimulado[m.codigo] === "Cursado" && progresoBase[m.codigo] !== "Cursado"
-        );
-
-        if (materiasCursables.length > 0 && !algunCambio) {
-            try {
-                addToast({
-                    title: "Atención",
-                    description: "Avanzaste sin haber modificado el estado de ninguna materia mostrada.",
-                    color: "warning",
-                });
-            } catch (e) { /* fallback if ToastProvider is not configured by user */ }
-        }
-
-        const semestreCompletado = {
-            anioActual,
-            cuatri,
-            materiasDelSemestre: materiasCursables,
-            progresoSnapshot: { ...progresoSimulado },
-            progresoBaseSnapshot: { ...progresoBase }
-        }
-        setHistorialSemestres(prev => [...prev, semestreCompletado])
-        setProgresoBase({ ...progresoSimulado })
-
-        const cantidadCursados = materias.filter(m => progresoSimulado[m.codigo] === "Cursado").length
-
-        if (cantidadCursados === materias.length) {
-            setSimulacionTerminada(true)
-            setEstadoSiguiente(false)
-        } else if (cuatri === "1") {
-            setCuatri("2")
-        } else if (cuatri === "2") {
-            setAnioActual(anioActual + 1)
-            setCuatri("1")
-        }
-    }
 
     const marcarTodasEnPantalla = (estado) => {
         if (!materiasCursables.length) return;
@@ -304,8 +273,8 @@ function Simulador() {
                 onOpenChange={onConfiguracionOpenChange}
                 onClose={onConfiguracionClose}
                 setModo={setModo}
-                setAnio={setAnio}
-                setCuatri={setCuatri}
+                setAnio={setAnioInicio}
+                setCuatri={setCuatriInicio}
                 setPlan={setPlan}
             />
 
@@ -468,7 +437,7 @@ function Simulador() {
                             {/* ESTADO ACTUAL O FINALZADO */}
                             <div>
                                 {simulacionTerminada ? (
-                                    <div className="flex flex-col gap-4 sm:gap-6 w-full">
+                                    <div className="flex flex-col gap-4 sm:gap-6 w-full mt-4">
                                         <Card className='bg-linear-to-r from-success to-emerald-500 text-white shadow-lg border-none rounded-2xl w-full'>
                                             <CardBody className="p-6 sm:p-8 text-center flex flex-col items-center justify-center space-y-2 sm:space-y-4">
                                                 <div className="bg-white/20 p-4 sm:p-5 rounded-full backdrop-blur-md">
@@ -476,7 +445,8 @@ function Simulador() {
                                                 </div>
                                                 <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">¡Carrera Finalizada!</h2>
                                                 <p className="text-white/90 text-xs sm:text-sm max-w-sm">
-                                                    Has completado todas las materias del plan de estudios exitosamente en tu simulación.
+                                                    Has completado todas las materias.<br />
+                                                    Según esta simulación, <strong>te egresarías en el año {anioActual}</strong>.
                                                 </p>
                                             </CardBody>
                                         </Card>
@@ -517,8 +487,12 @@ function Simulador() {
                                     </div>
                                 ) : (
                                     <>
-                                        <Card className='mb-6 bg-linear-to-r from-primary to-secondary text-white shadow-md border-none rounded-2xl'>
-                                            <CardBody className="p-4 md:p-6">
+                                        <Card className='mb-6 bg-primary text-primary-foreground shadow-lg border-none rounded-3xl overflow-hidden relative'>
+                                            {/* Decoración abstracta para que no sea un bloque plano */}
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                                            <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-12 -mb-12 blur-xl" />
+
+                                            <CardBody className="p-5 md:p-8 relative z-10">
                                                 <div className="flex items-center gap-4">
                                                     <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm hidden md:block">
                                                         <i className="fa-regular fa-calendar-days text-3xl"></i>
@@ -603,6 +577,7 @@ function Simulador() {
                                             color="primary"
                                             endContent={<i className="fa-solid fa-chevron-right" />}
                                             className="w-full md:w-auto font-bold transition-transform hover:scale-105"
+                                            aria-label="Siguiente cuatrimestre"
                                         >
                                             Siguiente
                                         </Button>

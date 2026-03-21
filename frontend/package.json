@@ -16,7 +16,7 @@
     "@fortawesome/fontawesome-svg-core": "^7.2.0",
     "@fortawesome/react-fontawesome": "^3.2.0",
     "@heroui/card": "^2.2.27",
-    "@heroui/react": "^2.8.9",
+    "@heroui/react": "^2.8.10",
     "@heroui/system": "^2.4.27",
     "@heroui/theme": "^2.4.26",
     "@tailwindcss/vite": "^4.2.1",

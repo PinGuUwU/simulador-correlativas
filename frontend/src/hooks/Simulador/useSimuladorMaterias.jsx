@@ -8,22 +8,23 @@ const useSimuladorMaterias = (materias, progreso, cuatri, setProgreso, progresoB
     useEffect(() => {
         if (!progresoBase || Object.keys(progresoBase).length === 0) return;
 
-        // Calculamos el índice global del cuatrimestre en base al año y cuatri actual
-        const semestreGlobal = (anioActual - 1) * 2 + Number(cuatri);
 
         // Filtramos para que no sean del futuro Y respeten la época del año (impar = 1, par = 2)
         let nextMaterias = materias.filter(m => {
             const numCuatri = Number(m.cuatrimestre);
             
-            // Verificamos si la temporada del año coincide
+            // Si la materia no tiene correlativas, la mostramos en cualquier cuatrimestre
+            // (permite empezar en C2 y ver materias de C1 sin prerequisito)
+            if (m.correlativas && m.correlativas.length === 0) return true;
+
+            // Verificamos si la temporada del año coincide (impar = Q1, par = Q2)
             const esImpar = numCuatri % 2 !== 0;
             const esPar = numCuatri % 2 === 0;
             
-            let temporadaCorrecta = false;
-            if (cuatri === "1" && esImpar) temporadaCorrecta = true;
-            if (cuatri === "2" && esPar) temporadaCorrecta = true;
+            if (cuatri === "1" && esImpar) return true;
+            if (cuatri === "2" && esPar) return true;
 
-            return temporadaCorrecta;
+            return false;
         });
 
         // Me quedo solo con las que no se cursaron (mirando la foto ANTES de este cuatrimestre)

@@ -12,51 +12,29 @@ const useSimuladorMaterias = (materias, progreso, cuatri, setProgreso, progresoB
         // Filtramos para que no sean del futuro Y respeten la época del año (impar = 1, par = 2)
         let nextMaterias = materias.filter(m => {
             const numCuatri = Number(m.cuatrimestre);
-            
-            // Si la materia no tiene correlativas, la mostramos en cualquier cuatrimestre
-            // (permite empezar en C2 y ver materias de C1 sin prerequisito)
-            if (m.correlativas && m.correlativas.length === 0) return true;
-
-            // Verificamos si la temporada del año coincide (impar = Q1, par = Q2)
             const esImpar = numCuatri % 2 !== 0;
             const esPar = numCuatri % 2 === 0;
-            
+
             if (cuatri === "1" && esImpar) return true;
             if (cuatri === "2" && esPar) return true;
 
-            return false;
-        });
-
+            return false; // Si no coincide la temporada, no se muestra
+        })
         // Me quedo solo con las que no se cursaron (mirando la foto ANTES de este cuatrimestre)
         nextMaterias = nextMaterias.filter(m => progresoBase[m.codigo] === "No Cursado")
         const posibles = []
         // Filtro por correlativas usando el progresoBase
         nextMaterias.forEach((materia) => {
-            const nombreStr = materia.nombre.toLowerCase();
-            const esTesina = nombreStr.includes("tesina de grado") || materia.correlativas[0] === "Todas";
-            const esOptativa = nombreStr.includes("optativa ");
+            const esTesina = materia.tesis
+            const esOptativa = materia.es_optativa
 
             if (esTesina) {
                 // La tesina requiere que absolutamente TODAS las demás materias estén cursadas
-                const hayPendientes = materias.some(m => 
+                const hayPendientes = materias.some(m =>
                     m.codigo !== materia.codigo && progresoBase[m.codigo] !== "Cursado"
                 );
                 if (!hayPendientes) posibles.push(materia);
-            } 
-            else if (esOptativa) {
-                // Las optativas requieren que todas las materias hasta X cuatrimestre estén cursadas
-                const cuatriLimite = Number(materia.correlativas[0]);
-                if (!isNaN(cuatriLimite)) {
-                    const hayPendientes = materias.some(m => 
-                        Number(m.cuatrimestre) <= cuatriLimite && progresoBase[m.codigo] !== "Cursado"
-                    );
-                    if (!hayPendientes) posibles.push(materia);
-                } else {
-                    // Fallback si no está bien configurado el cuatri
-                    posibles.push(materia);
-                }
-            } 
-            else {
+            } else {
                 // Materias regulares: revisamos sus correlativas normalmente
                 if (materia.correlativas.length > 0) {
                     let todasBien = true

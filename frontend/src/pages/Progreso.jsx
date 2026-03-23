@@ -33,7 +33,6 @@ function Progreso({ plan }) {
     useEffect(() => {
         const planData = plansData.find(p => p.plan_numero === plan)
         setMaterias(planData.materias)
-        console.log(planData.materias)
         //Inicializo acá mismo el progreso dependiendo si había progreso previo o no
         let progresoInicial = {}
         const storageKey = `progreso+${plan}`;
@@ -51,7 +50,6 @@ function Progreso({ plan }) {
             localStorage.setItem(storageKey, JSON.stringify(progresoInicial))
         } else {
             progresoInicial = JSON.parse(storageData)
-            console.log(progresoInicial);
         }
 
         setProgreso(progresoInicial)

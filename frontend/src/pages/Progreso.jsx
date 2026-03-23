@@ -119,7 +119,7 @@ function Progreso({ plan }) {
 
             {/* Breve descripción de lo que significa cada estado posible */}
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between pb-6 mx-5 md:mx-10 lg:mx-15">
-                <LeyendaEstados />
+                <LeyendaEstados materias={materias} />
                 <Button
                     color="primary"
                     variant="flat"

@@ -1,7 +1,9 @@
-import { Card, CardBody, CardHeader } from '@heroui/card'
+import { Card, CardBody, CardFooter, CardHeader } from '@heroui/card'
 import materiasUtils from '../../utils/Progreso/materiasUtils'
+import { Chip } from '@heroui/react'
 
-function LeyendaEstados() {
+function LeyendaEstados({ materias }) {
+
     // Los nombres deben coincidir exactamente con los "case" de tu switch
     const estados = [
         { name: "Aprobado", desc: "Materia completada" },
@@ -9,6 +11,11 @@ function LeyendaEstados() {
         { name: "Disponible", desc: "Lista para cursar" },
         { name: "Bloqueado", desc: "Faltan correlativas" },
     ]
+
+    const horas_totales = materias.reduce((acumulador, materia) => {
+        const horas = Number(materia.horas_totales)
+        return acumulador + horas
+    }, 0)
 
     // Mapeo para los fondos suaves basado en el "accent" semántico de HeroUI
     const bgMap = {
@@ -49,6 +56,11 @@ function LeyendaEstados() {
                         )
                     })}
                 </CardBody>
+                <CardFooter className='flex justify-center'>
+                    <Chip variant='flat' color='success'>
+                        Horas totales de la carrera: {horas_totales}
+                    </Chip>
+                </CardFooter>
             </Card>
         </div>
     )

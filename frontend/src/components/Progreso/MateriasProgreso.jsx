@@ -1,5 +1,5 @@
 import { Card, CardBody, CardFooter, CardHeader } from '@heroui/card'
-import { Button, Popover, PopoverContent, PopoverTrigger, Progress, useDisclosure } from '@heroui/react'
+import { Button, Chip, Popover, PopoverContent, PopoverTrigger, Progress, useDisclosure } from '@heroui/react'
 import React, { useState } from 'react'
 import FiltroMateriasModal from './modals/FiltroMateriasModal'
 
@@ -12,6 +12,16 @@ function MateriasProgreso({ progreso, materias }) {
             label: "Disponibles",
             estado: "Disponible",
             count: materias.filter(m => progreso[m.codigo] === "Disponible").length,
+            horas_semanales: materias.filter(m => progreso[m.codigo] === "Disponible")
+                .reduce((acumulador, materia) => {
+                    const horas = Number(materia.horas_semanales) || 0
+                    return acumulador + horas
+                }, 0),
+            horas_totales: materias.filter(m => progreso[m.codigo] === "Disponible")
+                .reduce((acumulador, materia) => {
+                    const horas = Number(materia.horas_totales) || 0
+                    return acumulador + horas
+                }, 0),
             color: "primary",
             icon: "fa-solid fa-unlock",
             accent: "bg-primary-300 border-primary-400/50 shadow-primary",
@@ -23,6 +33,16 @@ function MateriasProgreso({ progreso, materias }) {
             label: "Regulares",
             estado: "Regular",
             count: materias.filter(m => progreso[m.codigo] === "Regular").length,
+            horas_semanales: materias.filter(m => progreso[m.codigo] === "Regular")
+                .reduce((acumulador, materia) => {
+                    const horas = Number(materia.horas_semanales) || 0
+                    return acumulador + horas
+                }, 0),
+            horas_totales: materias.filter(m => progreso[m.codigo] === "Regular")
+                .reduce((acumulador, materia) => {
+                    const horas = Number(materia.horas_totales) || 0
+                    return acumulador + horas
+                }, 0),
             color: "warning",
             icon: "fa-regular fa-clock",
             accent: "bg-warning-300 border-warning-400/50 shadow-warning",
@@ -34,6 +54,16 @@ function MateriasProgreso({ progreso, materias }) {
             label: "Aprobadas",
             estado: "Aprobado",
             count: materias.filter(m => progreso[m.codigo] === "Aprobado").length,
+            horas_semanales: materias.filter(m => progreso[m.codigo] === "Aprobado")
+                .reduce((acumulador, materia) => {
+                    const horas = Number(materia.horas_semanales) || 0
+                    return acumulador + horas
+                }, 0),
+            horas_totales: materias.filter(m => progreso[m.codigo] === "Aprobado")
+                .reduce((acumulador, materia) => {
+                    const horas = Number(materia.horas_totales) || 0
+                    return acumulador + horas
+                }, 0),
             color: "success",
             icon: "fa-regular fa-circle-check",
             accent: "bg-success-300 border-success-400/50 shadow-success",
@@ -45,6 +75,16 @@ function MateriasProgreso({ progreso, materias }) {
             label: "Bloqueadas",
             estado: "Bloqueado",
             count: materias.filter(m => progreso[m.codigo] === "Bloqueado").length,
+            horas_semanales: materias.filter(m => progreso[m.codigo] === "Bloqueado")
+                .reduce((acumulador, materia) => {
+                    const horas = Number(materia.horas_semanales) || 0
+                    return acumulador + horas
+                }, 0),
+            horas_totales: materias.filter(m => progreso[m.codigo] === "Bloqueado")
+                .reduce((acumulador, materia) => {
+                    const horas = Number(materia.horas_totales) || 0
+                    return acumulador + horas
+                }, 0),
             color: "default",
             icon: "fa-solid fa-lock",
             accent: "bg-default-300 border-default-400/50 shadow-default",
@@ -108,6 +148,15 @@ function MateriasProgreso({ progreso, materias }) {
                         <p className="font-black text-4xl text-default-800">
                             {stat.count}
                         </p>
+
+                        <div className='text-center'>
+                            <Chip
+                                color={`${stat.color}`}
+                                variant={`flat`}
+                            >
+                                Horas totales: {stat.horas_totales}
+                            </Chip>
+                        </div>
 
                         {/* Contenedor del Icono Estilo "Neon" del prototipo */}
                         <div className={`${stat.accent} flex items-center justify-center w-12 h-12 rounded-full border-2 shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.4)]`}>

@@ -3,6 +3,7 @@ import estadoUtils from "../../utils/Progreso/estadoUtils";
 
 
 function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {
+    if (!estado) return <p>Cargando Materia...</p>
     // 2. Desestructuramos las propiedades de "materia" para un código más limpio en el JSX
     const { codigo, correlativas, nombre, anio, cuatrimestre } = materia;
 

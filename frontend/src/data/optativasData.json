@@ -1,0 +1,30 @@
+[
+    {
+        "codigo": "11804",
+        "nombre": "Procesamiento de Imágenes"
+    },
+    {
+        "codigo": "11806",
+        "nombre": "Programación Científica"
+    },
+    {
+        "codigo": "11807",
+        "nombre": "Análisis y Minería de Grafos y Redes"
+    },
+    {
+        "codigo": "11808",
+        "nombre": "Artefactor Digitales Interactivos"
+    },
+    {
+        "codigo": "11809",
+        "nombre": "Compiladores"
+    },
+    {
+        "codigo": "11949",
+        "nombre": "Taller de Bioinformática"
+    },
+    {
+        "codigo": "20395",
+        "nombre": "Sistemas de Información Geográfica"
+    }
+]

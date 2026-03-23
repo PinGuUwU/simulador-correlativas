@@ -2,78 +2,39 @@ import { useEffect } from "react"
 import materiasUtils from "../../utils/Progreso/materiasUtils"
 
 const useProgresoMaterias = (progreso, setProgreso, materias) => {
-    //Por la situación especial de las optativas, debo tener un useEffect para que cuando se actualice el progreso, revisar si hay que actualizar las optativas
-    useEffect(() => {
-        let huboCambios = false
-        let nuevoProgreso = { ...progreso }
-        const revisarOptativas = () => {
-            //Filtro las optativas
-            const optativas = materias.filter((m) => m.nombre.toLowerCase().includes("optativa "))
-            //Si todavía no se cargaron las materias de la base de datos
-            if (optativas.length === 0) return
-            //Recorro las optativas
-            optativas.forEach((op) => {
-                const cuatriLimite = Number(op.correlativas[0])
 
-                //Verifico que todas las materias hasta el cuatri 7 estén aprobadas
-                const hayMateriasPendientes = materias
-                    .filter(m => Number(m.cuatrimestre) <= cuatriLimite)
-                    .some(m => progreso[m.codigo] !== materiasUtils.estadosPosibles[2])
-                if (hayMateriasPendientes && progreso[op.codigo] !== materiasUtils.bloquear) {
-                    //Entonceshay materias no aprobadas, se bloquea la optativa
-                    nuevoProgreso[op.codigo] = materiasUtils.bloquear
-                    huboCambios = true
-                }
-            })
-        }
-        revisarOptativas()
-        if (huboCambios) {
-            setProgreso(nuevoProgreso)
-        }
-    }, [progreso])
-
-    //Por la situación en específico de la Tesina
+    // Vigilancia de la tesis
     useEffect(() => {
-        let huboCambios = false
-        let nuevoProgreso = { ...progreso }
-        //Obtengo la tesina
-        const materia = materias.filter((m) => m.nombre.toLowerCase().includes("tesina de grado"))
-        const tesina = materia[0]
-        //Si todavía no se cargaron las materias de la base de datos
-        if (!tesina) return
+        const tesinas = materias.find(m => m.tesis);
+        const tesina = tesinas[0]
+        if (!tesina) return;
 
         const revisarTesina = () => {
-            //Verifico si se desaprobo alguna materia anteriormente aprobada
-            const hayMateriasPendientes = materias
-                .filter((m) => m.nombre.toLowerCase() != tesina.nombre.toLowerCase())
-                .some(m => progreso[m.codigo] !== materiasUtils.estadosPosibles[2])
+            // Usamos el flag m.tesis para excluirla, es mucho más seguro que el nombre
+            const hayMateriasPendientes = materias.some(m =>
+                !m.tesis && progreso[m.codigo] !== materiasUtils.estadosPosibles[2]
+            );
 
-            if (hayMateriasPendientes && progreso[tesina.codigo] != materiasUtils.bloquear) {
-                //Si hay materias pendientes y la tesina no está bloqueada, la bloqueo y aviso que se debe actualizar el progreso
-                nuevoProgreso[tesina.codigo] = materiasUtils.bloquear
-                huboCambios = true
+            // IMPORTANTE: Solo bloqueamos si hay pendientes Y si la tesina no está ya bloqueada.
+            // Pero si el usuario la acaba de aprobar (Short-cut), el efecto no debe revertirlo.
+            if (hayMateriasPendientes && progreso[tesina.codigo] !== materiasUtils.bloquear) {
+                setProgreso(prev => ({
+                    ...prev,
+                    [tesina.codigo]: materiasUtils.bloquear
+                }));
             }
-        }
-        revisarTesina()
-        if (huboCambios) {
-            setProgreso(nuevoProgreso)
-        }
-    }, [progreso])
+        };
 
-    //Funcion para aprobar todas las materias hasta cierto cuatri, para materias optativas del plan viejo
-    const aprobarHastaCuatri = (cuatrimestre, nuevoProgreso, materiasModificadas) => {
-        const cuatriLimite = Number(cuatrimestre)
+        revisarTesina();
+    }, [progreso, materias])
+
+
+    //Funcion para aprobar todas las materias para la tesis
+    const aprobarTodas = (nuevoProgreso, materiasModificadas) => {
         materias.forEach((m) => {
-            if (!m.nombre.toLowerCase().includes("tesina de grado")) {
-                const cuatriMateria = Number(m.cuatrimestre)
-                if (cuatriMateria <= cuatriLimite) {
-                    //Si es mejor o igual al cuatrimestre elegido
-                    //Si el cuatrimeste de la materia es menor o igual al que tenemos, la apruebo
-                    nuevoProgreso[m.codigo] = materiasUtils.estadosPosibles[2]
-                    //Ya que se modifico, la guardo
-                    materiasModificadas.push(m.codigo)
-                }
-            }
+            nuevoProgreso[m.codigo] = materiasUtils.estadosPosibles[2]
+            //Ya que se modifico, la guardo
+            materiasModificadas.push(m.codigo)
         })
     }
 
@@ -173,17 +134,12 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
         let nuevoProgreso = { ...progreso, [codigoMateria]: estadoNuevo }
         let materiasModificadas = [materiaActual.codigo]
 
-        //Si es una materia optativa  tendrá un valor en "correlativas" distinto
-        //Que se debe manejar como caso aparte
-        //el número del cuatrimestre que debe tener regular
-        const cuatrimestre = materiaActual.correlativas[0]
-        const esCuatrimestre = /^[1-9]$/.test(cuatrimestre)
+        //Si es una materia optativa tendrá "es_optativa" === true
+        //Que ya NO se maneja como caso a parte, se solucionaron los problemas de correlatividades disminuyendo así el código utilizado
+
         //Si es la tesina
-        if (materiaActual.correlativas[0] === "Todas") {
-            aprobarHastaCuatri(materiaActual.cuatrimestre, nuevoProgreso, materiasModificadas)
-        } else if (esCuatrimestre) {
-            //Si es el número de un cuatrimestre entonces tengo que aprobar todas las materias hasta ese cuatrimestre
-            aprobarHastaCuatri(cuatrimestre, nuevoProgreso, materiasModificadas)
+        if (materiaActual.tesis && estadoNuevo === materiasUtils.estadosPosibles[2]) {
+            aprobarTodas(nuevoProgreso, materiasModificadas)
         } else {
             //4 casos posibles:
             if ((estadoInicial === materiasUtils.bloquear || estadoInicial === materiasUtils.estadosPosibles[0]) && estadoNuevo === materiasUtils.estadosPosibles[1]) {
@@ -208,7 +164,6 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
                 //No existe, es "actualizarCorrelativas()" que hace esta transición solo a partir de las materias modificadas
             }
         }
-        console.log(materiasModificadas);
         //Desbloqueo dependencias
         if (materiasModificadas.length > 0) {
             materiasModificadas.forEach((codigoMateria) => {

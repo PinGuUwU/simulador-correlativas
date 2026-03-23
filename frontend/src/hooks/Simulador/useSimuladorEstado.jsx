@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { addToast } from '@heroui/react'
-import { fetchWithFallback } from '../../utils/fetchWithFallback'
 
 const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCursables }) => {
     const [materias, setMaterias] = useState([])
@@ -18,112 +17,112 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCurs
     useEffect(() => {
         if (!plan) return
 
-        const fetchMaterias = async () => {
-            setCargando(true)
-            try {
-                // Hago la petición usando la utilidad con fallback
-                const response = await fetchWithFallback(`/${plan}`);
-                
-                if (!response.ok) throw new Error('Error en la respuesta del servidor')
-                const data = await response.json()
-                setMaterias(data)
+        // const fetchMaterias = async () => {
+        //     setCargando(true)
+        //     try {
+        //         // Hago la petición usando la utilidad con fallback
+        //         const response = await fetchWithFallback(`/${plan}`);
 
-                // Modo: cargar simulación guardada
-                if (modo === 'guardado') {
-                    const simuData = localStorage.getItem(`simulacion+${plan}`)
-                    if (simuData) {
-                        const parsed = JSON.parse(simuData)
-                        setHistorialSemestres(parsed.historialSemestres ?? [])
-                        setProgresoSimulado(parsed.progresoSimulado ?? {})
-                        setProgresoBase(parsed.progresoBase ?? {})
-                        setAnioActual(parsed.anioActual ?? new Date().getFullYear())
-                        setCuatri(parsed.cuatri ?? '1')
-                        setSimulacionTerminada(parsed.simulacionTerminada ?? false)
-                        setCargando(false)
-                        return
-                    }
-                    // Si no hay guardado, cae al modo "nuevo"
-                }
+        //         if (!response.ok) throw new Error('Error en la respuesta del servidor')
+        //         const data = await response.json()
+        //         setMaterias(data)
 
-                // Progreso real del alumno (de /progreso)
-                const storageData = localStorage.getItem(`progreso+${plan}`)
-                const progresoInicial = storageData ? JSON.parse(storageData) : null
+        //         // Modo: cargar simulación guardada
+        //         if (modo === 'guardado') {
+        //             const simuData = localStorage.getItem(`simulacion+${plan}`)
+        //             if (simuData) {
+        //                 const parsed = JSON.parse(simuData)
+        //                 setHistorialSemestres(parsed.historialSemestres ?? [])
+        //                 setProgresoSimulado(parsed.progresoSimulado ?? {})
+        //                 setProgresoBase(parsed.progresoBase ?? {})
+        //                 setAnioActual(parsed.anioActual ?? new Date().getFullYear())
+        //                 setCuatri(parsed.cuatri ?? '1')
+        //                 setSimulacionTerminada(parsed.simulacionTerminada ?? false)
+        //                 setCargando(false)
+        //                 return
+        //             }
+        //             // Si no hay guardado, cae al modo "nuevo"
+        //         }
 
-                let nuevoProgreso = {}
+        //         // Progreso real del alumno (de /progreso)
+        //         const storageData = localStorage.getItem(`progreso+${plan}`)
+        //         const progresoInicial = storageData ? JSON.parse(storageData) : null
 
-                // Modo: nuevo (sin progreso previo)
-                if (modo === 'nuevo' || !progresoInicial) {
-                    data.forEach(m => { nuevoProgreso[m.codigo] = 'No Cursado' })
-                    setProgresoSimulado(nuevoProgreso)
-                    setProgresoBase(nuevoProgreso)
-                    setAnioActual(Number(anioInicio) || new Date().getFullYear())
-                    setCuatri(cuatriInicio || '1')
-                    setHistorialSemestres([])
-                    setSimulacionTerminada(false)
-                } else {
-                    // Modo: viejo (con progreso previo del alumno)
-                    data.forEach(m => {
-                        nuevoProgreso[m.codigo] = ['Regular', 'Aprobado'].includes(progresoInicial[m.codigo])
-                            ? 'Cursado'
-                            : 'No Cursado'
-                    })
+        //         let nuevoProgreso = {}
 
-                    let maxSemestre = 0
-                    data.forEach(m => {
-                        if (nuevoProgreso[m.codigo] === 'Cursado')
-                            maxSemestre = Math.max(maxSemestre, Number(m.cuatrimestre))
-                    })
+        //         // Modo: nuevo (sin progreso previo)
+        //         if (modo === 'nuevo' || !progresoInicial) {
+        //             data.forEach(m => { nuevoProgreso[m.codigo] = 'No Cursado' })
+        //             setProgresoSimulado(nuevoProgreso)
+        //             setProgresoBase(nuevoProgreso)
+        //             setAnioActual(Number(anioInicio) || new Date().getFullYear())
+        //             setCuatri(cuatriInicio || '1')
+        //             setHistorialSemestres([])
+        //             setSimulacionTerminada(false)
+        //         } else {
+        //             // Modo: viejo (con progreso previo del alumno)
+        //             data.forEach(m => {
+        //                 nuevoProgreso[m.codigo] = ['Regular', 'Aprobado'].includes(progresoInicial[m.codigo])
+        //                     ? 'Cursado'
+        //                     : 'No Cursado'
+        //             })
 
-                    // Calcular fechas reales hacia atrás desde anioInicio/cuatriInicio
-                    let currentY = Number(anioInicio) || new Date().getFullYear()
-                    let currentC = Number(cuatriInicio) || 1
-                    const pastDates = []
-                    for (let i = 0; i < maxSemestre; i++) {
-                        if (currentC === 1) { currentC = 2; currentY-- }
-                        else { currentC = 1 }
-                        pastDates.push({ y: currentY, c: currentC })
-                    }
-                    pastDates.reverse()
+        //             let maxSemestre = 0
+        //             data.forEach(m => {
+        //                 if (nuevoProgreso[m.codigo] === 'Cursado')
+        //                     maxSemestre = Math.max(maxSemestre, Number(m.cuatrimestre))
+        //             })
 
-                    const fakeHistorial = []
-                    const acumulado = {}
-                    data.forEach(m => { acumulado[m.codigo] = 'No Cursado' })
+        //             // Calcular fechas reales hacia atrás desde anioInicio/cuatriInicio
+        //             let currentY = Number(anioInicio) || new Date().getFullYear()
+        //             let currentC = Number(cuatriInicio) || 1
+        //             const pastDates = []
+        //             for (let i = 0; i < maxSemestre; i++) {
+        //                 if (currentC === 1) { currentC = 2; currentY-- }
+        //                 else { currentC = 1 }
+        //                 pastDates.push({ y: currentY, c: currentC })
+        //             }
+        //             pastDates.reverse()
 
-                    for (let i = 1; i <= maxSemestre; i++) {
-                        const materiasDelSemestre = data.filter(m => Number(m.cuatrimestre) === i)
-                        const progresoBaseSnapshot = { ...acumulado }
-                        materiasDelSemestre.forEach(m => {
-                            if (nuevoProgreso[m.codigo] === 'Cursado') acumulado[m.codigo] = 'Cursado'
-                        })
-                        const progresoSnapshot = { ...acumulado }
-                        const pd = pastDates[i - 1]
-                        fakeHistorial.push({
-                            anioActual: pd.y,
-                            cuatri: String(pd.c),
-                            materiasDelSemestre,
-                            progresoSnapshot,
-                            progresoBaseSnapshot
-                        })
-                    }
+        //             const fakeHistorial = []
+        //             const acumulado = {}
+        //             data.forEach(m => { acumulado[m.codigo] = 'No Cursado' })
 
-                    setHistorialSemestres(fakeHistorial)
-                    setProgresoSimulado({ ...acumulado })
-                    setProgresoBase({ ...acumulado })
-                    setAnioActual(Number(anioInicio) || new Date().getFullYear())
-                    setCuatri(cuatriInicio || '1')
+        //             for (let i = 1; i <= maxSemestre; i++) {
+        //                 const materiasDelSemestre = data.filter(m => Number(m.cuatrimestre) === i)
+        //                 const progresoBaseSnapshot = { ...acumulado }
+        //                 materiasDelSemestre.forEach(m => {
+        //                     if (nuevoProgreso[m.codigo] === 'Cursado') acumulado[m.codigo] = 'Cursado'
+        //                 })
+        //                 const progresoSnapshot = { ...acumulado }
+        //                 const pd = pastDates[i - 1]
+        //                 fakeHistorial.push({
+        //                     anioActual: pd.y,
+        //                     cuatri: String(pd.c),
+        //                     materiasDelSemestre,
+        //                     progresoSnapshot,
+        //                     progresoBaseSnapshot
+        //                 })
+        //             }
 
-                    const cursadas = data.filter(m => acumulado[m.codigo] === 'Cursado').length
-                    setSimulacionTerminada(cursadas === data.length && data.length > 0)
-                }
+        //             setHistorialSemestres(fakeHistorial)
+        //             setProgresoSimulado({ ...acumulado })
+        //             setProgresoBase({ ...acumulado })
+        //             setAnioActual(Number(anioInicio) || new Date().getFullYear())
+        //             setCuatri(cuatriInicio || '1')
 
-                setCargando(false)
-            } catch (error) {
-                console.error('Error al traer las materias:', error)
-                setCargando(false)
-            }
-        }
+        //             const cursadas = data.filter(m => acumulado[m.codigo] === 'Cursado').length
+        //             setSimulacionTerminada(cursadas === data.length && data.length > 0)
+        //         }
 
-        fetchMaterias()
+        //         setCargando(false)
+        //     } catch (error) {
+        //         console.error('Error al traer las materias:', error)
+        //         setCargando(false)
+        //     }
+        // }
+
+        // fetchMaterias()
     }, [plan, modo, anioInicio, cuatriInicio])
 
     // ─── Habilitar/deshabilitar botones de navegación ──────────────────────

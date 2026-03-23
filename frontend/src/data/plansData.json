@@ -1,0 +1,1139 @@
+[
+    {
+        "plan_numero": "17.13",
+        "carrera": "Licenciatura en Sistemas de Información",
+        "materias": [
+            {
+                "codigo": "11071",
+                "nombre": "Introducción a la Programación",
+                "anio": "1",
+                "cuatrimestre": "1",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [],
+                "notas": []
+            },
+            {
+                "codigo": "11072",
+                "nombre": "Álgebra y Lógica Computacional",
+                "anio": "1",
+                "cuatrimestre": "1",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [],
+                "notas": []
+            },
+            {
+                "codigo": "21056",
+                "nombre": "Introducción a los Sistemas de Información",
+                "anio": "1",
+                "cuatrimestre": "1",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [],
+                "notas": []
+            },
+            {
+                "codigo": "41407",
+                "nombre": "Organización de Computadoras",
+                "anio": "1",
+                "cuatrimestre": "1",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [],
+                "notas": []
+            },
+            {
+                "codigo": "11073",
+                "nombre": "Matemática Discreta",
+                "anio": "1",
+                "cuatrimestre": "2",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11072"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11074",
+                "nombre": "Programación I",
+                "anio": "1",
+                "cuatrimestre": "2",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11071"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "41406",
+                "nombre": "Arquitectura de Computadoras",
+                "anio": "1",
+                "cuatrimestre": "2",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "41407"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "31971",
+                "nombre": "Inglés I",
+                "anio": "1",
+                "cuatrimestre": "2",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [],
+                "notas": []
+            },
+            {
+                "codigo": "11081",
+                "nombre": "Análisis Matemático I",
+                "anio": "2",
+                "cuatrimestre": "3",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11072"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11075",
+                "nombre": "Programación II",
+                "anio": "2",
+                "cuatrimestre": "3",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11074"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11056",
+                "nombre": "Sistemas de Información I",
+                "anio": "2",
+                "cuatrimestre": "3",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "21056",
+                    "11074"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "31972",
+                "nombre": "Inglés II",
+                "anio": "2",
+                "cuatrimestre": "3",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "31971"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11082",
+                "nombre": "Análisis Matemático II",
+                "anio": "2",
+                "cuatrimestre": "4",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11081"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11410",
+                "nombre": "Sistemas Operativos",
+                "anio": "2",
+                "cuatrimestre": "4",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "41406",
+                    "11075"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11076",
+                "nombre": "Programación Orientada a Objetos",
+                "anio": "2",
+                "cuatrimestre": "4",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11075"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11077",
+                "nombre": "Base de Datos I",
+                "anio": "2",
+                "cuatrimestre": "4",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11073",
+                    "11075",
+                    "11056"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11058",
+                "nombre": "Sistemas de Información II",
+                "anio": "3",
+                "cuatrimestre": "5",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11056",
+                    "11076"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "10040",
+                "nombre": "Teleinformática y Redes",
+                "anio": "3",
+                "cuatrimestre": "5",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11410"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11083",
+                "nombre": "Estadística y Probabilidad",
+                "anio": "3",
+                "cuatrimestre": "5",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11081"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11079",
+                "nombre": "Programación Funcional y Lógica",
+                "anio": "3",
+                "cuatrimestre": "5",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11073",
+                    "11074"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11059",
+                "nombre": "Sistemas de Información III",
+                "anio": "3",
+                "cuatrimestre": "6",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11077",
+                    "11058"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11078",
+                "nombre": "Base de Datos II",
+                "anio": "3",
+                "cuatrimestre": "6",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11077"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "21057",
+                "nombre": "Aspectos Profesionales y Sociales",
+                "anio": "3",
+                "cuatrimestre": "6",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11056"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11085",
+                "nombre": "Administración y Gestión de Redes",
+                "anio": "3",
+                "cuatrimestre": "6",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "10040",
+                    "11083"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "41408",
+                "nombre": "Modelos, Simulación y Teoría de la Decisión",
+                "anio": "4",
+                "cuatrimestre": "7",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11083"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "41409",
+                "nombre": "Sistemas Distribuidos y Programación Paralela",
+                "anio": "4",
+                "cuatrimestre": "7",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11085"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11086",
+                "nombre": "Programación en Ambiente Web",
+                "anio": "4",
+                "cuatrimestre": "7",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11058",
+                    "11085"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11087",
+                "nombre": "Seminario de Integración Profesional",
+                "anio": "4",
+                "cuatrimestre": "7",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "31972",
+                    "10040",
+                    "11059",
+                    "11078"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11412",
+                "nombre": "Teoría de la Computación I",
+                "anio": "4",
+                "cuatrimestre": "8",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11075"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11088",
+                "nombre": "Base de Datos Masivas (Gestión y Análisis)",
+                "anio": "4",
+                "cuatrimestre": "8",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11059",
+                    "11078",
+                    "41408"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "OP1",
+                "nombre": "Optativa I",
+                "anio": "4",
+                "cuatrimestre": "8",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "41408",
+                    "41409",
+                    "11086",
+                    "11087"
+                ],
+                "es_optativa": true,
+                "notas": []
+            },
+            {
+                "codigo": "11060",
+                "nombre": "Sistemas de Información IV",
+                "anio": "4",
+                "cuatrimestre": "8",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11059",
+                    "11078"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11089",
+                "nombre": "Sistemas Inteligentes",
+                "anio": "5",
+                "cuatrimestre": "9",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11412",
+                    "11079"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "OP2",
+                "nombre": "Optativa II",
+                "anio": "5",
+                "cuatrimestre": "9",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "41408",
+                    "41409",
+                    "11086",
+                    "11087"
+                ],
+                "es_optativa": true,
+                "notas": []
+            },
+            {
+                "codigo": "11092",
+                "nombre": "Seguridad de la Información",
+                "anio": "5",
+                "cuatrimestre": "9",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11085",
+                    "21057"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11090",
+                "nombre": "Recuperación de Información",
+                "anio": "5",
+                "cuatrimestre": "9",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11078",
+                    "11086"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11091",
+                "nombre": "Taller de Tesina",
+                "anio": "5",
+                "cuatrimestre": "9",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11412",
+                    "11088",
+                    "11060"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11417",
+                "nombre": "Teoría de la Computación II",
+                "anio": "5",
+                "cuatrimestre": "10",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11412"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "21058",
+                "nombre": "Gestión de Proyectos",
+                "anio": "5",
+                "cuatrimestre": "10",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11060"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "OP3",
+                "nombre": "Optativa III",
+                "anio": "5",
+                "cuatrimestre": "10",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "41408",
+                    "41409",
+                    "11086",
+                    "11087"
+                ],
+                "es_optativa": true,
+                "notas": []
+            },
+            {
+                "codigo": "41410",
+                "nombre": "Calidad de los Sistemas de Información",
+                "anio": "5",
+                "cuatrimestre": "10",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11060"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11095",
+                "nombre": "Tesina de Grado",
+                "anio": "6",
+                "cuatrimestre": "11",
+                "horas_semanales": "N/A",
+                "horas_totales": "200",
+                "correlativas": [],
+                "tesis": true,
+                "notas": []
+            }
+        ]
+    },
+    {
+        "plan_numero": "17.14",
+        "carrera": "Licenciatura en Sistemas de Información",
+        "materias": [
+            {
+                "codigo": "19054",
+                "nombre": "Competencias Básicas en Informática",
+                "anio": "1",
+                "cuatrimestre": "1",
+                "horas_semanales": "8",
+                "horas_totales": "48",
+                "correlativas": [],
+                "notas": [
+                    "(2)",
+                    "(7)"
+                ],
+                "taller": true
+            },
+            {
+                "codigo": "39553",
+                "nombre": "Competencias Básicas en Idioma Inglés",
+                "anio": "1",
+                "cuatrimestre": "1",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [],
+                "notas": [
+                    "(2)"
+                ],
+                "taller": true
+            },
+            {
+                "codigo": "14026",
+                "nombre": "Taller Introductorio de Interpretación de Problemas",
+                "anio": "1",
+                "cuatrimestre": "1",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [],
+                "notas": [
+                    "(3)"
+                ],
+                "taller": true
+            },
+            {
+                "codigo": "11271",
+                "nombre": "Introducción a la Programación",
+                "anio": "1",
+                "cuatrimestre": "1",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "13014",
+                "nombre": "Matemática Básica",
+                "anio": "1",
+                "cuatrimestre": "1",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [],
+                "notas": []
+            },
+            {
+                "codigo": "21256",
+                "nombre": "Introducción a los Sistemas de Información",
+                "anio": "1",
+                "cuatrimestre": "1",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11274",
+                "nombre": "Sistemas de Información 1",
+                "anio": "1",
+                "cuatrimestre": "2",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "21256"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11256",
+                "nombre": "Programación Estructurada",
+                "anio": "1",
+                "cuatrimestre": "2",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11271"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "41407",
+                "nombre": "Organización de Computadoras",
+                "anio": "1",
+                "cuatrimestre": "2",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "13014"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "13021",
+                "nombre": "Algebra Lineal y Geometría",
+                "anio": "1",
+                "cuatrimestre": "2",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "13014"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11275",
+                "nombre": "Estructuras de Datos y Algoritmos I",
+                "anio": "2",
+                "cuatrimestre": "3",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "13014",
+                    "11274"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11258",
+                "nombre": "Sistemas de Información II",
+                "anio": "2",
+                "cuatrimestre": "3",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11256"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "13022",
+                "nombre": "Análisis Matemático I",
+                "anio": "2",
+                "cuatrimestre": "3",
+                "horas_semanales": "8",
+                "horas_totales": "128",
+                "correlativas": [
+                    "13014"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "41426",
+                "nombre": "Arquitectura de Computadoras",
+                "anio": "2",
+                "cuatrimestre": "3",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11271",
+                    "41407"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11276",
+                "nombre": "Programación Orientada a Objetos",
+                "anio": "2",
+                "cuatrimestre": "4",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11275"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "13923",
+                "nombre": "Análisis Matemático II",
+                "anio": "2",
+                "cuatrimestre": "4",
+                "horas_semanales": "8",
+                "horas_totales": "128",
+                "correlativas": [
+                    "13022"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11259",
+                "nombre": "Sistemas de Información III",
+                "anio": "2",
+                "cuatrimestre": "4",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11258"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11410",
+                "nombre": "Sistemas Operativos",
+                "anio": "2",
+                "cuatrimestre": "4",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "41426",
+                    "11274"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11083",
+                "nombre": "Estadística y Probabilidad",
+                "anio": "3",
+                "cuatrimestre": "5",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "19054",
+                    "13022"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "14027",
+                "nombre": "Fundamentos de Redes de Datos",
+                "anio": "3",
+                "cuatrimestre": "5",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11410"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11286",
+                "nombre": "Programación en Ambiente Web",
+                "anio": "3",
+                "cuatrimestre": "5",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11276",
+                    "11410"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11277",
+                "nombre": "Bases de Datos Relacionales",
+                "anio": "3",
+                "cuatrimestre": "5",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11256",
+                    "11275",
+                    "11410"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "21279",
+                "nombre": "Gestión de Soluciones Innovadoras",
+                "anio": "3",
+                "cuatrimestre": "6",
+                "horas_semanales": "3",
+                "horas_totales": "48",
+                "correlativas": [
+                    "11258"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11287",
+                "nombre": "Seminario de Integración Profesional",
+                "anio": "3",
+                "cuatrimestre": "6",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "11259",
+                    "11277",
+                    "11286"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11278",
+                "nombre": "Bases de Datos Distribuidas",
+                "anio": "3",
+                "cuatrimestre": "6",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "14027",
+                    "11277"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "14028",
+                "nombre": "Matemática Computacional",
+                "anio": "3",
+                "cuatrimestre": "6",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "13923",
+                    "11083"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "14029",
+                "nombre": "Administración de Redes",
+                "anio": "4",
+                "cuatrimestre": "7",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "14027",
+                    "14028"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "14030",
+                "nombre": "Estructuras de Datos y Algoritmos II",
+                "anio": "4",
+                "cuatrimestre": "7",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11275",
+                    "14028"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "14031",
+                "nombre": "Teoría de la Computación",
+                "anio": "4",
+                "cuatrimestre": "7",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "14028",
+                    "11275"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11260",
+                "nombre": "Sistemas de Información IV",
+                "anio": "4",
+                "cuatrimestre": "7",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11259"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11288",
+                "nombre": "Gestión de Datos Masivos",
+                "anio": "4",
+                "cuatrimestre": "8",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11278",
+                    "14027",
+                    "11083"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "14032",
+                "nombre": "Diseño Avanzado de Software",
+                "anio": "4",
+                "cuatrimestre": "8",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "14030",
+                    "11277"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "41429",
+                "nombre": "Sistemas Distribuidos y Programación Paralela",
+                "anio": "4",
+                "cuatrimestre": "8",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "14029",
+                    "11286"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "14034",
+                "nombre": "Modelos de decisión y optimización",
+                "anio": "4",
+                "cuatrimestre": "8",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "14028",
+                    "14030"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11292",
+                "nombre": "Seguridad Informática",
+                "anio": "5",
+                "cuatrimestre": "9",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "14029",
+                    "11260"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "11289",
+                "nombre": "Inteligencia Artificial",
+                "anio": "5",
+                "cuatrimestre": "9",
+                "horas_semanales": "6",
+                "horas_totales": "96",
+                "correlativas": [
+                    "13021",
+                    "11083",
+                    "14030"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "14033",
+                "nombre": "Bases de Datos Textuales",
+                "anio": "5",
+                "cuatrimestre": "9",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11288"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "21258",
+                "nombre": "Gestión de Proyectos",
+                "anio": "5",
+                "cuatrimestre": "10",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "21279"
+                ],
+                "notas": [
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "21257",
+                "nombre": "Aspectos Profesionales y Sociales",
+                "anio": "5",
+                "cuatrimestre": "10",
+                "horas_semanales": "3",
+                "horas_totales": "48",
+                "correlativas": [
+                    "21279"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "11091",
+                "nombre": "Taller de Tesina",
+                "anio": "5",
+                "cuatrimestre": "10",
+                "horas_semanales": "4",
+                "horas_totales": "64",
+                "correlativas": [
+                    "11292",
+                    "11289",
+                    "14033"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "PSTC-1714",
+                "nombre": "Prácticas Socio-Técnico-Culturales",
+                "anio": "6",
+                "cuatrimestre": "11",
+                "horas_semanales": "-",
+                "horas_totales": "80",
+                "correlativas": [
+                    "21279",
+                    "11287",
+                    "11278",
+                    "14028"
+                ],
+                "notas": []
+            },
+            {
+                "codigo": "AO-1714",
+                "nombre": "Actividades Optativas",
+                "anio": "6",
+                "cuatrimestre": "11",
+                "horas_semanales": "-",
+                "horas_totales": "150",
+                "correlativas": [
+                    "21279",
+                    "11287",
+                    "11278",
+                    "14028"
+                ],
+                "notas": [
+                    "(4)",
+                    "(5)",
+                    "(6)",
+                    "(7)"
+                ]
+            },
+            {
+                "codigo": "TES-1714",
+                "nombre": "Tesina de Grado",
+                "anio": "6",
+                "cuatrimestre": "11",
+                "horas_semanales": "-",
+                "horas_totales": "120",
+                "correlativas": [],
+                "tesis": true,
+                "notas": []
+            }
+        ]
+    }
+]

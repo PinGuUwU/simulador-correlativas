@@ -133,11 +133,14 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
 
         // Usamos la lista de materias que ya tenemos en el estado
         materias.forEach(m => {
-            // Aplicamos la misma lógica del inicio: 
-            // Si no tiene correlativas, queda 'Disponible'. Si tiene, 'Bloqueado'.
-            progresoInicial[m.codigo] = (m.correlativas.length > 0 ? 'Bloqueado' : 'Disponible')
+            if (m.tesis) {
+                progresoInicial[m.codigo] = materiasUtils.bloquear
+            } else {
+                progresoInicial[m.codigo] = (m.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0])
+            }
         })
-
+        const storageKey = `progreso+${plan}`;
+        localStorage.setItem(storageKey, JSON.stringify(progresoInicial))
         // Actualizo el progreso
         setProgreso(progresoInicial)
         onResetClose()

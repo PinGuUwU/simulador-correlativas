@@ -14,7 +14,7 @@ const obtenerEstiloPorEstado = (estado) => {
 }
 
 //Obtener las materias Correlativas Disponibles
-const buscarMateriasCorrelativas = (codigosCorrelativas, materias, progreso) => {
+const buscarMateriasCorrelativas = (codigosCorrelativas, materias) => {
     let materiasEncontradas = []
     materias.forEach((m) => {
         if (codigosCorrelativas.includes(m.codigo)) {

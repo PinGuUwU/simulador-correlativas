@@ -115,8 +115,10 @@ function MateriasProgreso({ progreso, materias }) {
     // Manejo el evento de que en celu haga para atrás, que cierre el modal y no se salga de la página
     React.useEffect(() => {
         const handlePopState = () => {
-            // Si el usuario vuelve atrás, cerramos el modal
-            onOpenChange(false)
+            // Si el modal de detalle está abierto, no cerrarmos el filtro (lo maneja su propio listener)
+            if (!isDetailOpen) {
+                onOpenChange(false)
+            }
         }
 
         // Solo activamos el "escuchador" si el modal está abierto
@@ -127,10 +129,10 @@ function MateriasProgreso({ progreso, materias }) {
         return () => {
             window.removeEventListener("popstate", handlePopState)
         }
-    }, [isOpen, onOpenChange])
+    }, [isOpen, onOpenChange, isDetailOpen])
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 my-8">
+        <div className="grid grid-cols-1 min-[768px]:grid-cols-2 xl:grid-cols-4 gap-6 my-8">
             {stats.map((stat, index) => (
                 <Card
                     isPressable
@@ -145,7 +147,7 @@ function MateriasProgreso({ progreso, materias }) {
                     </CardHeader>
 
                     <CardBody className="py-4 px-5 flex flex-row items-center justify-between overflow-visible">
-                        <p className="font-black text-4xl text-default-800">
+                        <p className="font-black text-xl md:text-4xl text-default-800">
                             {stat.count}
                         </p>
 
@@ -159,7 +161,7 @@ function MateriasProgreso({ progreso, materias }) {
                         </div>
 
                         {/* Contenedor del Icono Estilo "Neon" del prototipo */}
-                        <div className={`${stat.accent} flex items-center justify-center w-12 h-12 rounded-full border-2 shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.4)]`}>
+                        <div className={`${stat.accent} flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full border-2 shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.4)]`}>
                             <i className={`${stat.icon} text-lg`}></i>
                         </div>
                     </CardBody>

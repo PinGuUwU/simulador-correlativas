@@ -80,21 +80,24 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
     }
     //Manejo el evento de que en celu haga para atrás, que cierre el modal y no se saque la página
     useEffect(() => {
-        const handlePopState = () => {
-            // Si el usuario vuelve atrás, cerramos el modal
-            // (Asegúrate de tener acceso a la función que lo cierra aquí)
-            onDetailClose()
-        }
-
-        // Solo activamos el "escuchador" si el modal está abierto
-        if (isDetailOpen) {
-            window.addEventListener("popstate", handlePopState)
-        }
-
-        return () => {
-            window.removeEventListener("popstate", handlePopState)
-        }
+        const handlePopState = () => onDetailClose()
+        if (isDetailOpen) window.addEventListener("popstate", handlePopState)
+        return () => window.removeEventListener("popstate", handlePopState)
     }, [isDetailOpen, onDetailClose])
+
+    // Manejo de historial para modal de reset
+    useEffect(() => {
+        const handlePopState = () => onResetClose()
+        if (isResetOpen) window.addEventListener("popstate", handlePopState)
+        return () => window.removeEventListener("popstate", handlePopState)
+    }, [isResetOpen, onResetClose])
+
+    // Manejo de historial para modal de confirmación
+    useEffect(() => {
+        const handlePopState = () => onConfirmationClose()
+        if (isConfirmationOpen) window.addEventListener("popstate", handlePopState)
+        return () => window.removeEventListener("popstate", handlePopState)
+    }, [isConfirmationOpen, onConfirmationClose])
 
     //Para cambiar el tamaño de la barra de progreso
     const getProgressBar = () => {
@@ -148,6 +151,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
     //Abrir el modal de confirmar el reestablecer progreso
     const handleBorrado = () => {
         onResetOpen()
+        window.history.pushState({ modalOpen: true }, "")
     }
 
     //Manejar el cambio de estado
@@ -155,6 +159,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
         if (progreso[codigo] === materiasUtils.bloquear && mostrar) {
             onConfirmationOpen()
             setCodigoMateria(codigo)
+            window.history.pushState({ modalOpen: true }, "")
         } else {
             cambioDeEstado(codigo, plan)
         }
@@ -366,7 +371,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                                                                 </Chip>
                                                             </div>
 
-                                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                                                            <div className="grid grid-cols-1 min-[768px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                                                                 {materiasCuatri.map((materia, index) => {
                                                                     const esElPrimero = materia.codigo === materias[0]?.codigo;
                                                                     return (

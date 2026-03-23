@@ -43,24 +43,34 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, onOpenCh
                                         {(() => {
 
                                             return (
-                                                <div className="flex items-center gap-4 text-sm text-default-600 mb-5">
-                                                    {/* Usamos Chip para el badge del estado */}
-                                                    <Chip size="sm" color={estiloEstado(progreso[infoMateria.codigo])} variant="flat" className="capitalize font-medium">
-                                                        {progreso[infoMateria.codigo]}
-                                                    </Chip>
-                                                    <span>{infoMateria.anio}° Año</span>
-                                                    <span>Cuatrimestre {infoMateria.cuatrimestre}</span>
+                                                <div className="flex flex-col m-2">
+                                                    <div className="flex items-center gap-4 text-sm text-default-600 mb-5 justify-center">
+                                                        {/* Usamos Chip para el badge del estado */}
+                                                        <Chip size="sm" color={estiloEstado(progreso[infoMateria.codigo])} variant="flat" className="capitalize font-medium">
+                                                            {progreso[infoMateria.codigo]}
+                                                        </Chip>
+                                                        <span>{infoMateria.anio}° Año</span>
+                                                        <span>Cuatrimestre {infoMateria.cuatrimestre}</span>
+                                                    </div>
+                                                    <div className="flex flex-col gap-2 min-[768px]:flex-row md:gap-4 justify-center items-center">
+                                                        <Chip>
+                                                            Horas semanales: {infoMateria.horas_semanales}
+                                                        </Chip>
+                                                        <Chip>
+                                                            Horas Totales: {infoMateria.horas_totales}
+                                                        </Chip>
+                                                    </div>
                                                 </div>
                                             )
                                         })()}
 
                                         {/* 4. Sección de Descripción (recuadro redondeado) */}
-                                        <div className="bg-default-50 border border-default-100 rounded-3xl p-6 shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
+                                        {/* <div className="bg-default-50 border border-default-100 rounded-3xl p-6 shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
                                             <h4 className="font-bold text-foreground mb-2">Descripción</h4>
                                             <p className="text-default-600 leading-relaxed text-base">
                                                 {infoMateria.descripcion || "Agregarle descripción a las materias"}
                                             </p>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </DrawerHeader>
                                 <DrawerBody>

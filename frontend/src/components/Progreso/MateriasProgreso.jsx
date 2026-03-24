@@ -147,21 +147,23 @@ function MateriasProgreso({ progreso, materias }) {
                     </CardHeader>
 
                     <CardBody className="py-4 px-5 flex flex-row items-center justify-between overflow-visible">
-                        <p className="font-black text-xl md:text-4xl text-default-800">
-                            {stat.count}
-                        </p>
+                        <div className="flex flex-col md:text-start max-[768px]:text-center max-[768px]:w-full">
+                            <p className="font-black  md:text-4xl text-default-800">
+                                {stat.count}
+                            </p>
 
-                        <div className='text-center'>
-                            <Chip
-                                color={`${stat.color}`}
-                                variant={`flat`}
-                            >
-                                Horas totales: {stat.horas_totales}
-                            </Chip>
+                            <div className='text-center'>
+                                <Chip
+                                    color={`${stat.color}`}
+                                    variant={`flat`}
+                                >
+                                    Horas totales: {stat.horas_totales}
+                                </Chip>
+                            </div>
                         </div>
 
                         {/* Contenedor del Icono Estilo "Neon" del prototipo */}
-                        <div className={`${stat.accent} flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full border-2 shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.4)]`}>
+                        <div className={`${stat.accent}  hidden min-[768px]:flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full border-2 shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.4)]`}>
                             <i className={`${stat.icon} text-lg`}></i>
                         </div>
                     </CardBody>

@@ -63,7 +63,7 @@ const NavLinks = ({ onItemClick }) => {
     const menuItems = [
         { name: 'Progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
         { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
-        { name: 'Equivalencias entre planes', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: true },
+        { name: 'Equivalencias entre planes', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: false },
         { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot', isDeactivated: true },
         { name: 'Cómo usar', icon: 'fa-circle-question', path: '/como-usar', isDeactivated: false, id: 'btn-como-usar' },
     ]

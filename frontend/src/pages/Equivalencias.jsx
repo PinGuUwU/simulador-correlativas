@@ -23,24 +23,25 @@ function Equivalencias() {
     const planNuevo = plansData.find(p => p.plan_numero === "17.14")
 
     const [materiasViejas, setMateriasViejas] = useState(planViejo.materias)
-    const [materiasNuevas, setMateriasNuevas] = useState(planNuevo.materias) 
-    
+    const [materiasNuevas, setMateriasNuevas] = useState(planNuevo.materias)
+
     const [equivalenciasAprobadas, setEquivalenciasAprobadas] = useState(0)
 
-    const [progresoViejo, setProgresoViejo ] = useState([])
-    const [progresoNuevo, setProgresoNuevo ] = useState([])
+    const [progresoViejo, setProgresoViejo] = useState([])
+    const [progresoNuevo, setProgresoNuevo] = useState([])
 
     //Esto es para modificar qué materias muestro con los botones que estarán en otro componente
     const [materiasMostradas, setMateriasMostradas] = useState([])
 
     //Leo su progreso de entrada para mostrar una barra de progreso generarl, además puedo usar su progrso luego si es que quiere ver en base a su progreso 
 
-    useEffect( () => {
-        const storageKey = "progreso+17,13"
+    useEffect(() => {
+        const storageKey = "progreso+17.13"
         //Agarro del localstorage el progreso hasta ahora
-        const progresoStorage = localStorage.getItem(storageKey)
+        const progresoStorage = JSON.parse(localStorage.getItem(storageKey))
+        console.log(progresoStorage);
         //La guardo y no la modifico, ya que acá es para ver pero no para editar.
-        if(progresoStorage) {
+        if (progresoStorage) {
             //Solamente lo seteo si es que existe, porque si no quedará como undefined
             setProgresoViejo(progresoStorage)
         } else {
@@ -56,32 +57,38 @@ function Equivalencias() {
             setProgresoViejo(progreso)
         }
 
+
+    }, []) //<-- para que se ejecute una sola vez 
+
+    useEffect(() => {
+        //Si se actualiza el progreso viejo, actualizo el nuevo
+
         let progresoNuevoInicial = []
 
         //A partir del progreso viejo que tengo, debo inicializar el progreso en la carrera nueva, para pasarselo al header
-        materiasNuevas.forEach( materia => {
+        materiasNuevas.forEach(materia => {
             //Me guardo las equivalencias de la materia actual
             const equivalenciasMateria = equivalencias[materia.codigo]
-            if(equivalenciasMateria){
-                //Si tiene equivalencias
+            if (equivalenciasMateria) {
+                //Si tiene equivalencias el ej json de equivalencias
                 let regulares = 0
                 let aprobadas = 0
                 let pendientes = 0
-                equivalenciasMateria.forEach(m => {
+                equivalenciasMateria.forEach(codigo => {
                     //Recorro las equivalencias
-                    if(["Disponible","Bloqueado"].includes(progresoViejo[m.codigo])){
+                    if (progresoViejo[codigo] === "Aprobado") {
                         //Si la equivalencia no está regular o aprobada seteo false
-                        pendientes++
-                    } else if(progresoViejo[m.codigo] === "Regular"){
+                        aprobadas++
+                    } else if (progresoViejo[codigo] === "Regular") {
                         regulares++
                     } else {
-                        aprobadas++
+                        pendientes++
                     }
                 })
-                if(aprobadas === equivalenciasMateria.length){
+                if (aprobadas === equivalenciasMateria.length) {
                     //Si tiene todas las equivalencias aprobadas, entonces la marco como que la tiene aprobada
-                    progresoNuevoInicial[materia.codigo] = "Aprobada"
-                } else if( regulares === equivalenciasMateria.length) {
+                    progresoNuevoInicial[materia.codigo] = "Aprobado"
+                } else if (regulares === equivalenciasMateria.length) {
                     //Si tiene todas las equivalencias regualres, entonces la marco como que la tiene regular
                     progresoNuevoInicial[materia.codigo] = "Regular"
                 } else {
@@ -89,61 +96,65 @@ function Equivalencias() {
                     progresoNuevoInicial[materia.codigo] = "Pendiente"
                 }
             } else {
-                //Si no tiene equivalencias qué debería hacer? Que aparezca con un estado en específico diría
-                progresoNuevoInicial[materia.codigo] = "Sin equivalencias"
+                //Si no tiene equivalencias qué debería hacer? 
+                //Primero veo si es la misma materia con el mismo codigo en ambos planes    
+                const existe = progresoViejo[materia.codigo]
+                console.log(existe, "existe?");
+                if (!existe) {
+                    //Si no la marco como Sin equivalencias, para materias nuevas por ejemplo
+                    progresoNuevoInicial[materia.codigo] = "Sin equivalencias"
+                } else {
+                    progresoNuevoInicial[materia.codigo] = progresoViejo[materia.codigo]
+                }
             }
         })
+        console.log(progresoNuevoInicial);
         setProgresoNuevo(progresoNuevoInicial)
 
-    },[]) //<-- para que se ejecute una sola vez 
-
-    useEffect( () => {
-        //Si se actualiza el progreso viejo, actualizo el nuevo
-        
     }, [progresoViejo])
 
-    useEffect( () => {
+    useEffect(() => {
         //Cada vez que cambia el progreso viejo o nuevo, entonces cambia la cantidad de equivalencias completadas
         let equivalenciasAprobadasActuales = 0
-        materiasNuevas.forEach(m=> {
-            if(progresoNuevo[m.codigo] === "Aprobada"){
+        materiasNuevas.forEach(m => {
+            if (progresoNuevo[m.codigo] === "Aprobado") {
                 equivalenciasAprobadasActuales++
             }
         })
         const porcentajeNuevo = Math.trunc((equivalenciasAprobadasActuales * 100) / materiasNuevas.length)
         setEquivalenciasAprobadas(equivalenciasAprobadasActuales)
-        
+
         //Ahora actualizo las barras del header
         setProgresoNuevoBar(porcentajeNuevo)
         let materiasViejasAprobadas = 0
-        materiasViejas.forEach(m=> {
-            if(progresoViejo[m.codigo] === "Aprobada" ){
+        materiasViejas.forEach(m => {
+            if (progresoViejo[m.codigo] === "Aprobado") {
                 materiasViejasAprobadas++
             }
         })
-        const procentajeViejo = (materiasViejasAprobadas * 100)/ materiasViejas.length
-        setProgresoViejoBar(procentajeViejo)
-    }, [progresoNuevo, progresoViejo])
+        const porcentajeViejo = Math.trunc((materiasViejasAprobadas * 100) / materiasViejas.length)
+        setProgresoViejoBar(porcentajeViejo)
+    }, [progresoNuevo])
 
-const [progresoViejoBar, setProgresoViejoBar] = useState(0)
-const [progresoNuevoBar, setProgresoNuevoBar] = useState(0)
+    const [progresoViejoBar, setProgresoViejoBar] = useState(0)
+    const [progresoNuevoBar, setProgresoNuevoBar] = useState(0)
 
 
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <HeaderEquivalencias 
-                progresoViejo={progresoViejoBar} 
+            <HeaderEquivalencias
+                progresoViejo={progresoViejoBar}
                 progresoNuevo={progresoNuevoBar}
                 totalMaterias={materiasNuevas.length}
                 equivalenciasAprobadas={equivalenciasAprobadas}
             />
-            
+
             <SearchMateria
                 setMateriasMostradas={setMateriasMostradas}
-                materias={{materiasViejas, materiasNuevas}}
-            /> 
-            
+                materias={{ materiasViejas, materiasNuevas }}
+            />
+
             <ListaMaterias
                 materiasMostradas={materiasMostradas}
                 materiasNuevas={materiasNuevas}
@@ -152,7 +163,7 @@ const [progresoNuevoBar, setProgresoNuevoBar] = useState(0)
                 progresoViejo={progresoViejo}
                 setProgresoNuevo={setProgresoNuevo}
                 setProgresoViejo={setProgresoViejo}
-            />        
+            />
         </div>
     )
 }

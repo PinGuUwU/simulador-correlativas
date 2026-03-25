@@ -6,7 +6,7 @@ import ProgresoTotal from '../components/Progreso/ProgresoTotal';
 import { Spinner, Button } from '@heroui/react';
 import LeyendaEstados from '../components/Progreso/LeyendaEstados';
 import TutorialTour from '../components/Tutorial/TutorialTour';
-import plansData from '../data/plansData.json'
+import planService from '../services/planService';
 import materiasUtils from '../utils/Progreso/materiasUtils';
 
 
@@ -31,30 +31,39 @@ function Progreso({ plan }) {
 
     //Busca las materias desde la base de datos, en base al plan seleccionado
     useEffect(() => {
-        const planData = plansData.find(p => p.plan_numero === plan)
-        setMaterias(planData.materias)
-        //Inicializo acá mismo el progreso dependiendo si había progreso previo o no
-        let progresoInicial = {}
-        const storageKey = `progreso+${plan}`;
-        const storageData = localStorage.getItem(storageKey);
+        try {
+            const planData = planService.getPlanByNumber(plan)
+            if (!planData) {
+                console.error(`Plan ${plan} not found`);
+                setCargando(false);
+                return;
+            }
+            setMaterias(planData.materias)
+            //Inicializo acá mismo el progreso dependiendo si había progreso previo o no
+            let progresoInicial = {}
+            const storageKey = `progreso+${plan}`;
+            const storageData = localStorage.getItem(storageKey);
 
-        if (!storageData) {
-            //Si no hay progreso previo, se inicializa
-            planData.materias.forEach(m => {
-                if (m.tesis) {
-                    progresoInicial[m.codigo] = materiasUtils.bloquear
-                } else {
-                    progresoInicial[m.codigo] = (m.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0])
-                }
-            })
-            localStorage.setItem(storageKey, JSON.stringify(progresoInicial))
-        } else {
-            progresoInicial = JSON.parse(storageData)
+            if (!storageData) {
+                //Si no hay progreso previo, se inicializa
+                planData.materias.forEach(m => {
+                    if (m.tesis) {
+                        progresoInicial[m.codigo] = materiasUtils.bloquear
+                    } else {
+                        progresoInicial[m.codigo] = (m.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0])
+                    }
+                })
+                localStorage.setItem(storageKey, JSON.stringify(progresoInicial))
+            } else {
+                progresoInicial = JSON.parse(storageData)
+            }
+
+            setProgreso(progresoInicial)
+        } catch (error) {
+            console.error("Error loading plan data:", error)
+        } finally {
+            setCargando(false)
         }
-
-        setProgreso(progresoInicial)
-
-        setCargando(false)
     }, [plan])//Array vacío para que se ejecute una única vez
 
     //Calcular el progreso total para pasarselo al componente

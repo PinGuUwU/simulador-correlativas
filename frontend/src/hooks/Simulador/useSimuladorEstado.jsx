@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { addToast } from '@heroui/react'
-import plansData from '../../data/plansData.json'
+import planService from '../../services/planService'
 
 const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCursables }) => {
     const [materias, setMaterias] = useState([])
@@ -18,99 +18,109 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCurs
     useEffect(() => {
         if (!plan) return
         setCargando(true)
-        const planData = plansData.find(p => p.plan_numero === plan)
-        setMaterias(planData.materias)
-
-        // Modo: cargar simulación guardada
-        if (modo === 'guardado') {
-            const simuData = localStorage.getItem(`simulacion+${plan}`)
-            if (simuData) {
-                const parsed = JSON.parse(simuData)
-                setHistorialSemestres(parsed.historialSemestres ?? [])
-                setProgresoSimulado(parsed.progresoSimulado ?? {})
-                setProgresoBase(parsed.progresoBase ?? {})
-                setAnioActual(parsed.anioActual ?? new Date().getFullYear())
-                setCuatri(parsed.cuatri ?? '1')
-                setSimulacionTerminada(parsed.simulacionTerminada ?? false)
-                setCargando(false)
-                return
+        try {
+            const planData = planService.getPlanByNumber(plan)
+            if (!planData) {
+                console.error(`Plan ${plan} not found`);
+                setCargando(false);
+                return;
             }
-            // Si no hay guardado, cae al modo "nuevo"
-        }
+            setMaterias(planData.materias)
 
-        // Progreso real del alumno (de /progreso)
-        const storageData = localStorage.getItem(`progreso+${plan}`)
-        const progresoInicial = storageData ? JSON.parse(storageData) : null
-
-        let nuevoProgreso = {}
-        const data = planData.materias
-        // Modo: nuevo (sin progreso previo)
-        if (modo === 'nuevo' || !progresoInicial) {
-            data.forEach(m => { nuevoProgreso[m.codigo] = 'No Cursado' })
-            setProgresoSimulado(nuevoProgreso)
-            setProgresoBase(nuevoProgreso)
-            setAnioActual(Number(anioInicio) || new Date().getFullYear())
-            setCuatri(cuatriInicio || '1')
-            setHistorialSemestres([])
-            setSimulacionTerminada(false)
-        } else {
-            // Modo: viejo (con progreso previo del alumno)
-            data.forEach(m => {
-                nuevoProgreso[m.codigo] = ['Regular', 'Aprobado'].includes(progresoInicial[m.codigo])
-                    ? 'Cursado'
-                    : 'No Cursado'
-            })
-
-            let maxSemestre = 0
-            data.forEach(m => {
-                if (nuevoProgreso[m.codigo] === 'Cursado')
-                    maxSemestre = Math.max(maxSemestre, Number(m.cuatrimestre))
-            })
-
-            // Calcular fechas reales hacia atrás desde anioInicio/cuatriInicio
-            let currentY = Number(anioInicio) || new Date().getFullYear()
-            let currentC = Number(cuatriInicio) || 1
-            const pastDates = []
-            for (let i = 0; i < maxSemestre; i++) {
-                if (currentC === 1) { currentC = 2; currentY-- }
-                else { currentC = 1 }
-                pastDates.push({ y: currentY, c: currentC })
+            // Modo: cargar simulación guardada
+            if (modo === 'guardado') {
+                const simuData = localStorage.getItem(`simulacion+${plan}`)
+                if (simuData) {
+                    const parsed = JSON.parse(simuData)
+                    setHistorialSemestres(parsed.historialSemestres ?? [])
+                    setProgresoSimulado(parsed.progresoSimulado ?? {})
+                    setProgresoBase(parsed.progresoBase ?? {})
+                    setAnioActual(parsed.anioActual ?? new Date().getFullYear())
+                    setCuatri(parsed.cuatri ?? '1')
+                    setSimulacionTerminada(parsed.simulacionTerminada ?? false)
+                    setCargando(false)
+                    return
+                }
+                // Si no hay guardado, cae al modo "nuevo"
             }
-            pastDates.reverse()
 
-            const fakeHistorial = []
-            const acumulado = {}
-            data.forEach(m => { acumulado[m.codigo] = 'No Cursado' })
+            // Progreso real del alumno (de /progreso)
+            const storageData = localStorage.getItem(`progreso+${plan}`)
+            const progresoInicial = storageData ? JSON.parse(storageData) : null
 
-            for (let i = 1; i <= maxSemestre; i++) {
-                const materiasDelSemestre = data.filter(m => Number(m.cuatrimestre) === i)
-                const progresoBaseSnapshot = { ...acumulado }
-                materiasDelSemestre.forEach(m => {
-                    if (nuevoProgreso[m.codigo] === 'Cursado') acumulado[m.codigo] = 'Cursado'
+            let nuevoProgreso = {}
+            const data = planData.materias
+            // Modo: nuevo (sin progreso previo)
+            if (modo === 'nuevo' || !progresoInicial) {
+                data.forEach(m => { nuevoProgreso[m.codigo] = 'No Cursado' })
+                setProgresoSimulado(nuevoProgreso)
+                setProgresoBase(nuevoProgreso)
+                setAnioActual(Number(anioInicio) || new Date().getFullYear())
+                setCuatri(cuatriInicio || '1')
+                setHistorialSemestres([])
+                setSimulacionTerminada(false)
+            } else {
+                // Modo: viejo (con progreso previo del alumno)
+                data.forEach(m => {
+                    nuevoProgreso[m.codigo] = ['Regular', 'Aprobado'].includes(progresoInicial[m.codigo])
+                        ? 'Cursado'
+                        : 'No Cursado'
                 })
-                const progresoSnapshot = { ...acumulado }
-                const pd = pastDates[i - 1]
-                fakeHistorial.push({
-                    anioActual: pd.y,
-                    cuatri: String(pd.c),
-                    materiasDelSemestre,
-                    progresoSnapshot,
-                    progresoBaseSnapshot
+
+                let maxSemestre = 0
+                data.forEach(m => {
+                    if (nuevoProgreso[m.codigo] === 'Cursado')
+                        maxSemestre = Math.max(maxSemestre, Number(m.cuatrimestre))
                 })
+
+                // Calcular fechas reales hacia atrás desde anioInicio/cuatriInicio
+                let currentY = Number(anioInicio) || new Date().getFullYear()
+                let currentC = Number(cuatriInicio) || 1
+                const pastDates = []
+                for (let i = 0; i < maxSemestre; i++) {
+                    if (currentC === 1) { currentC = 2; currentY-- }
+                    else { currentC = 1 }
+                    pastDates.push({ y: currentY, c: currentC })
+                }
+                pastDates.reverse()
+
+                const fakeHistorial = []
+                const acumulado = {}
+                data.forEach(m => { acumulado[m.codigo] = 'No Cursado' })
+
+                for (let i = 1; i <= maxSemestre; i++) {
+                    const materiasDelSemestre = data.filter(m => Number(m.cuatrimestre) === i)
+                    const progresoBaseSnapshot = { ...acumulado }
+                    materiasDelSemestre.forEach(m => {
+                        if (nuevoProgreso[m.codigo] === 'Cursado') acumulado[m.codigo] = 'Cursado'
+                    })
+                    const progresoSnapshot = { ...acumulado }
+                    const pd = pastDates[i - 1]
+                    fakeHistorial.push({
+                        anioActual: pd.y,
+                        cuatri: String(pd.c),
+                        materiasDelSemestre,
+                        progresoSnapshot,
+                        progresoBaseSnapshot
+                    })
+                }
+
+                setHistorialSemestres(fakeHistorial)
+                setProgresoSimulado({ ...acumulado })
+                setProgresoBase({ ...acumulado })
+                setAnioActual(Number(anioInicio) || new Date().getFullYear())
+                setCuatri(cuatriInicio || '1')
+
+                const cursadas = data.filter(m => acumulado[m.codigo] === 'Cursado').length
+                setSimulacionTerminada(cursadas === data.length && data.length > 0)
             }
-
-            setHistorialSemestres(fakeHistorial)
-            setProgresoSimulado({ ...acumulado })
-            setProgresoBase({ ...acumulado })
-            setAnioActual(Number(anioInicio) || new Date().getFullYear())
-            setCuatri(cuatriInicio || '1')
-
-            const cursadas = data.filter(m => acumulado[m.codigo] === 'Cursado').length
-            setSimulacionTerminada(cursadas === data.length && data.length > 0)
+        } catch (error) {
+            console.error("Error loading simulation state:", error);
+        } finally {
+            setCargando(false)
         }
-
-        setCargando(false)
     }, [plan, modo, anioInicio, cuatriInicio])
+
 
     // ─── Habilitar/deshabilitar botones de navegación ──────────────────────
     useEffect(() => {

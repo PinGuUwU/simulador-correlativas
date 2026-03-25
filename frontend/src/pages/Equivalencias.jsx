@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import HeaderEquivalencias from '../components/Equivalencias/HeaderEquivalencias'
 import ListaMaterias from '../components/Equivalencias/ListaMaterias'
-import plansData from '../data/plansData.json'
+import planService from '../services/planService'
 import SearchMateria from '../components/Equivalencias/SearchMateria'
 import equivalencias from '../data/equivalencias.json'
 import materiasUtils from '../utils/Progreso/materiasUtils'
@@ -19,11 +19,11 @@ function Equivalencias() {
     //3. botón para "Mostrar todas" para poder mostrar todas, que sería como retractarse de elegir alguno de los otros dos botones, porque si no para volver a ver todas debería recargar la página
 
     //En algún lugar quiero que se muestre la comparativa de horas semanales y totales tanto de las materias como de la carrera en sí según plan de estudop
-    const planViejo = plansData.find(p => p.plan_numero === "17.13")
-    const planNuevo = plansData.find(p => p.plan_numero === "17.14")
+    const planViejo = planService.getPlanByNumber("17.13")
+    const planNuevo = planService.getPlanByNumber("17.14")
 
-    const [materiasViejas, setMateriasViejas] = useState(planViejo.materias)
-    const [materiasNuevas, setMateriasNuevas] = useState(planNuevo.materias)
+    const [materiasViejas, setMateriasViejas] = useState(planViejo?.materias || [])
+    const [materiasNuevas, setMateriasNuevas] = useState(planNuevo?.materias || [])
 
     const [equivalenciasAprobadas, setEquivalenciasAprobadas] = useState(0)
 

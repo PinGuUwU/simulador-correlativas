@@ -1,11 +1,13 @@
+import React from 'react';
+import { Card, CardBody, Chip } from '@heroui/react';
+import { CheckCircle2, Lock, Unlock, Clock, AlertCircle, HelpCircle } from 'lucide-react';
+
 const MateriaCard = ({ materia, estado, actualizarEstado, isNewPlan = false }) => {
     const statusConfig = {
-        Aprobado: { color: "success", label: "Aprobada" },
+        Aprobado: { color: "success", label: "Aprobado" },
         Regular: { color: "warning", label: "Regular" },
-        Disponible: { color: "primary", label: "Disponible" },
-        Bloqueado: { color: "default", label: "Bloqueada" },
         Pendiente: { color: "secondary", label: "Pendiente" },
-        "Sin equivalencias": { color: "default", label: "Sin equiv." }
+        "Sin equivalencias": { color: "default", label: "Sin equiv" }
     };
 
     const config = statusConfig[estado] || statusConfig["Pendiente"];
@@ -30,3 +32,5 @@ const MateriaCard = ({ materia, estado, actualizarEstado, isNewPlan = false }) =
         </div>
     );
 };
+
+export default MateriaCard;

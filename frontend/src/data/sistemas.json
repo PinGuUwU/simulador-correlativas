@@ -540,7 +540,7 @@
                 "anio": "1",
                 "cuatrimestre": "1",
                 "horas_semanales": "8",
-                "horas_totales": "48",
+                "horas_totales": "0",
                 "correlativas": [],
                 "notas": [
                     "(2)",
@@ -554,7 +554,7 @@
                 "anio": "1",
                 "cuatrimestre": "1",
                 "horas_semanales": "6",
-                "horas_totales": "96",
+                "horas_totales": "0",
                 "correlativas": [],
                 "notas": [
                     "(2)"
@@ -567,7 +567,7 @@
                 "anio": "1",
                 "cuatrimestre": "1",
                 "horas_semanales": "6",
-                "horas_totales": "96",
+                "horas_totales": "48",
                 "correlativas": [],
                 "notas": [
                     "(3)"

@@ -1,34 +1,50 @@
 import React from 'react';
-import { Card, CardBody, Chip } from '@heroui/react';
-import { CheckCircle2, Lock, Unlock, Clock, AlertCircle, HelpCircle } from 'lucide-react';
+import { Card, Chip } from '@heroui/react';
+import { Clock, Calendar } from 'lucide-react';
+import materiasUtils from '../../utils/Progreso/materiasUtils';
 
-const MateriaCard = ({ materia, estado, actualizarEstado, isNewPlan = false }) => {
+const MateriaCard = ({ materia, estado, isNewPlan = false, onClick }) => {
     const statusConfig = {
-        Aprobado: { color: "success", label: "Aprobado" },
-        Regular: { color: "warning", label: "Regular" },
-        Pendiente: { color: "secondary", label: "Pendiente" },
-        "Sin equivalencias": { color: "default", label: "Sin equiv" }
+        [materiasUtils.estadosPosibles[2]]: { color: "success", label: "Aprobada" },
+        [materiasUtils.estadosPosibles[1]]: { color: "warning", label: "Regular" },
+        [materiasUtils.estadosPosibles[0]]: { color: "secondary", label: "Pendiente" },
+        "Sin equivalencia": { color: "default", label: "Sin equiv" }
     };
 
-    const config = statusConfig[estado] || statusConfig["Pendiente"];
+    const config = statusConfig[estado] || statusConfig[materiasUtils.estadosPosibles[0]];
 
     return (
         <div
-            onClick={() => actualizarEstado?.(materia.codigo)}
-            className={`flex items-center justify-between p-3 rounded-xl transition-all ${isNewPlan ? "bg-primary/10" : "bg-default-100/50"
-                } ${actualizarEstado ? "cursor-pointer hover:bg-default-200" : ""}`}
+            onClick={onClick}
+            className={`flex flex-col gap-1 p-3 rounded-xl transition-all h-full ${
+                isNewPlan ? "bg-primary/5 border border-primary/10" : "bg-default-100/50 border border-transparent"
+            } ${onClick ? "cursor-pointer hover:bg-default-200 active:scale-[0.98]" : ""}`}
         >
-            <div className="flex flex-col min-w-0">
-                <span className={`text-[8px] font-bold uppercase ${isNewPlan ? "text-primary" : "text-default-400"}`}>
-                    {isNewPlan ? "Plan Nuevo" : "Plan Viejo"} • {materia.codigo}
-                </span>
-                <p className="text-sm font-semibold truncate text-default-700">
-                    {materia.nombre}
-                </p>
+            <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-col min-w-0">
+                    <span className={`text-[9px] font-bold uppercase tracking-wider ${isNewPlan ? "text-primary" : "text-default-400"}`}>
+                        {materia.codigo}
+                    </span>
+                    <h4 className="text-xs font-bold text-default-700 leading-tight line-clamp-2">
+                        {materia.nombre}
+                    </h4>
+                </div>
+                <Chip size="sm" variant="flat" color={config.color} className="h-5 text-[8px] font-black uppercase px-1 flex-shrink-0">
+                    {config.label}
+                </Chip>
             </div>
-            <Chip size="sm" variant="flat" color={config.color} className="h-5 text-[9px] font-bold uppercase">
-                {config.label}
-            </Chip>
+
+            {/* Visualización de Horas - Diseño compacto */}
+            <div className="flex items-center gap-3 mt-auto pt-2 border-t border-default-200/50">
+                <div className="flex items-center gap-1 text-[10px] text-default-500 font-medium">
+                    <Clock size={10} strokeWidth={2.5} />
+                    <span>{materia.horas_totales}h</span>
+                </div>
+                <div className="flex items-center gap-1 text-[10px] text-default-500 font-medium">
+                    <Calendar size={10} strokeWidth={2.5} />
+                    <span>{materia.horas_semanales}h/sem</span>
+                </div>
+            </div>
         </div>
     );
 };

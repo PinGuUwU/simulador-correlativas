@@ -27,8 +27,8 @@ function Equivalencias() {
 
     const [equivalenciasAprobadas, setEquivalenciasAprobadas] = useState(0)
 
-    const [progresoViejo, setProgresoViejo] = useState([])
-    const [progresoNuevo, setProgresoNuevo] = useState([])
+    const [progresoViejo, setProgresoViejo] = useState({})
+    const [progresoNuevo, setProgresoNuevo] = useState({})
 
     //Esto es para modificar qué materias muestro con los botones que estarán en otro componente
     const [materiasMostradas, setMateriasMostradas] = useState([])
@@ -39,7 +39,7 @@ function Equivalencias() {
         const storageKey = "progreso+17.13"
         //Agarro del localstorage el progreso hasta ahora
         const progresoStorage = JSON.parse(localStorage.getItem(storageKey))
-        console.log(progresoStorage);
+
         //La guardo y no la modifico, ya que acá es para ver pero no para editar.
         if (progresoStorage) {
             //Solamente lo seteo si es que existe, porque si no quedará como undefined
@@ -63,7 +63,7 @@ function Equivalencias() {
     useEffect(() => {
         //Si se actualiza el progreso viejo, actualizo el nuevo
 
-        let progresoNuevoInicial = []
+        let progresoNuevoInicial = {}
 
         //A partir del progreso viejo que tengo, debo inicializar el progreso en la carrera nueva, para pasarselo al header
         materiasNuevas.forEach(materia => {
@@ -99,7 +99,6 @@ function Equivalencias() {
                 //Si no tiene equivalencias qué debería hacer? 
                 //Primero veo si es la misma materia con el mismo codigo en ambos planes    
                 const existe = progresoViejo[materia.codigo]
-                console.log(existe, "existe?");
                 if (!existe) {
                     //Si no la marco como Sin equivalencias, para materias nuevas por ejemplo
                     progresoNuevoInicial[materia.codigo] = "Sin equivalencias"
@@ -108,7 +107,6 @@ function Equivalencias() {
                 }
             }
         })
-        console.log(progresoNuevoInicial);
         setProgresoNuevo(progresoNuevoInicial)
 
     }, [progresoViejo])

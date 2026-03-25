@@ -71,8 +71,11 @@ export const useEquivalencias = () => {
         return paresMaterias.filter(par => {
             const matchesBusqueda = par.materiaVieja.nombre.toLowerCase().includes(busqueda.toLowerCase()) || par.materiaVieja.codigo.includes(busqueda);
             const estado = progresoSimulado[par.materiaVieja.codigo];
+            
+            // Lógica corregida: Pendientes incluye todo lo que NO sea Aprobado
             if (filtro === 'aprobadas') return matchesBusqueda && estado === materiasUtils.estadosPosibles[2];
-            if (filtro === 'pendientes') return matchesBusqueda && estado === materiasUtils.estadosPosibles[0];
+            if (filtro === 'pendientes') return matchesBusqueda && estado !== materiasUtils.estadosPosibles[2];
+            
             return matchesBusqueda;
         });
     }, [paresMaterias, progresoSimulado, filtro, busqueda]);

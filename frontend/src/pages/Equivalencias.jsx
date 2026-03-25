@@ -3,10 +3,12 @@ import { useEquivalencias } from '../hooks/useEquivalencias';
 import HeaderEquivalencias from '../components/Equivalencias/HeaderEquivalencias';
 import ListaMaterias from '../components/Equivalencias/ListaMaterias';
 import SearchMateria from '../components/Equivalencias/SearchMateria';
-import { Tabs, Tab, Card, CardBody, Switch, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Progress, Chip } from "@heroui/react";
-import { ListFilter, Save, RotateCcw, Download, Info, Edit3, Clock, TrendingDown } from "lucide-react";
+import { Tabs, Tab, Card, CardBody, Switch, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Progress, Chip, Checkbox } from "@heroui/react";
+import { ListFilter, Save, RotateCcw, Download, Info, Edit3, Clock, TrendingDown, AlertTriangle, ArrowRight } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 function Equivalencias() {
+    const navigate = useNavigate();
     const {
         planViejo, planNuevo, progresoSimulado, materiasFiltradas, filtro, setFiltro, busqueda, setBusqueda,
         modoEdicion, setModoEdicion, toggleEstado, guardarSimulacion, cargarSimulacion, cargarProgresoReal,
@@ -14,7 +16,15 @@ function Equivalencias() {
     } = useEquivalencias();
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const { 
+        isOpen: isWarningOpen, 
+        onOpen: onWarningOpen, 
+        onOpenChange: onWarningOpenChange,
+        onClose: onWarningClose 
+    } = useDisclosure();
+
     const [materiaPendiente, setMateriaPendiente] = useState(null);
+    const [noMostrarAlerta, setNoMostrarAlerta] = useState(false);
 
     const handleMateriaClick = (codigo) => {
         if (!modoEdicion) {
@@ -25,10 +35,28 @@ function Equivalencias() {
         }
     };
 
-    const handleActivarEdicion = () => {
+    const handleSwitchChange = (isSelected) => {
+        if (isSelected && !noMostrarAlerta) {
+            onWarningOpen();
+        } else {
+            setModoEdicion(isSelected);
+        }
+    };
+
+    const confirmarActivacion = () => {
         setModoEdicion(true);
         if (materiaPendiente) toggleEstado(materiaPendiente);
-        onOpenChange();
+        onWarningClose();
+    };
+
+    const handleActivarEdicion = () => {
+        if (!noMostrarAlerta) {
+            onWarningOpen();
+        } else {
+            setModoEdicion(true);
+            if (materiaPendiente) toggleEstado(materiaPendiente);
+        }
+        onOpenChange(); // Cierra el modal de modo lectura
     };
 
     if (!planViejo || !planNuevo) return null;
@@ -125,7 +153,7 @@ function Equivalencias() {
                         <Switch 
                             aria-label="Activar modo edición"
                             isSelected={modoEdicion} 
-                            onValueChange={setModoEdicion} 
+                            onValueChange={handleSwitchChange} 
                             color="primary" 
                             size="md" 
                         />
@@ -189,6 +217,62 @@ function Equivalencias() {
                 </main>
             </div>
 
+            {/* Modal de Advertencia de Modo Simulación */}
+            <Modal isOpen={isWarningOpen} onOpenChange={onWarningOpenChange} backdrop="blur" size="md">
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1 items-center pt-8">
+                                <div className="w-14 h-14 bg-warning-100 rounded-full flex items-center justify-center text-warning-600 mb-2">
+                                    <AlertTriangle size={30} />
+                                </div>
+                                <h3 className="text-xl font-black uppercase tracking-tight">Atención: Modo Simulación</h3>
+                            </ModalHeader>
+                            <ModalBody className="text-center space-y-4">
+                                <p className="text-sm text-default-600 leading-relaxed">
+                                    Esta herramienta es <b>meramente visual</b>. Los cambios que realices aquí no se actualizarán en cascada (correlativas).
+                                </p>
+                                <div className="bg-primary-50 p-4 rounded-2xl border border-primary-100">
+                                    <p className="text-[13px] text-primary-700 font-medium">
+                                        Si buscas proyectar tu avance completo con validación de correlativas, te recomendamos usar nuestro simulador especializado.
+                                    </p>
+                                </div>
+                                <Checkbox 
+                                    isSelected={noMostrarAlerta} 
+                                    onValueChange={setNoMostrarAlerta}
+                                    size="sm"
+                                    classNames={{ label: "text-xs font-bold text-default-500" }}
+                                >
+                                    No volver a mostrar en esta sesión
+                                </Checkbox>
+                            </ModalBody>
+                            <ModalFooter className="flex flex-col gap-2 pt-6">
+                                <Button 
+                                    color="primary" 
+                                    className="w-full font-black uppercase tracking-wider shadow-lg shadow-primary/20" 
+                                    onPress={confirmarActivacion}
+                                >
+                                    Continuar con la edición
+                                </Button>
+                                <Button 
+                                    variant="flat" 
+                                    color="primary"
+                                    className="w-full font-bold" 
+                                    onPress={() => {
+                                        onClose();
+                                        navigate('/simulador');
+                                    }}
+                                    endContent={<ArrowRight size={16} />}
+                                >
+                                    Ir al Simulador Pro
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            {/* Modal de Modo Lectura */}
             <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur" size="xs">
                 <ModalContent>
                     {(onClose) => (
@@ -217,3 +301,4 @@ function Equivalencias() {
 }
 
 export default Equivalencias;
+

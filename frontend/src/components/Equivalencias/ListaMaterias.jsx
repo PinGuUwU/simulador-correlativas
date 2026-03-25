@@ -5,13 +5,13 @@ import MateriaCard from '../Equivalencias/MateriaCard';
 
 function ListaMaterias({ materiasFiltradas, progresoSimulado, onToggleEstado }) {
 
-  // Agrupación de las materias por año académico del Plan Viejo
+  // Agrupación de las materias por año académico
   const materiasPorAnio = useMemo(() => {
     const grupos = {};
-    materiasFiltradas.forEach(par => {
-      const anio = par.materiaVieja.anio || "6"; // Si no tiene año, lo mandamos al final
+    materiasFiltradas.forEach(grupo => {
+      const anio = grupo.anio || "6"; // Usamos la propiedad anio del grupo
       if (!grupos[anio]) grupos[anio] = [];
-      grupos[anio].push(par);
+      grupos[anio].push(grupo);
     });
     return Object.entries(grupos).sort(([a], [b]) => parseInt(a) - parseInt(b));
   }, [materiasFiltradas]);
@@ -73,15 +73,15 @@ function ListaMaterias({ materiasFiltradas, progresoSimulado, onToggleEstado }) 
           >
             <div className="flex flex-col gap-10 py-2">
               {[1, 2].map((cuatri) => {
-                // Agrupamos por cuatrimestre basado en la materia de origen (Plan Viejo)
-                const materiasCuatri = materias.filter(
-                  (par) => (Number(par.materiaVieja.cuatrimestre) % 2 === 0 ? 2 : 1) === cuatri
+                // Agrupamos por cuatrimestre usando el año/cuatri definido en el hook
+                const gruposCuatri = materias.filter(
+                  (grupo) => (Number(grupo.cuatrimestre) % 2 === 0 ? 2 : 1) === cuatri
                 );
 
-                if (materiasCuatri.length === 0) return null;
+                if (gruposCuatri.length === 0) return null;
 
                 return (
-                  <div key={cuatri} className="flex flex-col gap-6">
+                  <div key={cuatri} className="flex flex-col gap-8">
                     {/* Cabecera del Cuatrimestre */}
                     <div className="flex items-center justify-between bg-default-100/30 border border-default-200/50 rounded-2xl px-5 py-3 shadow-sm">
                       <div className="flex items-center gap-3">
@@ -90,45 +90,66 @@ function ListaMaterias({ materiasFiltradas, progresoSimulado, onToggleEstado }) 
                           {cuatri}° Cuatrimestre
                         </h3>
                       </div>
-                      <Chip
-                        size="sm"
-                        variant="flat"
+                      <Chip 
+                        size="sm" 
+                        variant="flat" 
                         className="bg-background/50 border border-default-200 text-default-500 font-bold text-[10px] uppercase px-3"
                       >
-                        {materiasCuatri.length} {materiasCuatri.length === 1 ? 'materia' : 'materias'}
+                        {gruposCuatri.length} {gruposCuatri.length === 1 ? 'grupo' : 'grupos'}
                       </Chip>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-8 sm:gap-14">
-                      {materiasCuatri.map((par, index) => {
-                        const estadoActual = progresoSimulado[par.materiaVieja.codigo];
+                    <div className="grid grid-cols-1 gap-12 sm:gap-16">
+                      {gruposCuatri.map((grupo, index) => {
+                        // Un grupo está aprobado si TODAS sus materias viejas lo están
+                        const todasAprobadas = grupo.materiasViejas.length > 0 && 
+                          grupo.materiasViejas.every(m => progresoSimulado[m.codigo] === "Aprobado");
+                        
+                        const estadoNuevo = grupo.esEquivalente 
+                          ? (todasAprobadas ? "Aprobado" : "Disponible")
+                          : "Sin equivalencia";
+
                         return (
-                          <React.Fragment key={par.id}>
-                            <div className="flex flex-col sm:grid sm:grid-cols-11 gap-4 sm:gap-4 items-stretch">
-                              <div className="w-full sm:col-span-5">
-                                <MateriaCard
-                                  materia={par.materiaVieja}
-                                  estado={estadoActual}
-                                  onClick={() => onToggleEstado(par.materiaVieja.codigo)}
-                                />
+                          <React.Fragment key={grupo.id}>
+                            <div className="flex flex-col sm:grid sm:grid-cols-11 gap-4 sm:gap-6 items-center">
+                              
+                              {/* Lado Izquierdo: Materias Viejas (Origen) */}
+                              <div className="w-full sm:col-span-5 flex flex-col gap-3">
+                                {grupo.materiasViejas.map((mVieja) => (
+                                  <MateriaCard
+                                    key={mVieja.codigo}
+                                    materia={mVieja}
+                                    estado={progresoSimulado[mVieja.codigo]}
+                                    onClick={() => onToggleEstado(mVieja.codigo)}
+                                  />
+                                ))}
+                                {grupo.materiasViejas.length === 0 && (
+                                  <div className="p-8 rounded-2xl border-2 border-dashed border-default-200 flex items-center justify-center text-default-400 text-xs font-bold uppercase tracking-widest bg-default-50/50">
+                                    Sin origen (Materia nueva pura)
+                                  </div>
+                                )}
                               </div>
+
+                              {/* Centro: Flecha / Conector */}
                               <div className="flex sm:col-span-1 justify-center items-center py-2 sm:py-0">
-                                <ArrowRight className="hidden sm:block text-primary/20" size={24} strokeWidth={2.5} />
-                                <ChevronDown className="sm:hidden text-default-700" size={16} />
+                                <ArrowRight className="hidden sm:block text-primary/20" size={32} strokeWidth={2.5} />
+                                <ChevronDown className="sm:hidden text-default-400" size={20} />
                               </div>
+
+                              {/* Lado Derecho: Materia Nueva (Destino) */}
                               <div className="w-full sm:col-span-5">
                                 <MateriaCard
                                   isNewPlan
-                                  materia={par.materiaNueva}
-                                  estado={par.esEquivalente ? estadoActual : "Sin equivalencia"}
+                                  materia={grupo.materiaNueva}
+                                  estado={estadoNuevo}
                                 />
                               </div>
                             </div>
 
-                            {/* Separador entre pares - Solo visible en mobile para mejorar la distinción */}
-                            {index < materiasCuatri.length - 1 && (
+                            {/* Separador entre grupos - Solo visible en mobile */}
+                            {index < gruposCuatri.length - 1 && (
                               <div className="sm:hidden flex items-center justify-center py-2">
-                                <div className="w-full h-px bg-default-400" />
+                                <div className="w-full h-px bg-gradient-to-r from-transparent via-default-300/40 to-transparent" />
                               </div>
                             )}
                           </React.Fragment>

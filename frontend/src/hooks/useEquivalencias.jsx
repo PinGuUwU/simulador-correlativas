@@ -46,39 +46,66 @@ export const useEquivalencias = () => {
         }
     };
 
-    // Lógica de emparejamiento (Plan Viejo -> Plan Nuevo)
-    const paresMaterias = useMemo(() => {
+    // NUEVO MOTOR DE MAPEO: Grupos de Equivalencia (Many-to-One y One-to-One)
+    const gruposEquivalencia = useMemo(() => {
         if (!planViejo || !planNuevo) return [];
-        return planViejo.materias.map(mVieja => {
-            let mNuevaCodigo = Object.keys(equivalenciasData).find(key =>
-                equivalenciasData[key].includes(mVieja.codigo)
+
+        // 1. Mapear todas las materias del Plan Nuevo a sus orígenes
+        const grupos = planNuevo.materias.map(mNueva => {
+            const codigosOrigen = equivalenciasData[mNueva.codigo] || [];
+            const materiasOrigen = planViejo.materias.filter(mVieja => 
+                codigosOrigen.includes(mVieja.codigo) || mVieja.codigo === mNueva.codigo
             );
-            if (!mNuevaCodigo) {
-                const mismaMateria = planNuevo.materias.find(m => m.codigo === mVieja.codigo);
-                if (mismaMateria) mNuevaCodigo = mismaMateria.codigo;
-            }
-            const mNueva = planNuevo.materias.find(m => m.codigo === mNuevaCodigo);
+
             return {
-                id: `${mVieja.codigo}-${mNuevaCodigo || 'null'}`,
-                materiaVieja: mVieja,
-                materiaNueva: mNueva || { nombre: "Sin equivalente directo", codigo: "N/A", horas_totales: "0", horas_semanales: "0" },
-                esEquivalente: !!mNueva
+                id: `grupo-${mNueva.codigo}`,
+                materiaNueva: mNueva,
+                materiasViejas: materiasOrigen.length > 0 ? materiasOrigen : [],
+                esEquivalente: materiasOrigen.length > 0,
+                // AHORA: El orden lo dicta el Plan Nuevo
+                anio: mNueva.anio,
+                cuatrimestre: mNueva.cuatrimestre
             };
+        });
+
+        // 2. Identificar materias del Plan Viejo que se quedaron huérfanas (sin equivalencia)
+        const codigosViejosMapeados = new Set();
+        grupos.forEach(g => g.materiasViejas.forEach(m => codigosViejosMapeados.add(m.codigo)));
+        
+        const huerfanas = planViejo.materias
+            .filter(m => !codigosViejosMapeados.has(m.codigo))
+            .map(mVieja => ({
+                id: `huerfana-${mVieja.codigo}`,
+                materiaNueva: { nombre: "Sin equivalente directo", codigo: "N/A", horas_totales: "0", horas_semanales: "0" },
+                materiasViejas: [mVieja],
+                esEquivalente: false,
+                anio: mVieja.anio,
+                cuatrimestre: mVieja.cuatrimestre
+            }));
+
+        return [...grupos, ...huerfanas].sort((a, b) => {
+            if (a.anio !== b.anio) return parseInt(a.anio) - parseInt(b.anio);
+            return parseInt(a.cuatrimestre) - parseInt(b.cuatrimestre);
         });
     }, [planViejo, planNuevo]);
 
     const materiasFiltradas = useMemo(() => {
-        return paresMaterias.filter(par => {
-            const matchesBusqueda = par.materiaVieja.nombre.toLowerCase().includes(busqueda.toLowerCase()) || par.materiaVieja.codigo.includes(busqueda);
-            const estado = progresoSimulado[par.materiaVieja.codigo];
+        return gruposEquivalencia.filter(grupo => {
+            // Busqueda en cualquier materia vieja del grupo o en la nueva
+            const matchesBusqueda = 
+                grupo.materiaNueva.nombre.toLowerCase().includes(busqueda.toLowerCase()) || 
+                grupo.materiasViejas.some(m => m.nombre.toLowerCase().includes(busqueda.toLowerCase()) || m.codigo.includes(busqueda));
             
-            // Lógica corregida: Pendientes incluye todo lo que NO sea Aprobado
-            if (filtro === 'aprobadas') return matchesBusqueda && estado === materiasUtils.estadosPosibles[2];
-            if (filtro === 'pendientes') return matchesBusqueda && estado !== materiasUtils.estadosPosibles[2];
+            // Para el filtro de estado, consideramos el estado del grupo (Equivalencia aceptada si TODAS están aprobadas)
+            const todasAprobadas = grupo.materiasViejas.length > 0 && 
+                grupo.materiasViejas.every(m => progresoSimulado[m.codigo] === materiasUtils.estadosPosibles[2]);
+            
+            if (filtro === 'aprobadas') return matchesBusqueda && todasAprobadas;
+            if (filtro === 'pendientes') return matchesBusqueda && !todasAprobadas;
             
             return matchesBusqueda;
         });
-    }, [paresMaterias, progresoSimulado, filtro, busqueda]);
+    }, [gruposEquivalencia, progresoSimulado, filtro, busqueda]);
 
     const toggleEstado = (codigoMateria) => {
         if (!modoEdicion) return;

@@ -1,15 +1,17 @@
 import React from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, addToast } from '@heroui/react'
 import { trackGuardarSimulacion } from '../../../services/analyticsService'
+import { useAuth } from '../../../context/AuthContext'
 
 /**
  * Modal de confirmación para sobrescribir una simulación guardada.
  */
 function GuardarSimulacion({ isOpen, onOpenChange, onClose, plan, historialSemestres, progresoSimulado, progresoBase, anioActual, cuatri, simulacionTerminada }) {
+    const { setSimulacionLocal } = useAuth();
     const handleSobrescribir = () => {
-        localStorage.setItem(`simulacion+${plan}`, JSON.stringify({
+        setSimulacionLocal(plan, {
             historialSemestres, progresoSimulado, progresoBase, anioActual, cuatri, simulacionTerminada
-        }))
+        });
         trackGuardarSimulacion({ plan, semestresCompletados: historialSemestres.length })
         try { addToast({ title: 'Éxito', description: 'Simulación sobrescrita exitosamente.', color: 'success' }) } catch (_) { }
         onClose()

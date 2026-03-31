@@ -6,6 +6,8 @@ import { loginConGoogle, logout } from '../services/authService';
 import { isIntentionalAuthCancel } from '../utils/errorCodes';
 import { logError } from '../services/logService';
 import { trackLogin, trackLogout } from '../services/analyticsService';
+import { getUserData } from '../services/dbService';
+import { syncProgreso } from '../services/syncService';
 
 // ─── Constantes de persistencia ────────────────────────────────────────────────
 const SESSION_KEY = 'auth_session';
@@ -31,12 +33,53 @@ const isSessionExpired = () => {
     }
 };
 
+const getLocalProgress = () => {
+    const localData = {};
+    let hasMeaningfulData = false;
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('progreso+')) {
+            const plan = key.split('+')[1];
+            try {
+                const data = JSON.parse(localStorage.getItem(key));
+                localData[plan] = data;
+                
+                const values = Object.values(data || {});
+                if (values.some(v => ['Aprobado', 'Regular', 'Cursado'].includes(v))) {
+                    hasMeaningfulData = true;
+                }
+            } catch {
+                // Ignore parse errors
+            }
+        }
+    }
+
+    return hasMeaningfulData ? localData : null;
+};
+
+const hydrateLocalData = (cloudData) => {
+    if (cloudData?.progreso) {
+        for (const [plan, progreso] of Object.entries(cloudData.progreso)) {
+            localStorage.setItem(`progreso+${plan}`, JSON.stringify(progreso));
+        }
+    }
+    
+    if (cloudData?.config?.tema) {
+        localStorage.setItem('theme', cloudData.config.tema);
+        window.dispatchEvent(new Event('storage'));
+    }
+    
+    window.dispatchEvent(new Event('progress-hydrated'));
+};
+
 // ─── Contexto ───────────────────────────────────────────────────────────────────
 const AuthContext = createContext(null);
 
 // ─── Provider ───────────────────────────────────────────────────────────────────
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
+    const [userData, setUserData] = useState(null); // Para guardar config, alias, etc.
     const [loading, setLoading] = useState(true);
     /**
      * authError: mensaje legible para mostrar al usuario (no un código técnico).
@@ -49,9 +92,31 @@ export function AuthProvider({ children }) {
      */
     const [firestoreWarning, setFirestoreWarning] = useState(null);
 
+    const [showSyncModal, setShowSyncModal] = useState(false);
+    const [pendingSyncData, setPendingSyncData] = useState(null);
+
     // Helper para limpiar errores (útil para que la UI los descarte)
     const clearAuthError = useCallback(() => setAuthError(null), []);
     const clearFirestoreWarning = useCallback(() => setFirestoreWarning(null), []);
+
+    // Funciones globales para evitar el asiduo uso disperso de localStorage
+    const getProgresoLocal = useCallback((plan) => {
+        try {
+            const data = localStorage.getItem(`progreso+${plan}`);
+            return data ? JSON.parse(data) : null;
+        } catch { return null; }
+    }, []);
+
+    const getSimulacionLocal = useCallback((plan) => {
+        try {
+            const data = localStorage.getItem(`simulacion+${plan}`);
+            return data ? JSON.parse(data) : null;
+        } catch { return null; }
+    }, []);
+
+    const setSimulacionLocal = useCallback((plan, data) => {
+        localStorage.setItem(`simulacion+${plan}`, JSON.stringify(data));
+    }, []);
 
     // ─── Observer de Firebase ─────────────────────────────────────────────────
     useEffect(() => {
@@ -60,19 +125,46 @@ export function AuthProvider({ children }) {
             clearSession();
         }
 
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
                 if (isSessionExpired()) {
                     logout().catch(() => { });
                     clearSession();
                     setUser(null);
+                    setLoading(false);
                 } else {
                     setUser(firebaseUser);
+                    
+                    try {
+                        const cloudData = await getUserData(firebaseUser.uid);
+                        if (cloudData) setUserData(cloudData);
+
+                        const localProgress = getLocalProgress();
+                        const hasCloudProgress = cloudData?.progreso && Object.keys(cloudData.progreso).length > 0;
+
+                        if (localProgress && hasCloudProgress) {
+                            setPendingSyncData({ local: localProgress, cloud: cloudData });
+                            setShowSyncModal(true);
+                        } else if (localProgress && !hasCloudProgress) {
+                            for (const [plan, prog] of Object.entries(localProgress)) {
+                                syncProgreso(firebaseUser.uid, plan, prog);
+                            }
+                            if (cloudData?.config) hydrateLocalData({ config: cloudData.config });
+                        } else if (!localProgress && hasCloudProgress) {
+                            hydrateLocalData(cloudData);
+                        } else {
+                            if (cloudData?.config) hydrateLocalData({ config: cloudData.config });
+                        }
+                    } catch (err) {
+                        logError(err, { route: 'auth/hydration' });
+                    }
+                    
+                    setLoading(false);
                 }
             } else {
                 setUser(null);
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return () => unsubscribe();
@@ -145,16 +237,55 @@ export function AuthProvider({ children }) {
         }
     }, []);
 
+    const resolveSync = useCallback((choice) => {
+        if (!pendingSyncData || !user) return;
+        
+        if (choice === 'upload') {
+            for (const [plan, data] of Object.entries(pendingSyncData.local)) {
+                syncProgreso(user.uid, plan, data);
+            }
+        } else if (choice === 'download') {
+            hydrateLocalData(pendingSyncData.cloud);
+        }
+        
+        setShowSyncModal(false);
+        setPendingSyncData(null);
+    }, [pendingSyncData, user]);
+
+    const updateAuthProgreso = useCallback((plan, nuevoProgreso) => {
+        localStorage.setItem(`progreso+${plan}`, JSON.stringify(nuevoProgreso));
+        
+        if (user) {
+            syncProgreso(user.uid, plan, nuevoProgreso);
+        }
+    }, [user]);
+
+    // Setter para forzar en refresco de configuraciones
+    const refetchUserData = useCallback(async () => {
+        if (!user) return;
+        try {
+            const cloudData = await getUserData(user.uid);
+            if (cloudData) setUserData(cloudData);
+        } catch {}
+    }, [user]);
+
     const value = {
         user,
+        userData,
         loading,
         isAuthenticated: !!user,
-        // Estados de error para consumo en componentes
+        showSyncModal,
+        setShowSyncModal,
+        resolveSync,
+        updateAuthProgreso,
+        getProgresoLocal,
+        getSimulacionLocal,
+        setSimulacionLocal,
+        refetchUserData,
         authError,
         firestoreWarning,
         clearAuthError,
         clearFirestoreWarning,
-        // Acciones
         signIn,
         signOut,
     };
@@ -184,6 +315,15 @@ AuthProvider.propTypes = {
  *   clearFirestoreWarning: () => void,
  *   signIn: (rememberMe?: boolean) => Promise<void>,
  *   signOut: () => Promise<void>,
+ *   showSyncModal: boolean,
+ *   setShowSyncModal: (show: boolean) => void,
+ *   resolveSync: (choice: 'upload' | 'download') => void,
+ *   updateAuthProgreso: (plan: string, nuevoProgreso: object) => void,
+ *   getProgresoLocal: (plan: string) => object | null,
+ *   getSimulacionLocal: (plan: string) => object | null,
+ *   setSimulacionLocal: (plan: string, data: object) => void,
+ *   userData: object | null,
+ *   refetchUserData: () => Promise<void>
  * }}
  */
 export function useAuth() {

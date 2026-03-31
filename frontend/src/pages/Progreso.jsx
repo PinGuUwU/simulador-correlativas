@@ -8,9 +8,10 @@ import LeyendaEstados from '../components/Progreso/LeyendaEstados';
 import TutorialTour from '../components/Tutorial/TutorialTour';
 import planService from '../services/planService';
 import materiasUtils from '../utils/Progreso/materiasUtils';
-
+import { useAuth } from '../context/AuthContext';
 
 function Progreso({ plan }) {
+    const { getProgresoLocal, updateAuthProgreso } = useAuth();
     //Estados para guardar las materias y para mostrar una imagen de cargando, además para contabilizar el progreso
     const [materias, setMaterias] = useState([])
     const [progreso, setProgreso] = useState([])
@@ -41,8 +42,7 @@ function Progreso({ plan }) {
             setMaterias(planData.materias)
             //Inicializo acá mismo el progreso dependiendo si había progreso previo o no
             let progresoInicial = {}
-            const storageKey = `progreso+${plan}`;
-            const storageData = localStorage.getItem(storageKey);
+            const storageData = getProgresoLocal(plan);
 
             if (!storageData) {
                 //Si no hay progreso previo, se inicializa
@@ -53,9 +53,9 @@ function Progreso({ plan }) {
                         progresoInicial[m.codigo] = (m.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0])
                     }
                 })
-                localStorage.setItem(storageKey, JSON.stringify(progresoInicial))
+                updateAuthProgreso(plan, progresoInicial);
             } else {
-                progresoInicial = JSON.parse(storageData)
+                progresoInicial = storageData;
             }
 
             setProgreso(progresoInicial)

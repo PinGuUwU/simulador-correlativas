@@ -148,7 +148,7 @@ LoginModal.propTypes = {
 
 // ─── Panel de usuario (sección inferior del sidebar) ──────────────────────────
 const UserPanel = ({ onSignInPress }) => {
-    const { user, loading, isAuthenticated, signOut } = useAuth();
+    const { user, userData, loading, isAuthenticated, signOut } = useAuth();
     const navigate = useNavigate();
 
     // Skeleton mientras Firebase verifica la sesión
@@ -182,7 +182,7 @@ const UserPanel = ({ onSignInPress }) => {
     return (
         <div className="flex flex-col gap-2">
             {/* Info usuario */}
-            <div className="flex items-center gap-3 px-1 py-2">
+            <div className="flex items-center gap-3 px-1 py-2 overflow-hidden">
                 <Avatar
                     src={user.photoURL}
                     name={user.displayName}
@@ -191,11 +191,11 @@ const UserPanel = ({ onSignInPress }) => {
                     color="primary"
                     className="shrink-0"
                 />
-                <div className="flex flex-col min-w-0">
+                <div className="flex flex-col min-w-0 flex-1">
                     <span className="text-sm font-bold text-foreground truncate leading-tight">
-                        {user.displayName?.split(' ')[0] ?? 'Usuario'}
+                        {userData?.config?.alias || (user.displayName?.split(' ')[0] ?? 'Usuario')}
                     </span>
-                    <span className="text-[10px] text-foreground/50 truncate">{user.email}</span>
+                    <span className="text-[10px] text-foreground/50 truncate w-full">{user.email}</span>
                 </div>
             </div>
 

@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import materiasUtils from "../../utils/Progreso/materiasUtils"
 
-const useProgresoMaterias = (progreso, setProgreso, materias) => {
+const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthProgreso) => {
 
     // 1. Vigilante de la Tesina (Maneja el bloqueo y desbloqueo "Natural")
     useEffect(() => {
@@ -108,7 +108,7 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
     }
 
     // 5. El motor principal de cambios
-    const cambioDeEstado = (codigoMateria, plan) => {
+    const cambioDeEstado = (codigoMateria) => {
         const materiaActual = materias.find((materia) => materia.codigo === codigoMateria);
         if (!materiaActual) return; // Chequeo de seguridad
 
@@ -144,10 +144,9 @@ const useProgresoMaterias = (progreso, setProgreso, materias) => {
             });
         }
 
-        // Guardamos en memoria y en el almacenamiento de tu Linux
+        // Guardamos en estado local y global/nube
         setProgreso(nuevoProgreso);
-        const nombreStorage = "progreso+" + plan;
-        localStorage.setItem(nombreStorage, JSON.stringify(nuevoProgreso));
+        updateAuthProgreso(plan, nuevoProgreso);
     }
 
     return { cambioDeEstado }

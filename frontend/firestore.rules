@@ -16,11 +16,12 @@ service cloud.firestore {
       return
         data.uid is string && data.uid.size() > 0 &&
         data.email is string && data.email.size() > 0 &&
-        data.displayName is string &&
+        (data.displayName is string || data.displayName == null) &&
         (data.photoURL is string || data.photoURL == null) &&
-        data.materiasAprobadas is list &&
-        data.schemaVersion is int && data.schemaVersion == 1 &&
-        // Aseguramos que no se guarden campos sensibles no autorizados
+        (data.progreso == null || data.progreso is map) &&
+        (data.config == null || data.config is map) &&
+        (data.materiasAprobadas == null || data.materiasAprobadas is list) &&
+        data.schemaVersion is int && data.schemaVersion >= 1 &&
         !('password' in data) &&
         !('token'    in data) &&
         !('secret'   in data);

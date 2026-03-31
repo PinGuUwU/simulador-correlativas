@@ -6,8 +6,9 @@ import Inicio from '../pages/Inicio'
 import ChatBot from '../pages/Chatbot'
 import Simulador from '../pages/Simulador'
 import ComoUsar from '../pages/ComoUsar'
+import SettingsPage from '../pages/SettingsPage'
 
-const Rutas = ({ plan }) => {
+const Rutas = ({ plan, setPlan }) => {
     const componentesRutas = useRoutes([
         {
             path: "/",
@@ -32,6 +33,10 @@ const Rutas = ({ plan }) => {
         {
             path: "/como-usar",
             element: <ComoUsar />
+        },
+        {
+            path: "/config",
+            element: <SettingsPage plan={plan} setPlan={setPlan} />
         }
     ])
     return componentesRutas

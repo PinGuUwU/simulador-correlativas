@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { addToast } from '@heroui/react'
 import planService from '../../services/planService'
+import { useAuth } from '../../context/AuthContext'
 
 const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCursables }) => {
+    const { getProgresoLocal, getSimulacionLocal } = useAuth();
     const [materias, setMaterias] = useState([])
     const [cargando, setCargando] = useState(false)
     const [progresoSimulado, setProgresoSimulado] = useState(null)
@@ -29,9 +31,8 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCurs
 
             // Modo: cargar simulación guardada
             if (modo === 'guardado') {
-                const simuData = localStorage.getItem(`simulacion+${plan}`)
-                if (simuData) {
-                    const parsed = JSON.parse(simuData)
+                const parsed = getSimulacionLocal(plan);
+                if (parsed) {
                     setHistorialSemestres(parsed.historialSemestres ?? [])
                     setProgresoSimulado(parsed.progresoSimulado ?? {})
                     setProgresoBase(parsed.progresoBase ?? {})
@@ -45,8 +46,7 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCurs
             }
 
             // Progreso real del alumno (de /progreso)
-            const storageData = localStorage.getItem(`progreso+${plan}`)
-            const progresoInicial = storageData ? JSON.parse(storageData) : null
+            const progresoInicial = getProgresoLocal(plan);
 
             let nuevoProgreso = {}
             const data = planData.materias

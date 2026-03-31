@@ -6,13 +6,15 @@ import ConfirmarCambioModal from './modals/ConfirmarCambioModal.jsx'
 import { useNavigate } from 'react-router-dom'
 import materiasUtils from '../../utils/Progreso/materiasUtils.js'
 import useProgresoMaterias from '../../hooks/Progreso/useProgresoMaterias.jsx'
+import { useAuth } from '../../context/AuthContext.jsx'
 
 function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan }) {
+    const { updateAuthProgreso } = useAuth();
     const [modo, setModo] = useState(false) //Para saber si se está editando el estado o no
     const [infoMateria, setInfoMateria] = useState()
     const topSwitchRef = useRef(null)
     const [mostrarSwitchFlotante, setMostrarSwitchFlotante] = useState(false)
-    const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias)
+    const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)
     const [confirmacion, setConfirmacion] = useState(false)
     const [mostrar, setMostrar] = useState(true)
     //Logica para mostrar u ocultar las materias de un año
@@ -142,8 +144,8 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                 progresoInicial[m.codigo] = (m.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0])
             }
         })
-        const storageKey = `progreso+${plan}`;
-        localStorage.setItem(storageKey, JSON.stringify(progresoInicial))
+
+        updateAuthProgreso(plan, progresoInicial);
         // Actualizo el progreso
         setProgreso(progresoInicial)
         onResetClose()
@@ -161,14 +163,14 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
             setCodigoMateria(codigo)
             window.history.pushState({ modalOpen: true }, "")
         } else {
-            cambioDeEstado(codigo, plan)
+            cambioDeEstado(codigo)
         }
     }
     const [codigoMateria, setCodigoMateria] = useState()
 
     useEffect(() => {
         if (confirmacion === true) {
-            cambioDeEstado(codigoMateria, plan)
+            cambioDeEstado(codigoMateria)
             setConfirmacion(false)
         }
 

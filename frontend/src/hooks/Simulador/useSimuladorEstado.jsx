@@ -21,7 +21,7 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCurs
         try {
             const planData = planService.getPlanByNumber(plan)
             if (!planData) {
-                console.error(`Plan ${plan} not found`);
+                addToast({ title: 'Plan no encontrado', description: `No existe el plan "${plan}". Intentá recargar la página.`, color: 'danger' });
                 setCargando(false);
                 return;
             }
@@ -114,8 +114,8 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCurs
                 const cursadas = data.filter(m => acumulado[m.codigo] === 'Cursado').length
                 setSimulacionTerminada(cursadas === data.length && data.length > 0)
             }
-        } catch (error) {
-            console.error("Error loading simulation state:", error);
+        } catch {
+            // Error interno al calcular el estado inicial: el finally resetea cargando.
         } finally {
             setCargando(false)
         }

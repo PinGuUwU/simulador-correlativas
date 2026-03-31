@@ -58,13 +58,11 @@ function Inicio() {
         )
             .then(
                 () => {
-                    console.log("¡Mensaje enviado con éxito!")
                     setAction("¡Mensaje enviado con éxito!")
                     e.target.reset()
                     setTimeout(() => setAction(null), 3000)
                 },
                 (error) => {
-                    console.error("Error al enviar formulario:", error.text || error.message || error)
                     addToast({ title: "Error", description: "Hubo un problema al enviar el mensaje. Inténtalo de nuevo más tarde.", color: "danger" })
                 }
             )

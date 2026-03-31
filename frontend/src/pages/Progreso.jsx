@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import MateriasList from '../components/Progreso/MateriasList';
 import MateriasProgreso from '../components/Progreso/MateriasProgreso';
 import ProgresoTotal from '../components/Progreso/ProgresoTotal';
-import { Spinner, Button } from '@heroui/react';
+import { Spinner, Button, addToast } from '@heroui/react';
 import LeyendaEstados from '../components/Progreso/LeyendaEstados';
 import TutorialTour from '../components/Tutorial/TutorialTour';
 import planService from '../services/planService';
@@ -34,7 +34,7 @@ function Progreso({ plan }) {
         try {
             const planData = planService.getPlanByNumber(plan)
             if (!planData) {
-                console.error(`Plan ${plan} not found`);
+                addToast({ title: 'Plan no encontrado', description: `No existe el plan "${plan}". Intentá recargar la página.`, color: 'danger' });
                 setCargando(false);
                 return;
             }
@@ -59,8 +59,8 @@ function Progreso({ plan }) {
             }
 
             setProgreso(progresoInicial)
-        } catch (error) {
-            console.error("Error loading plan data:", error)
+        } catch {
+            addToast({ title: 'Error al cargar el plan', description: 'No se pudo inicializar el progreso. Intentá recargar la página.', color: 'danger' })
         } finally {
             setCargando(false)
         }

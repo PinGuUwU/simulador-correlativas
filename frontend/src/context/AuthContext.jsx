@@ -4,11 +4,13 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { loginConGoogle, logout } from '../services/authService';
 import { isIntentionalAuthCancel } from '../utils/errorCodes';
+import { logError } from '../services/logService';
+import { trackLogin, trackLogout } from '../services/analyticsService';
 
 // ─── Constantes de persistencia ────────────────────────────────────────────────
-const SESSION_KEY  = 'auth_session';
+const SESSION_KEY = 'auth_session';
 const EXPIRY_SHORT = 24 * 60 * 60 * 1000;      // 24 h  (sin "Recordarme")
-const EXPIRY_LONG  =  7 * 24 * 60 * 60 * 1000; //  7 d  (con "Recordarme")
+const EXPIRY_LONG = 7 * 24 * 60 * 60 * 1000; //  7 d  (con "Recordarme")
 
 // ─── Helpers de localStorage ────────────────────────────────────────────────────
 const saveSession = (rememberMe) => {
@@ -34,7 +36,7 @@ const AuthContext = createContext(null);
 
 // ─── Provider ───────────────────────────────────────────────────────────────────
 export function AuthProvider({ children }) {
-    const [user, setUser]       = useState(null);
+    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     /**
      * authError: mensaje legible para mostrar al usuario (no un código técnico).
@@ -48,20 +50,20 @@ export function AuthProvider({ children }) {
     const [firestoreWarning, setFirestoreWarning] = useState(null);
 
     // Helper para limpiar errores (útil para que la UI los descarte)
-    const clearAuthError      = useCallback(() => setAuthError(null), []);
+    const clearAuthError = useCallback(() => setAuthError(null), []);
     const clearFirestoreWarning = useCallback(() => setFirestoreWarning(null), []);
 
     // ─── Observer de Firebase ─────────────────────────────────────────────────
     useEffect(() => {
         if (isSessionExpired()) {
-            logout().catch(() => {});
+            logout().catch(() => { });
             clearSession();
         }
 
         const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             if (firebaseUser) {
                 if (isSessionExpired()) {
-                    logout().catch(() => {});
+                    logout().catch(() => { });
                     clearSession();
                     setUser(null);
                 } else {
@@ -100,9 +102,10 @@ export function AuthProvider({ children }) {
         saveSession(rememberMe);
 
         try {
-            const { firestoreWarning: warning } = await loginConGoogle();
+            const { user: loggedUser, firestoreWarning: warning } = await loginConGoogle();
 
-            // Firestore puede haber fallado aunque Auth sea exitoso
+            trackLogin({ userId: loggedUser.uid });
+
             if (warning) setFirestoreWarning(warning);
 
         } catch (err) {
@@ -110,6 +113,9 @@ export function AuthProvider({ children }) {
 
             // Cancelación intencional: no mostrar error al usuario
             if (isIntentionalAuthCancel(err)) return;
+
+            // Loguea en Firestore (fire-and-forget, nunca rompe la app)
+            logError(err, { route: window?.location?.pathname });
 
             // Error real: exponemos un mensaje legible
             setAuthError(
@@ -130,6 +136,7 @@ export function AuthProvider({ children }) {
         setFirestoreWarning(null);
         try {
             await logout();
+            trackLogout();
         } catch {
             // El signOut raramente falla; si lo hace simplemente limpiamos local
         } finally {

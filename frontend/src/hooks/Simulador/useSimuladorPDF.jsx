@@ -2,6 +2,8 @@ import { useCallback } from 'react'
 import { addToast } from '@heroui/react'
 import { toPng } from 'html-to-image'
 import { jsPDF } from 'jspdf'
+import { trackDescargaPDF } from '../../services/analyticsService'
+import { logError } from '../../services/logService'
 
 /**
  * Encapsula la lógica de generación de PDF del historial del simulador.
@@ -61,10 +63,11 @@ const useSimuladorPDF = ({ historialSemestres, plan, openedAccordions, setOpened
             pdf.save(`Simulacion_${plan}.pdf`)
 
             try { addToast({ title: '¡PDF Descargado!', description: 'Has guardado una copia de tu recorrido', color: 'success' }) } catch (_) { }
+            trackDescargaPDF({ plan })
 
             setOpenedAccordions(acordeonesPrevios)
-        } catch (error) {
-            console.error(error)
+        } catch (err) {
+            logError(err, { route: '/simulador', context: { plan } })
             try { addToast({ title: 'Error', description: 'Ocurrió un problema generando el documento.', color: 'danger' }) } catch (_) { }
         } finally {
             setDescargandoPDF(false)

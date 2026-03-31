@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidUserDoc() {
+      let data = request.resource.data;
+      return
+        data.uid is string && data.uid.size() > 0 &&
+        data.email is string && data.email.size() > 0 &&
+        data.displayName is string &&
+        (data.photoURL is string || data.photoURL == null) &&
+        data.materiasAprobadas is list &&
+        data.schemaVersion is int && data.schemaVersion == 1 &&
+        // Aseguramos que no se guarden campos sensibles no autorizados
+        !('password' in data) &&
+        !('token'    in data) &&
+        !('secret'   in data);
+    }
+
+    function isValidLogDoc() {
+      let data = request.resource.data;
+      return
+        data.level        is string &&
+        data.errorCode    is string &&
+        data.errorMessage is string &&
+        data.route        is string &&
+        data.schemaVersion is int &&
+        // Restricción de tamaño: el mensaje no puede ser un stack completo
+        data.errorMessage.size() <= 500 &&
+        // Campos prohibidos en logs
+        !('apiKey'    in data) &&
+        !('password'  in data) &&
+        !('token'     in data);
+    }
+
+    // ─── Colección: users ─────────────────────────────────────────────────────
+    match /users/{userId} {
+      // Un usuario solo puede leer y escribir SU propio documento
+      allow read:   if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserDoc();
+      allow update: if isOwner(userId) && isValidUserDoc();
+      // Nadie puede borrar su propio documento desde el cliente
+      allow delete: if false;
+    }
+
+    // ─── Colección: app_logs ──────────────────────────────────────────────────
+    match /app_logs/{logId} {
+      // Cualquier usuario (incluso no autenticado) puede CREAR un log,
+      // pero nadie puede leer, actualizar ni borrar logs desde el cliente.
+      // El acceso de lectura es solo desde Firebase Console / Admin SDK.
+      allow create: if isValidLogDoc();
+      allow read, update, delete: if false;
+    }
+
+    // ─── Resto de la base de datos: denegado por defecto ─────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

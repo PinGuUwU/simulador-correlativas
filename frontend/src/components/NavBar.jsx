@@ -14,6 +14,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 import PropTypes from 'prop-types';
 import { useAuth } from '../context/AuthContext';
+import { trackCambioTema } from '../services/analyticsService';
 
 // ─── Selector de Temas ─────────────────────────────────────────────────────────
 const ThemeSwitcher = () => {
@@ -40,7 +41,10 @@ const ThemeSwitcher = () => {
                 disallowEmptySelection={true}
                 onSelectionChange={(keys) => {
                     const selected = [...keys][0];
-                    if (selected) setTheme(selected);
+                    if (selected) {
+                        setTheme(selected);
+                        trackCambioTema({ tema: selected });
+                    }
                 }}
                 className="w-full"
                 classNames={{ trigger: 'bg-default-100 hover:bg-default-200' }}

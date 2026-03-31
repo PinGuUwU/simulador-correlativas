@@ -6,23 +6,31 @@ import Footer from './components/Footer'
 import ScrollToTop from './components/Shared/ScrollToTop'
 import AutoScrollTop from './components/Shared/AutoScrollTop'
 import { AuthProvider } from './context/AuthContext'
+import { usePageTracking } from './hooks/usePageTracking'
+
+// Componente interno para poder usar usePageTracking dentro del contexto del router
+function AppContent({ plan, setPlan }) {
+    usePageTracking();
+    return (
+        <div className='flex'>
+            <NavBar setPlan={setPlan} plan={plan} />
+            <main className='w-full'>
+                <Rutas plan={plan} />
+                <Footer />
+                <ScrollToTop />
+            </main>
+        </div>
+    )
+}
 
 function App() {
     const [plan, setPlan] = useState("17.14")
-    //Simulo la carrera, en el futuro debo hacer el fetch de plan en el dashboard y  de ahi pasar todo
 
     return (
         <AuthProvider>
             <BrowserRouter>
                 <AutoScrollTop />
-                <div className='flex'>
-                    <NavBar setPlan={setPlan} plan={plan} />
-                    <main className='w-full'>
-                        <Rutas plan={plan} />
-                        <Footer />
-                        <ScrollToTop />
-                    </main>
-                </div>
+                <AppContent plan={plan} setPlan={setPlan} />
             </BrowserRouter>
         </AuthProvider>
     )

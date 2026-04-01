@@ -26,10 +26,10 @@ const Rutas = ({ plan, setPlan }) => {
             path: "/equivalencias",
             element: <Equivalencias />,
         },
-        {
-            path: "/chatbot",
-            element: <ChatBot />
-        },
+        // {
+        //     path: "/chatbot",
+        //     element: <ChatBot />
+        // },
         {
             path: "/como-usar",
             element: <ComoUsar />

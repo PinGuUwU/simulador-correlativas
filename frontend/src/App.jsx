@@ -1,15 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import NavBar from './components/NavBar'
 import { BrowserRouter } from 'react-router-dom'
 import Rutas from './routes/Rutas'
-import Footer from './components/Footer'
 import ScrollToTop from './components/Shared/ScrollToTop'
 import AutoScrollTop from './components/Shared/AutoScrollTop'
 import { AuthProvider } from './context/AuthContext'
 import { usePageTracking } from './hooks/usePageTracking'
 import { initOfflineListener } from './services/syncService'
-import SyncModal from './components/SyncModal'
-import { useEffect } from 'react'
+
+// Componentes secundarios lazy-loaded para reducir FCP
+const Footer = lazy(() => import('./components/Footer'))
+const SyncModal = lazy(() => import('./components/SyncModal'))
 
 // Componente interno para poder usar usePageTracking dentro del contexto del router
 function AppContent({ plan, setPlan }) {
@@ -24,7 +25,9 @@ function AppContent({ plan, setPlan }) {
             <NavBar setPlan={setPlan} plan={plan} />
             <main className='w-full'>
                 <Rutas plan={plan} setPlan={setPlan} />
-                <Footer />
+                <Suspense fallback={null}>
+                    <Footer />
+                </Suspense>
                 <ScrollToTop />
             </main>
         </div>
@@ -38,7 +41,9 @@ function App() {
         <AuthProvider>
             <BrowserRouter>
                 <AutoScrollTop />
-                <SyncModal />
+                <Suspense fallback={null}>
+                    <SyncModal />
+                </Suspense>
                 <AppContent plan={plan} setPlan={setPlan} />
             </BrowserRouter>
         </AuthProvider>

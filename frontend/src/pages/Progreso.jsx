@@ -12,59 +12,57 @@ import { useAuth } from '../context/AuthContext';
 
 function Progreso({ plan }) {
     const { getProgresoLocal, updateAuthProgreso } = useAuth();
-    //Estados para guardar las materias y para mostrar una imagen de cargando, además para contabilizar el progreso
-    const [materias, setMaterias] = useState([])
-    const [progreso, setProgreso] = useState([])
-    const [cargando, setCargando] = useState(true)
-    //Simulo la carrera, en el futuro debo hacer el fetch de plan en el Progreso y  de ahi pasar todo
-    const carrera = "Licenciatura en Sistemas de Información"
-    const headerRef = useRef(null)
-    //El sticky del progreso total
-    const [isSticky, setIsSticky] = useState(false)
+    
+    // Inicialización síncrona para anular el bloqueo de renderizado (Mejora radical de LCP y FCP)
+    const [materias, setMaterias] = useState(() => {
+        const planData = planService.getPlanByNumber(plan);
+        return planData ? planData.materias : [];
+    });
 
-    // Tutorial state
-    const [mostrarTutorial, setMostrarTutorial] = useState(false)
+    const [progreso, setProgreso] = useState(() => {
+        const planData = planService.getPlanByNumber(plan);
+        if (!planData) return {};
+        const storageData = getProgresoLocal(plan);
+        if (storageData) return storageData;
 
-    // Forzar scroll arriba al montar la página
+        let progresoInicial = {};
+        planData.materias.forEach(m => {
+            if (m.tesis) progresoInicial[m.codigo] = materiasUtils.bloquear;
+            else progresoInicial[m.codigo] = (m.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0]);
+        });
+        return progresoInicial;
+    });
+
+    const [cargando, setCargando] = useState(false);
+    const carrera = "Licenciatura en Sistemas de Información";
+    const headerRef = useRef(null);
+    const [isSticky, setIsSticky] = useState(false);
+    const [mostrarTutorial, setMostrarTutorial] = useState(false);
+
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'instant' })
-    }, [])
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    }, []);
 
-    //Busca las materias desde la base de datos, en base al plan seleccionado
+    // Actualizar si el plan cambia dinámicamente
     useEffect(() => {
-        try {
-            const planData = planService.getPlanByNumber(plan)
-            if (!planData) {
-                addToast({ title: 'Plan no encontrado', description: `No existe el plan "${plan}". Intentá recargar la página.`, color: 'danger' });
-                setCargando(false);
-                return;
-            }
-            setMaterias(planData.materias)
-            //Inicializo acá mismo el progreso dependiendo si había progreso previo o no
-            let progresoInicial = {}
-            const storageData = getProgresoLocal(plan);
-
-            if (!storageData) {
-                //Si no hay progreso previo, se inicializa
-                planData.materias.forEach(m => {
-                    if (m.tesis) {
-                        progresoInicial[m.codigo] = materiasUtils.bloquear
-                    } else {
-                        progresoInicial[m.codigo] = (m.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0])
-                    }
-                })
-                updateAuthProgreso(plan, progresoInicial);
-            } else {
-                progresoInicial = storageData;
-            }
-
-            setProgreso(progresoInicial)
-        } catch {
-            addToast({ title: 'Error al cargar el plan', description: 'No se pudo inicializar el progreso. Intentá recargar la página.', color: 'danger' })
-        } finally {
-            setCargando(false)
+        const planData = planService.getPlanByNumber(plan);
+        if (!planData) {
+            addToast({ title: 'Plan no encontrado', description: `No existe el plan "${plan}".`, color: 'danger' });
+            return;
         }
-    }, [plan])//Array vacío para que se ejecute una única vez
+        setMaterias(planData.materias);
+        
+        let localProgreso = getProgresoLocal(plan);
+        if (!localProgreso) {
+            localProgreso = {};
+            planData.materias.forEach(m => {
+                if (m.tesis) localProgreso[m.codigo] = materiasUtils.bloquear;
+                else localProgreso[m.codigo] = (m.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0]);
+            });
+            updateAuthProgreso(plan, localProgreso);
+        }
+        setProgreso(localProgreso);
+    }, [plan, getProgresoLocal, updateAuthProgreso]);
 
     //Calcular el progreso total para pasarselo al componente
     const totalProgreso = () => {

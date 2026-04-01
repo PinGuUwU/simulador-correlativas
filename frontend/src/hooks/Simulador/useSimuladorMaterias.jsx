@@ -1,13 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 
 const useSimuladorMaterias = (materias, progreso, cuatri, setProgreso, progresoBase, anioActual) => {
-    const [materiasCursables, setMateriasCursables] = useState([])
 
     // Evaluamos las materias posibles SÓLO al inicio usando el progresoBase (la "foto" de progreso inicial).
     // Esto asegura que al volver atrás en el historial, las que marcaste no desaparezcan de la vista.
-    useEffect(() => {
-        if (!progresoBase || Object.keys(progresoBase).length === 0) return;
-
+    const materiasCursables = useMemo(() => {
+        if (!progresoBase || Object.keys(progresoBase).length === 0) return [];
 
         // Filtramos para que no sean del futuro Y respeten la época del año (impar = 1, par = 2)
         let nextMaterias = materias.filter(m => {
@@ -26,7 +24,6 @@ const useSimuladorMaterias = (materias, progreso, cuatri, setProgreso, progresoB
         // Filtro por correlativas usando el progresoBase
         nextMaterias.forEach((materia) => {
             const esTesina = materia.tesis
-            const esOptativa = materia.es_optativa
 
             if (esTesina) {
                 // La tesina requiere que absolutamente TODAS las demás materias estén cursadas
@@ -52,8 +49,7 @@ const useSimuladorMaterias = (materias, progreso, cuatri, setProgreso, progresoB
             }
         })
 
-        setMateriasCursables(posibles)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        return posibles;
     }, [cuatri, anioActual, materias, progresoBase])
 
     const cambioDeEstado = (codigoMateria) => {

@@ -25,10 +25,10 @@ const ThemeSwitcher = () => {
     if (!mounted) return null;
 
     const themes = [
-        { key: 'light',  label: 'Claro ☀️'   },
-        { key: 'dark',   label: 'Oscuro 🌙'  },
-        { key: 'girlie', label: 'Girlie 🌸'  },
-        { key: 'pastel', label: 'Pastel 🎨'  },
+        { key: 'light', label: 'Claro ☀️' },
+        { key: 'dark', label: 'Oscuro 🌙' },
+        { key: 'girlie', label: 'Girlie 🌸' },
+        { key: 'pastel', label: 'Pastel 🎨' },
     ];
 
     return (
@@ -106,10 +106,10 @@ const LoginModal = ({ isOpen, onClose, onConfirm }) => {
                             <i className="fa-solid fa-spinner animate-spin text-primary" />
                         ) : (
                             <svg className="w-5 h-5" viewBox="0 0 48 48">
-                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
                             </svg>
                         )}
                         {loading ? 'Conectando…' : 'Continuar con Google'}
@@ -141,8 +141,8 @@ const LoginModal = ({ isOpen, onClose, onConfirm }) => {
 };
 
 LoginModal.propTypes = {
-    isOpen:    PropTypes.bool.isRequired,
-    onClose:   PropTypes.func.isRequired,
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
     onConfirm: PropTypes.func.isRequired,
 };
 
@@ -240,11 +240,11 @@ const NavLinks = ({ onItemClick }) => {
     const navigate = useNavigate();
 
     const menuItems = [
-        { name: 'Progreso',                icon: 'fa-graduation-cap',  path: '/progreso',     isDeactivated: false },
-        { name: 'Simulador de Avance',     icon: 'fa-route',           path: '/simulador',    isDeactivated: false },
-        { name: 'Equivalencias entre planes', icon: 'fa-right-left',   path: '/equivalencias',isDeactivated: false },
-        { name: 'Chat IA',                 icon: 'fa-robot',           path: '/chatbot',      isDeactivated: true  },
-        { name: 'Cómo usar',               icon: 'fa-circle-question', path: '/como-usar',    isDeactivated: false, id: 'btn-como-usar' },
+        { name: 'Progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
+        { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
+        { name: 'Equivalencias entre planes', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: false },
+        { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot', isDeactivated: true },
+        { name: 'Cómo usar', icon: 'fa-circle-question', path: '/como-usar', isDeactivated: false, id: 'btn-como-usar' },
     ];
 
     const handleClick = (path) => {
@@ -266,11 +266,10 @@ const NavLinks = ({ onItemClick }) => {
                             key={item.path}
                             id={item.id}
                             onClick={() => handleClick(item.path)}
-                            className={`flex items-center gap-3 p-3 rounded-xl transition-all group ${
-                                isActive
-                                    ? 'bg-primary/10 text-primary font-bold shadow-sm border border-primary/20'
-                                    : 'text-foreground/80 hover:bg-default-100 hover:text-primary'
-                            }`}
+                            className={`flex items-center gap-3 p-3 rounded-xl transition-all group ${isActive
+                                ? 'bg-primary/10 text-primary font-bold shadow-sm border border-primary/20'
+                                : 'text-foreground/80 hover:bg-default-100 hover:text-primary'
+                                }`}
                         >
                             <i className={`fa-solid ${item.icon} w-5 text-lg ${isActive ? 'text-primary' : 'group-hover:scale-110 transition-transform'}`} />
                             <span className="text-sm font-medium">{item.name}</span>
@@ -323,11 +322,10 @@ const SidebarFooter = ({ setPlan, plan, onSignInPress, id_prefix = 'desktop' }) 
                                 <button
                                     key={id}
                                     onClick={() => setPlan(id)}
-                                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${
-                                        plan === id
-                                            ? 'bg-background text-primary shadow-sm ring-1 ring-default-200'
-                                            : 'text-foreground/80 hover:text-foreground hover:bg-default-200'
-                                    }`}
+                                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === id
+                                        ? 'bg-background text-primary shadow-sm ring-1 ring-default-200'
+                                        : 'text-foreground/80 hover:text-foreground hover:bg-default-200'
+                                        }`}
                                 >
                                     {id}
                                 </button>
@@ -362,10 +360,10 @@ const SidebarFooter = ({ setPlan, plan, onSignInPress, id_prefix = 'desktop' }) 
 };
 
 SidebarFooter.propTypes = {
-    setPlan:       PropTypes.func.isRequired,
-    plan:          PropTypes.string.isRequired,
+    setPlan: PropTypes.func.isRequired,
+    plan: PropTypes.string.isRequired,
     onSignInPress: PropTypes.func.isRequired,
-    id_prefix:     PropTypes.string,
+    id_prefix: PropTypes.string,
 };
 
 // ─── NavBar principal ─────────────────────────────────────────────────────────
@@ -401,7 +399,7 @@ export default function NavBar({ setPlan, plan }) {
             <LoginModal isOpen={isLoginOpen} onClose={onLoginClose} onConfirm={handleSignIn} />
 
             {/* Botón Hamburguesa Móvil */}
-            <div className="lg:hidden fixed top-3 right-3 z-50">
+            <div className="2xl:hidden fixed top-3 right-3 z-50">
                 <Button
                     isIconOnly
                     radius="full"
@@ -416,7 +414,7 @@ export default function NavBar({ setPlan, plan }) {
             </div>
 
             {/* Sidebar Desktop */}
-            <aside className="hidden lg:flex flex-col w-64 h-screen sticky left-0 top-0 bg-background border-r border-default-200 z-40 overflow-y-auto">
+            <aside className="hidden 2xl:flex flex-col w-64 h-screen sticky left-0 top-0 bg-background border-r border-default-200 z-40 overflow-y-auto">
                 <div className="p-6 mb-2 flex items-center gap-3">
                     <div
                         className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 cursor-pointer"
@@ -485,5 +483,5 @@ export default function NavBar({ setPlan, plan }) {
 
 NavBar.propTypes = {
     setPlan: PropTypes.func.isRequired,
-    plan:    PropTypes.string.isRequired,
+    plan: PropTypes.string.isRequired,
 };

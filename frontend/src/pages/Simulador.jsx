@@ -13,7 +13,7 @@ import useSimuladorEstado from '../hooks/Simulador/useSimuladorEstado'
 import useSimuladorMaterias from '../hooks/Simulador/useSimuladorMaterias'
 import useSimuladorPDF from '../hooks/Simulador/useSimuladorPDF'
 
-function Simulador() {
+function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
     // ─── Configuración (viene del modal, no cambia durante la simulación) ────
     const [plan, setPlan] = useState()
     const [modo, setModo] = useState()
@@ -27,11 +27,6 @@ function Simulador() {
     // ─── Modales ─────────────────────────────────────────────────────────────
     const { isOpen: isConfigOpen, onClose: onConfigClose, onOpenChange: onConfigOpenChange, onOpen: onConfigOpen } = useDisclosure()
     const { isOpen: isGuardarOpen, onClose: onGuardarClose, onOpenChange: onGuardarOpenChange, onOpen: onGuardarOpen } = useDisclosure()
-
-    // ─── Lógica de materias cursables (necesita materiasCursables para el hook de estado) ─
-    // Se define aquí para pasarlo a useSimuladorEstado (para el check de "algunCambio")
-    // La referencia circular se resuelve con un ref interno en el hook.
-    const [materiasCursablesRef, setMateriasCursablesRef] = useState([])
 
     // ─── Estado central de la simulación ─────────────────────────────────────
     const {
@@ -47,7 +42,7 @@ function Simulador() {
         simulacionTerminada, setSimulacionTerminada,
         handleAnterior,
         handleSiguiente
-    } = useSimuladorEstado({ plan, modo, anioInicio, cuatriInicio, materiasCursables: materiasCursablesRef })
+    } = useSimuladorEstado({ plan, modo, anioInicio, cuatriInicio })
 
     // ─── Materias disponibles para el cuatrimestre actual ────────────────────
     const { cambioDeEstado, materiasCursables } = useSimuladorMaterias(
@@ -58,9 +53,6 @@ function Simulador() {
         progresoBase || {},
         anioActual
     )
-
-    // Sincronizamos para que useSimuladorEstado pueda leerlo en handleSiguiente
-    React.useEffect(() => { setMateriasCursablesRef(materiasCursables) }, [materiasCursables])
 
     // ─── PDF ─────────────────────────────────────────────────────────────────
     const { handleDownloadPDF } = useSimuladorPDF({
@@ -231,7 +223,7 @@ function Simulador() {
                                         </div>
 
                                         <Button
-                                            onPress={handleSiguiente}
+                                            onPress={() => handleSiguiente(materiasCursables)}
                                             isDisabled={!estadoSiguiente}
                                             variant="shadow" color="primary"
                                             endContent={<i className="fa-solid fa-chevron-right" />}

@@ -3,7 +3,7 @@ import { addToast } from '@heroui/react'
 import planService from '../../services/planService'
 import { useAuth } from '../../context/AuthContext'
 
-const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCursables }) => {
+const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio }) => {
     const { getProgresoLocal, getSimulacionLocal } = useAuth();
     const [materias, setMaterias] = useState([])
     const [cargando, setCargando] = useState(false)
@@ -140,7 +140,7 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio, materiasCurs
         setHistorialSemestres(prev => prev.slice(0, -1))
     }
 
-    const handleSiguiente = () => {
+    const handleSiguiente = (materiasCursables) => {
         if (!progresoSimulado || !materias.length) return
 
         const algunCambio = materiasCursables.some(

@@ -23,14 +23,14 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
             {/* Sección Superior: Logo y Títulos */}
             <div className="flex flex-col md:flex-row items-center gap-5 text-center md:text-start">
                 {/* Icono/Logo Estilizado */}
-                <div className="bg-primary w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0 lg:hidden">
+                <div className="bg-primary w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0 2xl:hidden">
                     <i className="fa-solid fa-graduation-cap text-white text-3xl"></i>
                 </div>
 
                 <div className="space-y-1">
                     <div className="flex items-center gap-2 justify-center md:justify-normal">
-                        <span className="text-primary font-bold text-sm tracking-wider lg:hidden">UNLu</span>
-                        <span className="text-default-400 lg:hidden">|</span>
+                        <span className="text-primary font-bold text-sm tracking-wider 2xl:hidden">UNLu</span>
+                        <span className="text-default-400 2xl:hidden">|</span>
                         <span className="text-foreground font-semibold text-sm">{carrera}</span>
                     </div>
 
@@ -52,7 +52,7 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
                         ? "fixed top-0 right-0 z-30 backdrop-blur-md p-4 bg-background/95 shadow-md border-b border-default-200 animate-in slide-in-from-top duration-300 left-0 "
                         : "w-full"
                 }>
-                    <div className={isSticky ? "max-w-7xl mx-auto lg:pl-64" : ""}>
+                    <div className={isSticky ? "max-w-7xl mx-auto 2xl:pl-64" : ""}>
                         <div className="flex px-10 sm:p-0 justify-between items-end mb-3">
                             <div className="space-y-1">
                                 <span className="text-default-900 text-xs uppercase tracking-widest font-black">Estado Actual</span>

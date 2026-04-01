@@ -41,7 +41,7 @@ function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo, vist
                 <div className={`truncate text-foreground font-black tracking-tight ${vista === 'list' ? 'flex-1 pr-4' : ''}`} title={nombre}>
                     {nombre}
                 </div>
-                <div className={`gap-2 flex flex-col xl:flex-row xl:gap-4 ${vista === 'list' ? 'shrink-0' : ''}`}>
+                <div className={`gap-2 flex flex-col ${vista === 'list' ? 'shrink-0' : ''}`}>
                     <Chip color={config.color} variant="dot">
                         Horas semanales: {horas_semanales}
                     </Chip>

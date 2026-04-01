@@ -1,12 +1,20 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { useRoutes } from 'react-router-dom'
-import Progreso from '../pages/Progreso'
-import Equivalencias from '../pages/Equivalencias'
-import Inicio from '../pages/Inicio'
-import ChatBot from '../pages/Chatbot'
-import Simulador from '../pages/Simulador'
-import ComoUsar from '../pages/ComoUsar'
-import SettingsPage from '../pages/SettingsPage'
+import { Spinner } from '@heroui/react'
+
+const Progreso = lazy(() => import('../pages/Progreso'))
+const Equivalencias = lazy(() => import('../pages/Equivalencias'))
+const Inicio = lazy(() => import('../pages/Inicio'))
+const ChatBot = lazy(() => import('../pages/Chatbot'))
+const Simulador = lazy(() => import('../pages/Simulador'))
+const ComoUsar = lazy(() => import('../pages/ComoUsar'))
+const SettingsPage = lazy(() => import('../pages/SettingsPage'))
+
+const LoadingFallback = () => (
+    <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Spinner size="lg" color="primary" label="Cargando..." />
+    </div>
+)
 
 const Rutas = ({ plan, setPlan }) => {
     const componentesRutas = useRoutes([
@@ -39,7 +47,11 @@ const Rutas = ({ plan, setPlan }) => {
             element: <SettingsPage plan={plan} setPlan={setPlan} />
         }
     ])
-    return componentesRutas
+    return (
+        <Suspense fallback={<LoadingFallback />}>
+            {componentesRutas}
+        </Suspense>
+    )
 }
 
 export default Rutas

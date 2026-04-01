@@ -1,7 +1,5 @@
 import { useCallback } from 'react'
 import { addToast } from '@heroui/react'
-import { toPng } from 'html-to-image'
-import { jsPDF } from 'jspdf'
 import { trackDescargaPDF } from '../../services/analyticsService'
 import { logError } from '../../services/logService'
 
@@ -19,6 +17,12 @@ const useSimuladorPDF = ({ historialSemestres, plan, openedAccordions, setOpened
     const handleDownloadPDF = useCallback(async () => {
         try {
             setDescargandoPDF(true)
+
+            // Dynamic import of heavy libraries
+            const [ { toPng }, { jsPDF } ] = await Promise.all([
+                import('html-to-image'),
+                import('jspdf')
+            ]);
 
             // Abrir todos los acordeones para que el contenido sea visible en la captura
             const keysDeTodos = new Set(historialSemestres.map((_, i) => String(i)))

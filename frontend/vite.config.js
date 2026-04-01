@@ -16,17 +16,20 @@ export default defineConfig({
       ext: '.gz',
     }),
   ],
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
   build: {
     sourcemap: true,
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            // Firebase es enorme y aislado, puede vivir en su propio chunk
             if (id.includes('firebase')) return 'vendor-firebase';
-            if (id.includes('@heroui') || id.includes('framer-motion')) return 'vendor-ui';
-            if (id.includes('lucide-react')) return 'vendor-icons';
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) return 'vendor-react';
-            return 'vendor'; // El resto
+            // Consolidamos todo lo demás en vendor-app para evitar desincronización de hooks
+            return 'vendor-app';
           }
         }
       }

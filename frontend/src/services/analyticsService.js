@@ -8,13 +8,13 @@
  * Convención de nombres de eventos: snake_case, máx 40 caracteres (límite GA4).
  */
 
-import { logEvent } from 'firebase/analytics';
 import { analytics } from './firebase';
 
 // Guard: en entornos donde analytics no está disponible (SSR, tests), no falla
-const track = (eventName, params = {}) => {
+const track = async (eventName, params = {}) => {
     try {
         if (!analytics) return;
+        const { logEvent } = await import('firebase/analytics');
         logEvent(analytics, eventName, params);
     } catch {
         // Never break the app for a tracking failure

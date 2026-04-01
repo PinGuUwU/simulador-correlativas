@@ -5,16 +5,82 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Simulador de correlativas y seguimiento de progreso académico para la Licenciatura en Sistemas de Información de la UNLu." />
+  <meta name="description"
+    content="Simulador de correlativas y seguimiento de progreso académico para la Licenciatura en Sistemas de Información de la UNLu." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://simulador-correlativas-backend.onrender.com" crossorigin>
+  <link rel="preconnect" href="https://simulador-de-avance-unlu.firebaseapp.com" crossorigin>
+  <link rel="preconnect" href="https://firebase.googleapis.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Simulador de Correlativas | UNLu - Licenciatura en Sistemas</title>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <style>
+      #loader-skeleton {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        background-color: #fafafa;
+        font-family: sans-serif;
+      }
+
+      .sk-sidebar {
+        width: 256px;
+        border-right: 1px solid #eaeaea;
+        display: none;
+        padding: 24px;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      @media (min-width: 1024px) {
+        .sk-sidebar {
+          display: flex;
+        }
+      }
+
+      .sk-box {
+        background-color: #f0f0f0;
+        border-radius: 8px;
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+
+      .sk-main {
+        flex: 1;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      @keyframes pulse {
+
+        0%,
+        100% {
+          opacity: 1;
+        }
+
+        50% {
+          opacity: 0.5;
+        }
+      }
+    </style>
+    <div id="loader-skeleton">
+      <div class="sk-sidebar">
+        <div class="sk-box" style="height: 40px; border-radius: 12px; margin-bottom: 24px;"></div>
+        <div class="sk-box" style="height: 48px; border-radius: 12px;"></div>
+        <div class="sk-box" style="height: 48px; border-radius: 12px;"></div>
+        <div class="sk-box" style="height: 48px; border-radius: 12px;"></div>
+      </div>
+      <div class="sk-main">
+        <div class="sk-box" style="height: 120px; width: 100%; border-radius: 16px;"></div>
+        <div class="sk-box" style="height: 60vh; width: 100%; border-radius: 16px;"></div>
+      </div>
+    </div>
+  </div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

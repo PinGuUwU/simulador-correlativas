@@ -26,6 +26,12 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
         return [];
     });
 
+    const [vista, setVista] = useState(() => localStorage.getItem('materias_vista_preferida') || 'grid');
+
+    useEffect(() => {
+        localStorage.setItem('materias_vista_preferida', vista);
+    }, [vista]);
+
     useEffect(() => {
         localStorage.setItem('materias_isAnioOpen', JSON.stringify(isAnioOpen));
     }, [isAnioOpen]);
@@ -295,6 +301,23 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                         Modo Edición
                     </Switch>
                 </div>
+
+                {/* Selector de Vista (Lista vs Cuadrícula) */}
+                <div id="wrapper-view-selector" className="col-span-2 sm:col-span-1 flex justify-center">
+                    <Tabs
+                        size="sm"
+                        variant="bordered"
+                        selectedKey={vista}
+                        onSelectionChange={setVista}
+                        classNames={{
+                            tabList: "rounded-xl border-default-200 bg-background/50",
+                            cursor: "rounded-lg"
+                        }}
+                    >
+                        <Tab key="grid" title={<div className="flex items-center gap-2"><i className="fa-solid fa-table-cells-large"></i><span>Cuadrícula</span></div>} />
+                        <Tab key="list" title={<div className="flex items-center gap-2"><i className="fa-solid fa-list-ul"></i><span>Lista</span></div>} />
+                    </Tabs>
+                </div>
             </div>
             {/* Switch Flotante en la parte inferior derecha */}
             {mostrarSwitchFlotante && isProgressSticky && (
@@ -373,7 +396,10 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                                                                 </Chip>
                                                             </div>
 
-                                                            <div className="grid grid-cols-1 min-[768px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                                                            <div className={vista === 'grid'
+                                                                ? "grid grid-cols-1 min-[768px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+                                                                : "flex flex-col gap-3"
+                                                            }>
                                                                 {materiasCuatri.map((materia, index) => {
                                                                     const esElPrimero = materia.codigo === materias[0]?.codigo;
                                                                     return (
@@ -384,6 +410,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                                                                                 actualizarEstados={() => handleCambioDeEstado(materia.codigo)}
                                                                                 modo={modo}
                                                                                 abrirInfo={() => abrirInfo(materia)}
+                                                                                vista={vista}
                                                                             />
                                                                         </div>
                                                                     )

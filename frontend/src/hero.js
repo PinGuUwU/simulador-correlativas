@@ -61,10 +61,10 @@ export default heroui({
                 focus: "#006FEE",
                 overlay: "#000000",
                 default: {
-                    50: "#0d0d0e", 100: "#19191c", 200: "#26262a", 300: "#323238",
-                    400: "#3f3f46", 500: "#65656b", 600: "#8c8c90", 700: "#b2b2b5",
-                    800: "#d9d9da", 900: "#ffffff",
-                    foreground: "#fff", DEFAULT: "#3f3f46"
+                    50: "#0d0d0e", 100: "#1a1a1e", 200: "#2d2d33", 300: "#4b4b54",
+                    400: "#a1a1aa", 500: "#c4c4cc", 600: "#dcdce0", 700: "#ececf0",
+                    800: "#f4f4f5", 900: "#ffffff",
+                    foreground: "#fff", DEFAULT: "#a1a1aa"
                 },
                 primary: {
                     50: "#002147", 100: "#003571", 200: "#00489b", 300: "#005cc4",
@@ -98,8 +98,8 @@ export default heroui({
                 },
                 content1: { DEFAULT: "#18181b", foreground: "#fff" },
                 content2: { DEFAULT: "#27272a", foreground: "#fff" },
-                content3: { DEFAULT: "#3f3f46", foreground: "#fff" },
-                content4: { DEFAULT: "#52525b", foreground: "#fff" },
+                content3: { DEFAULT: "#333338", foreground: "#fff" },
+                content4: { DEFAULT: "#44444a", foreground: "#fff" },
             }
         },
 
@@ -117,17 +117,17 @@ export default heroui({
                 default: {
                     /* Rosa-gris: 400+ oscuros para legibilidad en texto */
                     50: "#fdf5f9",   100: "#faeaf4",   200: "#f5d5ea",   300: "#efbfdf",
-                    400: "#c47fa5",  500: "#a05e86",   600: "#7e4068",   700: "#5d264c",
-                    800: "#3e1332",  900: "#21071b",
-                    foreground: "#4a0028", DEFAULT: "#c47fa5"
+                    400: "#a05e86",  500: "#7e4068",   600: "#5d264c",   700: "#3e1332",
+                    800: "#2d0d24",  900: "#1a0615",
+                    foreground: "#4a0028", DEFAULT: "#a05e86"
                 },
 
                 /* Azules → Rosa fuerte / Hot pink (color de marca) */
                 primary: {
                     50: "#fff0f6",   100: "#ffd6e8",   200: "#ffadd1",   300: "#ff85ba",
                     400: "#f85ca1",  500: "#ec4899",   600: "#d63384",   700: "#b91c6e",
-                    800: "#9d1459",  900: "#831843",
-                    foreground: "#ffffff", DEFAULT: "#ec4899"
+                    800: "#831843",  900: "#4a0028",
+                    foreground: "#4a0028", DEFAULT: "#ec4899"
                 },
 
                 /* Secundario → Fucsia / Magenta vibrante */

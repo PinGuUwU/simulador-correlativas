@@ -30,16 +30,16 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
                 <div className="space-y-1">
                     <div className="flex items-center gap-2 justify-center md:justify-normal">
                         <span className="text-primary font-bold text-sm tracking-wider lg:hidden">UNLu</span>
-                        <span className="text-default-300 lg:hidden">|</span>
-                        <span className="text-foreground/80 font-medium text-sm">{carrera}</span>
+                        <span className="text-default-400 lg:hidden">|</span>
+                        <span className="text-foreground font-semibold text-sm">{carrera}</span>
                     </div>
 
-                    <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+                    <h1 className="text-3xl font-black text-foreground tracking-tight">
                         Mi Progreso Académico
                     </h1>
 
-                    <p className="text-foreground/80 text-base max-w-2xl leading-relaxed">
-                        Gestioná tu progreso académico de la <span className="text-default-700 font-medium">Licenciatura en Sistemas de Información</span> llevando el control de tus materias aprobadas y regulares.
+                    <p className="text-foreground font-medium text-base max-w-2xl leading-relaxed">
+                        Gestioná tu progreso académico de la <span className="text-default-900 font-bold underline decoration-primary/30">Licenciatura en Sistemas de Información</span> llevando el control de tus materias aprobadas y regulares.
                     </p>
                 </div>
             </div>
@@ -55,13 +55,13 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
                     <div className={isSticky ? "max-w-7xl mx-auto lg:pl-64" : ""}>
                         <div className="flex px-10 sm:p-0 justify-between items-end mb-3">
                             <div className="space-y-1">
-                                <span className="text-default-600 text-xs uppercase tracking-widest font-bold">Estado Actual</span>
-                                <p className="text-default-700 font-semibold">Progreso de la carrera</p>
+                                <span className="text-default-900 text-xs uppercase tracking-widest font-black">Estado Actual</span>
+                                <p className="text-foreground font-bold">Progreso de la carrera</p>
                             </div>
                             <div className="text-right">
                                 {/* Eliminé los pr-[8%] y pr-[20%] manuales para usar un layout más fluido */}
                                 <span className="text-2xl font-black text-secondary">{progress}%</span>
-                                <span className="text-foreground/60 text-sm ml-1 font-medium hidden sm:inline-block">completado</span>
+                                <span className="text-foreground font-bold text-sm ml-1 hidden sm:inline-block">completado</span>
                             </div>
                         </div>
 

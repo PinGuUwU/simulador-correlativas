@@ -2,7 +2,7 @@ import { Card, CardHeader, CardBody, CardFooter, Chip } from "@heroui/react"
 import estadoUtils from "../../utils/Progreso/estadoUtils";
 
 
-function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {
+function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo, vista = 'grid' }) {
     if (!estado) return <p>Cargando Materia...</p>
     // 2. Desestructuramos las propiedades de "materia" para un código más limpio en el JSX
     const { codigo, correlativas, nombre, anio, cuatrimestre, horas_totales, horas_semanales } = materia;
@@ -24,9 +24,9 @@ function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {
         <Card
             isPressable
             onPress={handlePress}
-            className={`w-full hover border-3 transition-colors duration-300 hover:font-bold font-medium ${config.estilo}`}
+            className={`w-full hover border-3 transition-colors duration-300 hover:font-bold font-medium ${config.estilo} ${vista === 'list' ? 'flex-row items-center justify-between p-2 h-auto' : ''}`}
         >
-            <CardHeader className="flex justify-between">
+            <CardHeader className={`flex justify-between shrink-0 ${vista === 'list' ? 'w-auto gap-4 p-2' : ''}`}>
                 <Chip color={config.color} variant="flat">
                     <i className={config.icono} />
                 </Chip>
@@ -35,13 +35,13 @@ function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {
                 </Chip>
             </CardHeader>
 
-            <CardBody>
-                <div>{codigo}</div>
+            <CardBody className={`${vista === 'list' ? 'flex-row items-center flex-1 justify-between p-2 overflow-hidden gap-4' : ''}`}>
+                <div className={`text-foreground font-extrabold ${vista === 'list' ? 'w-16 shrink-0' : ''}`}>{codigo}</div>
                 {/* Agregamos el atributo "title" para que el usuario pueda leer el nombre completo al pasar el mouse si se trunca */}
-                <div className="truncate" title={nombre}>
+                <div className={`truncate text-foreground font-black tracking-tight ${vista === 'list' ? 'flex-1 pr-4' : ''}`} title={nombre}>
                     {nombre}
                 </div>
-                <div className="gap-2 flex flex-col xl:flex-row xl:gap-4">
+                <div className={`gap-2 flex flex-col xl:flex-row xl:gap-4 ${vista === 'list' ? 'shrink-0' : ''}`}>
                     <Chip color={config.color} variant="dot">
                         Horas semanales: {horas_semanales}
                     </Chip>
@@ -51,8 +51,10 @@ function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo }) {
                 </div>
             </CardBody>
 
-            <CardFooter>
-                {anio}° Año • C{Number(cuatrimestre)}
+            <CardFooter className={`shrink-0 ${vista === 'list' ? 'w-auto p-2 justify-end' : ''}`}>
+                <span className={`text-foreground font-bold ${vista === 'list' ? 'text-xs' : 'text-sm'}`}>
+                    {anio}° Año • C{Number(cuatrimestre)}
+                </span>
             </CardFooter>
         </Card>
     );

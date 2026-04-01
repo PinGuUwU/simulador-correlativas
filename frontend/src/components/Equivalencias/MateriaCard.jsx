@@ -81,7 +81,7 @@ const MateriaCard = ({ materia, estado, isNewPlan = false, onClick }) => {
                                 {materia.codigo}
                             </span>
                             <div className="w-1 h-1 rounded-full bg-default-200" />
-                            <span className="text-[9px] font-bold text-default-400 uppercase tracking-wider">
+                            <span className="text-[9px] font-black text-default-600 dark:text-default-400 uppercase tracking-wider">
                                 {isNewPlan ? "Plan Nuevo" : "Plan Viejo"}
                             </span>
                         </div>
@@ -99,12 +99,12 @@ const MateriaCard = ({ materia, estado, isNewPlan = false, onClick }) => {
                 </div>
 
                 <div className="flex items-center gap-4 mt-auto">
-                    <div className="flex items-center gap-1.5 text-[10px] text-default-500 font-bold bg-default-100 px-2 py-1 rounded-lg">
-                        <Clock size={12} className="text-default-400" />
+                    <div className="flex items-center gap-1.5 text-[10px] text-default-800 dark:text-default-200 font-black bg-default-100 dark:bg-default-200 px-2 py-1 rounded-lg">
+                        <Clock size={12} className="text-default-500 dark:text-default-400" />
                         <span>{materia.horas_totales}h</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-default-500 font-bold bg-default-100 px-2 py-1 rounded-lg">
-                        <Calendar size={12} className="text-default-400" />
+                    <div className="flex items-center gap-1.5 text-[10px] text-default-800 dark:text-default-200 font-black bg-default-100 dark:bg-default-200 px-2 py-1 rounded-lg">
+                        <Calendar size={12} className="text-default-500 dark:text-default-400" />
                         <span>{materia.horas_semanales}h/s</span>
                     </div>
                 </div>

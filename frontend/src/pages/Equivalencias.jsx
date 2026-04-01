@@ -88,7 +88,7 @@ function Equivalencias() {
                         
                         <div className="space-y-4">
                             <div>
-                                <div className="flex justify-between text-[11px] font-bold uppercase text-default-500 mb-1">
+                                <div className="flex justify-between text-[11px] font-black uppercase text-default-800 dark:text-default-400 mb-1">
                                     <span>Plan 17.13 (Actual)</span>
                                     <span>{comparativaHoras?.viejo.restantes}h / {comparativaHoras?.viejo.totales}h</span>
                                 </div>
@@ -117,17 +117,17 @@ function Equivalencias() {
                     </CardBody>
                 </Card>
 
-                <Card className="bg-primary border-none shadow-lg shadow-primary/20 text-white">
+                <Card className="bg-primary border-none shadow-lg shadow-primary/20 text-primary-foreground">
                     <CardBody className="p-4 flex flex-row items-center gap-4">
                         <div className="bg-white/20 p-3 rounded-2xl">
                             <TrendingDown size={32} />
                         </div>
                         <div>
-                            <h4 className="text-xs font-bold uppercase tracking-widest opacity-80">Diferencia de cursada</h4>
-                            <p className="text-2xl font-black">
+                            <h4 className="text-xs font-black uppercase tracking-widest text-primary-foreground/90">Diferencia de cursada</h4>
+                            <p className="text-2xl font-black text-primary-foreground">
                                 {Math.abs(comparativaHoras?.viejo.restantes - comparativaHoras?.nuevo.restantes)} horas
                             </p>
-                            <p className="text-[10px] font-medium opacity-90 mt-1 italic">
+                            <p className="text-[10px] font-bold text-primary-foreground/95 mt-1 italic">
                                 {comparativaHoras?.nuevo.restantes < comparativaHoras?.viejo.restantes 
                                     ? '* El plan nuevo reduce tu carga horaria total restante.' 
                                     : '* El plan nuevo mantiene o incrementa levemente tu carga horaria.'}
@@ -146,8 +146,8 @@ function Equivalencias() {
                                 <Edit3 size={18} />
                             </div>
                             <div>
-                                <p className="text-xs font-bold uppercase tracking-wider">Modo Simulación</p>
-                                <p className="text-[10px] text-default-500 leading-none">Edita estados para proyectar tu avance</p>
+                                <p className="text-xs font-black uppercase tracking-wider text-foreground">Modo Simulación</p>
+                                <p className="text-[10px] text-default-800 dark:text-default-400 leading-none font-bold">Edita estados para proyectar tu avance</p>
                             </div>
                         </div>
                         <Switch 
@@ -167,13 +167,13 @@ function Equivalencias() {
                         <CardBody className="p-4 gap-4">
                             <div className="flex items-center gap-2 mb-2">
                                 <ListFilter size={18} className="text-primary" />
-                                <h3 className="font-bold text-sm uppercase tracking-wider text-foreground/70">Filtros</h3>
+                                <h3 className="font-extrabold text-sm uppercase tracking-wider text-foreground">Filtros</h3>
                             </div>
                             <SearchMateria busqueda={busqueda} setBusqueda={setBusqueda} />
                             <Tabs 
                                 aria-label="Filtros de estado de materias" 
                                 color="primary" 
-                                variant="flat" 
+                                variant="bordered" 
                                 fullWidth 
                                 selectedKey={filtro} 
                                 onSelectionChange={setFiltro}

@@ -1,4 +1,5 @@
 import { saveUserProgreso } from './dbService';
+import { auth } from './firebase';
 
 const QUEUE_KEY = 'sync_pending_queue';
 let debounceTimeout = null;
@@ -28,12 +29,15 @@ const enqueueToLocalStorage = (uid, plan, progreso) => {
 };
 
 /**
- * Ejecuta un flush de la cola guardada localmente hacia Firestore
+ * Ejecuta un flush de la cola guardada localmente hacia Firestore.
+ * Filtrado por UID actual para evitar errores de permisos.
  */
-export const flushSyncQueue = async () => {
+export const flushSyncQueue = async (currentUid = null) => {
     if (isFlushing || !navigator.onLine) return;
 
-    let queue = [];
+    // Si no se pasa UID, intentamos obtenerlo de la instancia de Auth (útil para listeners globales)
+    const activeUid = currentUid || auth.currentUser?.uid;
+    if (!activeUid) return; // No intentamos sincronizar si no hay nadie logueado
     try {
         const stored = localStorage.getItem(QUEUE_KEY);
         if (stored) queue = JSON.parse(stored);
@@ -49,6 +53,11 @@ export const flushSyncQueue = async () => {
     // Verificamos e intentamos sincronizar cada elemento pendiente
     for (const item of queue) {
         try {
+            // SEGURIDAD: Solo subimos si el UID en cola coincide con el UID logueado
+            if (activeUid && item.uid !== activeUid) {
+                remainingQueue.push(item);
+                continue;
+            }
             await saveUserProgreso(item.uid, item.plan, item.progreso);
         } catch (error) {
             console.error("Fallo al sincronizar un item a Firestore:", error);
@@ -69,6 +78,7 @@ export const flushSyncQueue = async () => {
 export const initOfflineListener = () => {
     window.addEventListener('online', () => {
         console.log("Conexión restablecida. Sincronizando pendientes...");
+        // Reintentamos flashear (el UID se validará al momento de gatillar por debounce o login)
         flushSyncQueue();
     });
 };
@@ -88,6 +98,6 @@ export const syncProgreso = (uid, plan, progreso) => {
 
     // 3. Setear encolamiento, tras 3 segundos de inactividad, se iniciará la sincronización en nube
     debounceTimeout = setTimeout(() => {
-        flushSyncQueue();
+        flushSyncQueue(uid);
     }, 3000);
 };

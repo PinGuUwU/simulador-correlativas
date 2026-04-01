@@ -11,9 +11,9 @@ function Inicio() {
     const form = useRef()
 
     const buttonItems = [
-        { name: 'Ver mi progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
-        { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
-        { name: 'Consultar Equivalencias', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: false },
+        { name: 'Ver mi progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false, color: 'primary' },
+        { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false, color: 'secondary' },
+        { name: 'Consultar Equivalencias', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: false, color: 'success' },
     ]
 
     const infoItems = [
@@ -89,7 +89,7 @@ function Inicio() {
                     {buttonItems.map((item, index) => (
                         <Button
                             key={index}
-                            color={index === 0 ? "primary" : "default"}
+                            color={item.isDeactivated ? "default" : item.color}
                             variant={item.isDeactivated ? "flat" : "shadow"}
                             size="lg"
                             className={`font-bold rounded-full px-8 shadow-md ${item.isDeactivated ? "opacity-60" : "hover:scale-105 transition-transform"}`}

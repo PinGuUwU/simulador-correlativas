@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEquivalencias } from '../hooks/useEquivalencias';
 import HeaderEquivalencias from '../components/Equivalencias/HeaderEquivalencias';
 import ListaMaterias from '../components/Equivalencias/ListaMaterias';
 import SearchMateria from '../components/Equivalencias/SearchMateria';
+import { trackSearch } from '../services/analyticsService';
 import { Tabs, Tab, Card, CardBody, Switch, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Progress, Chip, Checkbox } from "@heroui/react";
 import { ListFilter, Save, RotateCcw, Download, Info, Edit3, Clock, TrendingDown, AlertTriangle, ArrowRight } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +15,19 @@ function Equivalencias() {
         modoEdicion, setModoEdicion, toggleEstado, guardarSimulacion, cargarSimulacion, cargarProgresoReal,
         comparativaHoras, stats
     } = useEquivalencias();
+
+    // Trackear búsquedas con debounce (evitar ruido en analytics)
+    useEffect(() => {
+        if (!busqueda) return;
+        const timer = setTimeout(() => {
+            trackSearch({ 
+                term: busqueda, 
+                resultsCount: materiasFiltradas.length, 
+                context: 'equivalencias' 
+            });
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [busqueda, materiasFiltradas.length]);
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { 

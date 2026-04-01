@@ -7,6 +7,13 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import App from './App.jsx'
 import './main.css'
 
+// Silenciar logs y warnings en producción para una consola limpia y profesional
+if (import.meta.env.PROD) {
+  console.log = () => {};
+  console.warn = () => {};
+  // console.info = () => {}; // Descomenta si también quieres quitar los "info"
+}
+
 createRoot(document.getElementById('root')).render(
   <HeroUIProvider>
     <ToastProvider placement="bottom-center" maxVisibleToasts={1} />

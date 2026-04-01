@@ -12,6 +12,7 @@
 
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
+import { trackErrorGA } from './analyticsService';
 
 // ─── Entorno ──────────────────────────────────────────────────────────────────
 const IS_DEV = import.meta.env.DEV === true;
@@ -153,6 +154,15 @@ export const writeLog = ({
 
     const cleanMessage = sanitizeMessage(errorMessage);
     const cleanContext  = sanitizeContext(context);
+
+    // Trackear error en Analytics (sin datos sensibles)
+    if (level !== LOG_LEVEL.INFO) {
+        trackErrorGA({ 
+            code: errorCode, 
+            message: cleanMessage, 
+            fatal: level === LOG_LEVEL.ERROR 
+        });
+    }
 
     // ── Modo DEV: solo consola, sin Firestore ─────────────────────────────────
     if (IS_DEV) {

@@ -21,20 +21,38 @@ const track = async (eventName, params = {}) => {
     }
 };
 
+/**
+ * Asocia los eventos de la sesión con un ID de usuario único.
+ * @param {string | null} userId
+ */
+export const setAnalyticsUser = async (userId) => {
+    try {
+        if (!analytics) return;
+        const { setUserId } = await import('firebase/analytics');
+        setUserId(analytics, userId);
+    } catch {
+        // Silencio
+    }
+};
+
 // ─── Eventos de Autenticación ─────────────────────────────────────────────────
 
 /**
  * Trackea un login exitoso con Google.
  * @param {{ userId: string }} params
  */
-export const trackLogin = ({ userId }) =>
+export const trackLogin = ({ userId }) => {
+    setAnalyticsUser(userId);
     track('login', { method: 'google', uid: userId });
+};
 
 /**
  * Trackea el cierre de sesión.
  */
-export const trackLogout = () =>
+export const trackLogout = () => {
+    setAnalyticsUser(null);
     track('logout');
+};
 
 // ─── Eventos de Navegación ────────────────────────────────────────────────────
 
@@ -68,7 +86,42 @@ export const trackGuardarSimulacion = ({ plan, semestresCompletados }) =>
 export const trackAvanceSemestre = ({ plan, anio, cuatri }) =>
     track('avance_semestre', { plan, anio, cuatri });
 
-// ─── Eventos de UI ────────────────────────────────────────────────────────────
+// ─── Eventos de UI y Feedback ─────────────────────────────────────────────────
+
+/**
+ * Trackea una búsqueda de materia.
+ * Útil para detectar si los usuarios buscan cosas que no existen.
+ * @param {{ term: string, resultsCount: number, context: string }} params
+ */
+export const trackSearch = ({ term, resultsCount, context }) => {
+    if (!term || term.length < 3) return; // Evitar ruido de búsquedas cortas
+    track('search_materia', { 
+        search_term: term.toLowerCase(), 
+        results_count: resultsCount,
+        context: context // 'equivalencias', 'progreso', etc.
+    });
+};
+
+/**
+ * Trackea la interacción con el tutorial.
+ * @param {{ action: 'start' | 'step_view' | 'complete' | 'skip', stepIndex?: number, stepTitle?: string }} params
+ */
+export const trackTutorial = ({ action, stepIndex, stepTitle }) =>
+    track('tutorial_progreso', { 
+        action, 
+        step_index: stepIndex, 
+        step_title: stepTitle 
+    });
+
+/**
+ * Trackea un error capturado por la app en GA4.
+ * @param {{ code: string, message: string, fatal?: boolean }} params
+ */
+export const trackErrorGA = ({ code, message, fatal = false }) =>
+    track('exception', { 
+        description: `${code}: ${message}`, 
+        fatal 
+    });
 
 /**
  * Trackea cuando el usuario cambia el tema visual.

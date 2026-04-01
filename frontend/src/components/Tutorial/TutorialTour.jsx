@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Popover, PopoverTrigger, PopoverContent, Button } from '@heroui/react';
 import { getProgresoSteps } from './tutorialSteps';
+import { trackTutorial } from '../../services/analyticsService';
 
 // ============================================================
 //  TutorialTour — Tour guiado para la página /progreso
-//  Solo se renderiza en DESKTOP (>1024px). Progreso.jsx se encarga
-//  de no mostrarlo en móvil.
 // ============================================================
 
 export default function TutorialTour({ onComplete, onCancel }) {
@@ -16,9 +15,22 @@ export default function TutorialTour({ onComplete, onCancel }) {
 
     useEffect(() => {
         setIsClient(true);
+        // Track inicio del tutorial
+        trackTutorial({ action: 'start' });
     }, []);
 
     const step = tutorialSteps[currentStepIndex];
+
+    // Trackear vista de cada paso
+    useEffect(() => {
+        if (step) {
+            trackTutorial({ 
+                action: 'step_view', 
+                stepIndex: currentStepIndex + 1, 
+                stepTitle: step.title 
+            });
+        }
+    }, [currentStepIndex, step]);
 
     // Obtiene el rect del elemento objetivo y lo actualiza reactivamente
     const updateRect = useCallback(() => {
@@ -83,6 +95,7 @@ export default function TutorialTour({ onComplete, onCancel }) {
         if (currentStepIndex < tutorialSteps.length - 1) {
             setCurrentStepIndex(prev => prev + 1);
         } else {
+            trackTutorial({ action: 'complete' });
             if (onComplete) onComplete();
         }
     };
@@ -92,6 +105,7 @@ export default function TutorialTour({ onComplete, onCancel }) {
     };
 
     const handleCancel = () => {
+        trackTutorial({ action: 'skip', stepIndex: currentStepIndex + 1 });
         if (onCancel) onCancel();
     };
 

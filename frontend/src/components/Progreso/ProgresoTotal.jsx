@@ -1,7 +1,8 @@
 import { Progress } from '@heroui/react'
 import { useEffect, useRef, useState } from 'react'
+import MateriasProgreso from './MateriasProgreso'
 
-function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) {
+function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, headerRef, setIsSticky }) {
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -43,7 +44,13 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
                     </p>
                 </div>
             </div>
-
+            {/* Materias Progreso (Cards) */}
+            <div className="pt-4">
+                <p className="text-default-500 text-xs uppercase tracking-widest font-black mb-1">Distribución por estado</p>
+                <div className="mt-4 mb-4">
+                    <MateriasProgreso progreso={progreso} materias={materias} />
+                </div>
+            </div>
             {/* Sección Inferior: Barra de Progreso */}
             {/* Contenedor envolvente para evitar saltos de layout cuando se vuelve fixed */}
             <div className={isSticky ? "" : "pt-6 border-t"}>
@@ -75,6 +82,8 @@ function ProgresoTotal({ carrera, progress, isSticky, headerRef, setIsSticky }) 
                     </div>
                 </div>
             </div>
+
+
 
         </header>
     )

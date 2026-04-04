@@ -1,5 +1,5 @@
-import { Card, CardBody, CardFooter, CardHeader } from '@heroui/card'
-import { Button, Chip, Popover, PopoverContent, PopoverTrigger, Progress, useDisclosure } from '@heroui/react'
+import { Card, CardBody } from '@heroui/card'
+import { CircularProgress, useDisclosure } from '@heroui/react'
 import React, { useState } from 'react'
 import FiltroMateriasModal from './modals/FiltroMateriasModal'
 
@@ -132,59 +132,49 @@ function MateriasProgreso({ progreso, materias }) {
     }, [isOpen, onOpenChange, isDetailOpen])
 
     return (
-        <div className="grid grid-cols-1 min-[768px]:grid-cols-2 xl:grid-cols-4 gap-6 my-8">
-            {stats.map((stat, index) => (
-                <Card
-                    isPressable
-                    key={index}
-                    className={`${stat.accent} cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 ${stat.bg}`}
-                    onClick={() => handleClick(stat.estado, stat.label)}
-                >
-                    <CardHeader className="pb-0 pt-4 px-5 items-center flex justify-between text-center">
-                        <p className="text-tiny uppercase font-bold text-default-600 tracking-wider">
-                            {stat.label}
-                        </p>
-                    </CardHeader>
-
-                    <CardBody className="py-4 px-5 flex flex-row items-center justify-between overflow-visible">
-                        <div className="flex flex-col md:text-start max-[768px]:text-center max-[768px]:w-full">
-                            <p className="font-black  md:text-4xl text-default-800">
-                                {stat.count}
-                            </p>
-
-                            <div className='text-center'>
-                                <Chip
-                                    color={`${stat.color}`}
-                                    variant={`flat`}
-                                >
-                                    Horas totales: {stat.horas_totales}
-                                </Chip>
-                            </div>
-                        </div>
-
-                        {/* Contenedor del Icono Estilo "Neon" del prototipo */}
-                        <div className={`${stat.accent}  hidden min-[768px]:flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full border-2 shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.4)]`}>
-                            <i className={`${stat.icon} text-lg`}></i>
-                        </div>
-                    </CardBody>
-
-                    <CardFooter className="px-5 pb-5">
-                        <div className="flex flex-col w-full gap-2">
-                            <div className="flex justify-between items-center text-[10px] font-bold text-default-600 uppercase">
-                                <span>Avance</span>
-                                <span>{Math.round(calcularPorcentaje(stat.count))}%</span>
-                            </div>
-                            <Progress
-                                aria-label={`Progreso ${stat.label}`}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2 mb-6">
+            {stats.map((stat, index) => {
+                const porcentaje = Math.round(calcularPorcentaje(stat.count))
+                // Mapeo estático necesario para Tailwind (evita tree shaking de clases dinámicas)
+                const textColors = {
+                    primary: "text-primary",
+                    warning: "text-warning",
+                    success: "text-success",
+                    default: "text-default-500"
+                }
+                const textColorClass = textColors[stat.color] || "text-default-500"
+                
+                return (
+                    <Card
+                        isPressable
+                        key={index}
+                        className="bg-content2/50 border border-default-200/50 hover:border-default-300 transition-colors duration-200 shadow-none w-full"
+                        onPress={() => handleClick(stat.estado, stat.label)}
+                    >
+                        <CardBody className="py-3 px-4 flex flex-row items-center gap-4 overflow-visible">
+                            {/* Anillo de progreso visual circular */}
+                            <CircularProgress
+                                value={porcentaje}
+                                size="lg"
                                 color={stat.color}
-                                size="sm"
-                                value={calcularPorcentaje(stat.count)}
-                                className="max-w-md"
+                                showValueLabel={false}
+                                aria-label={`Progreso circular ${stat.label}`}
+                                classNames={{
+                                    svg: "w-10 h-10 drop-shadow-sm",
+                                    track: "stroke-default-200/50",
+                                }}
                             />
-                        </div>
-                    </CardFooter>
-                </Card>
-            ))}
+
+                            <div className="flex flex-col text-left">
+                                <span className="text-sm font-bold text-foreground leading-tight tracking-wide">{stat.label}</span>
+                                <span className={`text-sm font-black ${textColorClass}`}>
+                                    {porcentaje}%
+                                </span>
+                            </div>
+                        </CardBody>
+                    </Card>
+                )
+            })}
 
             <FiltroMateriasModal
                 estado={seleccionada}

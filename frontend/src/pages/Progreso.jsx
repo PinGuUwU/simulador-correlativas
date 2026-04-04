@@ -110,8 +110,7 @@ function Progreso({ plan }) {
                         headerRef={headerRef}
                         setIsSticky={setIsSticky}
                     />
-                    <div className='mx-5 md:mx-10 lg:mx-15'>
-                        <MateriasProgreso progreso={progreso} materias={materias} />
+                    <div className='mx-5 md:mx-10 lg:mx-15 mt-6'>
                         <MateriasList
                             plan={plan}
                             progreso={progreso}

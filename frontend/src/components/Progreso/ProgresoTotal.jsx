@@ -1,8 +1,9 @@
-import { Progress } from '@heroui/react'
+import { Progress, Button } from '@heroui/react'
 import { useEffect, useRef, useState } from 'react'
 import MateriasProgreso from './MateriasProgreso'
 
 function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, headerRef, setIsSticky }) {
+    const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -18,6 +19,16 @@ function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, header
         }
         return () => observer.disconnect()
     }, [])
+
+    const barRef = useRef(null)
+    const [barHeight, setBarHeight] = useState(0)
+
+    // Medir la altura de la barra para evitar saltos de layout
+    useEffect(() => {
+        if (barRef.current && !isSticky) {
+            setBarHeight(barRef.current.offsetHeight)
+        }
+    }, [isSticky, progreso]) // Re-medir si cambian las materias o el estado sticky
 
     return (
         <header ref={headerRef} className="bg-background border border-default-100 shadow-sm rounded-2xl p-6 md:p-8 flex flex-col gap-6 transition-all hover:shadow-md">
@@ -46,19 +57,39 @@ function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, header
             </div>
             {/* Materias Progreso (Cards) */}
             <div className="pt-4">
-                <p className="text-default-500 text-xs uppercase tracking-widest font-black mb-1">Distribución por estado</p>
-                <div className="mt-4 mb-4">
+                <div className="flex items-center justify-between mb-1">
+                    <p className="text-default-500 text-xs uppercase tracking-widest font-black">Progresos generales</p>
+                    {/* Toggle exclusivo para celular */}
+                    <Button
+                        size="sm"
+                        variant="flat"
+                        className="md:hidden font-bold h-7 px-3 rounded-lg"
+                        onPress={() => setIsStatsExpanded(!isStatsExpanded)}
+                        endContent={<i className={`fa-solid fa-chevron-down transition-transform duration-300 ${isStatsExpanded ? 'rotate-180' : ''}`}></i>}
+                    >
+                        {isStatsExpanded ? 'Ocultar' : 'Ver más'}
+                    </Button>
+                </div>
+
+                <div className={`mt-4 mb-4 ${isStatsExpanded ? 'block animate-in fade-in slide-in-from-top-2' : 'hidden md:block'}`}>
                     <MateriasProgreso progreso={progreso} materias={materias} />
                 </div>
             </div>
             {/* Sección Inferior: Barra de Progreso */}
-            {/* Contenedor envolvente para evitar saltos de layout cuando se vuelve fixed */}
-            <div className={isSticky ? "" : "pt-6 border-t"}>
-                <div id="progreso-total" className={
-                    isSticky
-                        ? "fixed top-0 right-0 z-30 backdrop-blur-md p-4 bg-background/95 shadow-md border-b border-default-200 animate-in slide-in-from-top duration-300 left-0 "
-                        : "w-full"
-                }>
+            {/* Contenedor envolvente con altura mínima para evitar saltos de layout */}
+            <div
+                className={`transition-all duration-300 ${!isSticky ? "pt-6 border-t" : ""}`}
+                style={{ minHeight: isSticky ? `${barHeight}px` : "auto" }}
+            >
+                <div
+                    id="progreso-total"
+                    ref={barRef}
+                    className={
+                        isSticky
+                            ? "fixed top-0 right-0 z-30 backdrop-blur-md p-4 bg-background/95 shadow-md border-b border-default-200 animate-in slide-in-from-top duration-300 left-0"
+                            : "w-full"
+                    }
+                >
                     <div className={isSticky ? "max-w-7xl mx-auto 2xl:pl-64" : ""}>
                         <div className="flex px-10 sm:p-0 justify-between items-end mb-3">
                             <div className="space-y-1">

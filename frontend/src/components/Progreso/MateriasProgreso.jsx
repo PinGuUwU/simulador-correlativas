@@ -94,6 +94,25 @@ function MateriasProgreso({ progreso, materias }) {
         }
     ]
 
+    const horasTotalesCarrera = materias.reduce((acc, m) => acc + (Number(m.horas_totales) || 0), 0)
+
+    const resumenStats = [
+        {
+            label: "Total Materias",
+            value: materiasTotales,
+            sublabel: "asignaturas",
+            icon: "fa-solid fa-book-bookmark",
+            color: "secondary"
+        },
+        {
+            label: "Carga Horaria",
+            value: horasTotalesCarrera,
+            sublabel: "horas totales",
+            icon: "fa-solid fa-clock-rotate-left",
+            color: "danger"
+        }
+    ]
+
     const calcularPorcentaje = (cant) => (materiasTotales > 0 ? (cant * 100) / materiasTotales : 0)
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
     const {
@@ -108,34 +127,27 @@ function MateriasProgreso({ progreso, materias }) {
         setTitulo(titulo)
         onOpen()
 
-        // Agrego una entrada al historial para que el botón "atrás" cierre el modal
         window.history.pushState({ modalOpen: true }, "")
     }
 
-    // Manejo el evento de que en celu haga para atrás, que cierre el modal y no se salga de la página
     useEffect(() => {
         const handlePopState = () => {
-            // Si el modal de detalle está abierto, no cerrarmos el filtro (lo maneja su propio listener)
             if (!isDetailOpen) {
                 onOpenChange(false)
             }
         }
-
-        // Solo activamos el "escuchador" si el modal está abierto
         if (isOpen) {
             window.addEventListener("popstate", handlePopState)
         }
-
         return () => {
             window.removeEventListener("popstate", handlePopState)
         }
     }, [isOpen, onOpenChange, isDetailOpen])
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mt-2 mb-6 uppercase tracking-wider">
             {stats.map((stat, index) => {
                 const porcentaje = Math.round(calcularPorcentaje(stat.count))
-                // Mapeo estático necesario para Tailwind (evita tree shaking de clases dinámicas)
                 const textColors = {
                     primary: "text-primary",
                     warning: "text-warning",
@@ -152,7 +164,6 @@ function MateriasProgreso({ progreso, materias }) {
                         onPress={() => handleClick(stat.estado, stat.label)}
                     >
                         <CardBody className="py-3 px-4 flex flex-row items-center gap-4 overflow-visible">
-                            {/* Anillo de progreso visual circular */}
                             <CircularProgress
                                 value={porcentaje}
                                 size="lg"
@@ -166,10 +177,51 @@ function MateriasProgreso({ progreso, materias }) {
                             />
 
                             <div className="flex flex-col text-left">
-                                <span className="text-sm font-bold text-foreground leading-tight tracking-wide">{stat.label}</span>
-                                <span className={`text-sm font-black ${textColorClass}`}>
+                                <span className="text-[10px] sm:text-xs font-bold text-foreground/70 leading-tight">{stat.label}</span>
+                                <span className={`text-sm sm:text-base font-black ${textColorClass}`}>
                                     {porcentaje}%
                                 </span>
+                            </div>
+                        </CardBody>
+                    </Card>
+                )
+            })}
+
+            {/* Tarjetas de Resumen (Horas y Materias) */}
+            {resumenStats.map((resumen, index) => {
+                const colorMap = {
+                    secondary: {
+                        bg: "bg-secondary/10",
+                        border: "border-secondary/20",
+                        text: "text-secondary",
+                        value: "text-secondary-600"
+                    },
+                    danger: {
+                        bg: "bg-danger/10",
+                        border: "border-danger/20",
+                        text: "text-danger",
+                        value: "text-danger-600"
+                    }
+                }
+                const styles = colorMap[resumen.color] || colorMap.secondary
+
+                return (
+                    <Card
+                        key={`resumen-${index}`}
+                        className="bg-content2/30 border border-default-200/50 shadow-none w-full"
+                    >
+                        <CardBody className="py-3 px-4 flex flex-row items-center gap-4 overflow-visible">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${styles.bg} ${styles.border} ${styles.text}`}>
+                                <i className={resumen.icon}></i>
+                            </div>
+                            <div className="flex flex-col text-left">
+                                <span className="text-[10px] sm:text-xs font-bold text-foreground/70 leading-tight">{resumen.label}</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className={`text-sm sm:text-base font-black ${styles.value}`}>
+                                        {resumen.value}
+                                    </span>
+                                    <span className="text-[9px] font-bold text-foreground/40">{resumen.sublabel}</span>
+                                </div>
                             </div>
                         </CardBody>
                     </Card>

@@ -1,30 +1,28 @@
-import { Card, CardHeader, CardBody, CardFooter, Chip } from "@heroui/react"
+import { Card, CardHeader, CardBody, CardFooter, Chip, Popover, PopoverTrigger, PopoverContent, Button, Divider } from "@heroui/react"
+import { useState } from "react";
 import estadoUtils from "../../utils/Progreso/estadoUtils";
 
+function MateriaCard({ materia, estado, actualizarEstados, abrirInfo, vista = 'grid' }) {
+    const [isOpen, setIsOpen] = useState(false);
 
-function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo, vista = 'grid' }) {
     if (!estado) return <p>Cargando Materia...</p>
-    // 2. Desestructuramos las propiedades de "materia" para un código más limpio en el JSX
     const { codigo, correlativas, nombre, anio, cuatrimestre, horas_totales, horas_semanales } = materia;
 
-    // 3. Obtenemos la configuración según el estado, con un fallback (por seguridad)
-    const config = estadoUtils.ESTADO_CONFIG[estado];
+    const config = estadoUtils.ESTADO_CONFIG[estado] || estadoUtils.ESTADO_CONFIG["Disponible"];
 
-    // 4. Renombramos la función usando convenciones estándar de React (handleAction)
-    const handlePress = () => {
-        if (modo) {
-            actualizarEstados(codigo, correlativas);
-        } else {
-            abrirInfo(materia);
+    const handleAction = (actionType, arg) => {
+        setIsOpen(false); // Cerramos el popover automáticamente
+        if (actionType === 'estado') {
+            actualizarEstados(arg);
+        } else if (actionType === 'detalles') {
+            abrirInfo(arg);
         }
     };
 
-    return (
-        // 5. Eliminamos el <div className=''> innecesario que envolvía a la Card
+    const cardContent = (
         <Card
-            isPressable
-            onPress={handlePress}
-            className={`w-full hover border-3 transition-colors duration-300 hover:font-bold font-medium ${config.estilo} ${vista === 'list' ? 'flex-row items-center justify-between p-2 h-auto' : ''}`}
+            isPressable={false}
+            className={`w-full border-3 transition-all duration-300 font-medium ${config.estilo} ${vista === 'list' ? 'flex-row items-center justify-between p-2 h-auto' : ''} ${estado === 'Bloqueado' ? 'opacity-70 grayscale-[0.3]' : ''}`}
         >
             <CardHeader className={`flex justify-between shrink-0 ${vista === 'list' ? 'w-auto gap-4 p-2' : ''}`}>
                 <Chip color={config.color} variant="flat">
@@ -37,7 +35,6 @@ function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo, vist
 
             <CardBody className={`${vista === 'list' ? 'flex-row items-center flex-1 justify-between p-2 overflow-hidden gap-4' : ''}`}>
                 <div className={`text-foreground font-extrabold ${vista === 'list' ? 'w-16 shrink-0' : ''}`}>{codigo}</div>
-                {/* Agregamos el atributo "title" para que el usuario pueda leer el nombre completo al pasar el mouse si se trunca */}
                 <div className={`truncate text-foreground font-black tracking-tight ${vista === 'list' ? 'flex-1 pr-4' : ''}`} title={nombre}>
                     {nombre}
                 </div>
@@ -57,6 +54,51 @@ function MateriaCard({ materia, estado, actualizarEstados, modo, abrirInfo, vist
                 </span>
             </CardFooter>
         </Card>
+    );
+
+    return (
+        <Popover placement="bottom" showArrow={true} className="w-full max-w-[280px]" isOpen={isOpen} onOpenChange={(open) => setIsOpen(open)}>
+            <PopoverTrigger>
+                <div role="button" aria-label="Cambiar estado" className="w-full cursor-pointer hover:scale-[1.02] transition-transform">
+                    {cardContent}
+                </div>
+            </PopoverTrigger>
+            <PopoverContent>
+                <div className="px-2 py-3 w-full flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                        <i className="fa-solid fa-gear text-default-500"></i>
+                        <span className="text-small font-bold">Cambiar Estado</span>
+                    </div>
+                    <Divider />
+
+                    {estado === "Bloqueado" && (
+                        <div className="bg-warning/10 border border-warning/30 rounded-lg p-2 text-xs text-warning-700 font-medium mb-1">
+                            <i className="fa-solid fa-triangle-exclamation mr-1"></i>
+                            Esta materia requiere correlativas. Al marcarla, se aprobarán/regularizarán sus dependencias automáticamente.
+                        </div>
+                    )}
+
+                    <div className="flex flex-col gap-2 w-full mt-1">
+                        <Button size="sm" color="warning" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-clock w-4" />} onPress={() => handleAction('estado', 'Regular')}>
+                            Regular
+                        </Button>
+                        <Button size="sm" color="success" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-check w-4" />} onPress={() => handleAction('estado', 'Aprobado')}>
+                            Aprobado
+                        </Button>
+                        <Button size="sm" color="success" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-ranking-star w-4" />} onPress={() => handleAction('estado', 'Promocionado')}>
+                            Promocionado
+                        </Button>
+                        <Divider className="my-1"/>
+                        <Button size="sm" color="default" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-circle-info w-4" />} onPress={() => handleAction('detalles', materia)}>
+                            Detalles
+                        </Button>
+                        <Button size="sm" color="danger" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-rotate-left w-4" />} onPress={() => handleAction('estado', 'Reiniciar')}>
+                            Reiniciar Estado
+                        </Button>
+                    </div>
+                </div>
+            </PopoverContent>
+        </Popover>
     );
 }
 

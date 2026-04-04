@@ -10,10 +10,7 @@ import { useAuth } from '../../context/AuthContext.jsx'
 
 function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan }) {
     const { updateAuthProgreso } = useAuth();
-    const [modo, setModo] = useState(false) //Para saber si se está editando el estado o no
     const [infoMateria, setInfoMateria] = useState()
-    const topSwitchRef = useRef(null)
-    const [mostrarSwitchFlotante, setMostrarSwitchFlotante] = useState(false)
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)
     const [confirmacion, setConfirmacion] = useState(false)
     const [mostrar, setMostrar] = useState(true)
@@ -36,24 +33,6 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
         localStorage.setItem('materias_isAnioOpen', JSON.stringify(isAnioOpen));
     }, [isAnioOpen]);
     const navigate = useNavigate()
-    // Observador para saber si el switch principal se ve
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                // Si el elemento ya no está en pantalla, isIntersecting es false
-                setMostrarSwitchFlotante(!entry.isIntersecting)
-            },
-            { threshold: 0 } // Se dispara apenas el elemento sale completamente de la vista
-        )
-
-        if (topSwitchRef.current) {
-            observer.observe(topSwitchRef.current)
-        }
-
-        return () => {
-            if (topSwitchRef.current) observer.unobserve(topSwitchRef.current)
-        }
-    }, [])
 
     // Para el Drawer/Info de la materia
     const {
@@ -162,25 +141,37 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
         window.history.pushState({ modalOpen: true }, "")
     }
 
-    //Manejar el cambio de estado
-    const handleCambioDeEstado = (codigo) => {
-        if (progreso[codigo] === materiasUtils.bloquear && mostrar) {
-            onConfirmationOpen()
-            setCodigoMateria(codigo)
-            window.history.pushState({ modalOpen: true }, "")
+    //Manejar el cambio de estado con Popover Menu
+    const [codigoMateria, setCodigoMateria] = useState()
+    const [targetStateModal, setTargetStateModal] = useState(null)
+
+    const handleCambioDeEstado = (codigo, targetState) => {
+        const mappedState = targetState === "Promocionado" ? "Aprobado" : targetState;
+
+        if (mappedState === "Reiniciar") {
+            const materia = materias.find(m => m.codigo === codigo);
+            const baseState = materia.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0];
+            cambioDeEstado(codigo, baseState);
+            return;
+        }
+
+        // Chequear si se requiere mostrar el Warning Modal para estos estados
+        if (mostrar && (mappedState === "Regular" || mappedState === "Aprobado")) {
+            setTargetStateModal(mappedState);
+            setCodigoMateria(codigo);
+            onConfirmationOpen();
+            window.history.pushState({ modalOpen: true }, "");
         } else {
-            cambioDeEstado(codigo)
+            cambioDeEstado(codigo, mappedState);
         }
     }
-    const [codigoMateria, setCodigoMateria] = useState()
 
     useEffect(() => {
         if (confirmacion === true) {
-            cambioDeEstado(codigoMateria)
+            cambioDeEstado(codigoMateria, targetStateModal)
             setConfirmacion(false)
         }
-
-    }, [onConfirmationClose, isConfirmationOpen])
+    }, [onConfirmationClose, confirmacion])
 
     //Manejo los años para saber si están o no mostrandose
     const handleMostrar = (id) => {
@@ -249,8 +240,8 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
             </Modal>
 
             {/* Sección de botones */}
-            <div ref={topSwitchRef} className="grid grid-cols-2 sm:flex sm:justify-between mb-8 gap-2">
-                {/* Botón de Reestablecer - Solo visible en modo edición */}
+            <div className="grid grid-cols-2 sm:flex sm:justify-between mb-8 gap-2">
+                {/* Botón de Reestablecer */}
                 <div id="wrapper-btn-reset-progreso" className="flex flex-col">
                     <Button
                         size="sm"
@@ -272,7 +263,6 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                     onPress={() => navigate("/simulador")}
                 >Simular Avance</Button>
 
-                {/* Ocular o mostrar todos los años */}
                 <div id="wrapper-btn-mostrar-todos" className="flex flex-col">
                     <Button
                         size='sm'
@@ -283,23 +273,6 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                     >
                         {isAnioOpen.length > 0 ? "Mostrar todos" : "Ocultar todos"}
                     </Button>
-                </div>
-
-                {/* Switch para intercambiar el modo edición */}
-                <div id="wrapper-switch-modo-edicion" className="flex items-center justify-center relative">
-                    <Switch
-                        isSelected={modo}
-                        color="success"
-                        onChange={() => setModo(!modo)}
-                        endContent={<span className="text-xs">off</span>}
-                        startContent={<span className="text-xs">on</span>}
-                        size={currentSize}
-                        classNames={{
-                            label: "text-default-600 font-medium"
-                        }}
-                    >
-                        Modo Edición
-                    </Switch>
                 </div>
 
                 {/* Selector de Vista (Lista vs Cuadrícula) */}
@@ -319,26 +292,6 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                     </Tabs>
                 </div>
             </div>
-            {/* Switch Flotante en la parte inferior derecha */}
-            {mostrarSwitchFlotante && isProgressSticky && (
-                <div className="fixed top-30 right-4 z-50 bg-background/90 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-default-200">
-                    <Switch
-                        color="success"
-                        isSelected={modo}
-                        onChange={() => setModo(!modo)}
-                        endContent={<span className="text-xs">OFF</span>}
-                        startContent={<span className="text-xs">ON</span>}
-                        size={currentSize}
-                        classNames={{
-                            label: "text-foreground font-bold"
-                        }}
-                    >
-                        Modo Edición
-                    </Switch>
-                </div>
-            )}
-
-
             {/* Sección materias */}
             <div id="tabs-filtro-anio" className="relative">
                 <Tabs aria-label="Filtos por año" items={tabs} className=' w-full mask-[linear-gradient(to_right,black_85%,transparent_100%)] pl-[3%] md:mask-none'>
@@ -407,8 +360,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                                                                             <MateriaCard
                                                                                 materia={materia}
                                                                                 estado={progreso[materia.codigo]}
-                                                                                actualizarEstados={() => handleCambioDeEstado(materia.codigo)}
-                                                                                modo={modo}
+                                                                                actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
                                                                                 abrirInfo={() => abrirInfo(materia)}
                                                                                 vista={vista}
                                                                             />
@@ -446,6 +398,7 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                 isOpen={isConfirmationOpen}
                 onOpenChange={onConfirmationOpenChange}
                 onClose={onConfirmationClose}
+                targetState={targetStateModal}
             />
 
         </div >

@@ -108,12 +108,12 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
     }
 
     // 5. El motor principal de cambios
-    const cambioDeEstado = (codigoMateria) => {
+    const cambioDeEstado = (codigoMateria, targetState = null) => {
         const materiaActual = materias.find((materia) => materia.codigo === codigoMateria);
         if (!materiaActual) return; // Chequeo de seguridad
 
         const estadoInicial = progreso[codigoMateria];
-        const estadoNuevo = actualizarEstado(estadoInicial);
+        const estadoNuevo = targetState ? targetState : actualizarEstado(estadoInicial);
 
         let nuevoProgreso = { ...progreso, [codigoMateria]: estadoNuevo };
         let materiasModificadas = [materiaActual.codigo];
@@ -124,15 +124,16 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
             aprobarTodas(nuevoProgreso, materiasModificadas);
         } else {
             // Lógica normal para el resto de materias
-            if ((estadoInicial === materiasUtils.bloquear || estadoInicial === materiasUtils.estadosPosibles[0]) && estadoNuevo === materiasUtils.estadosPosibles[1]) {
+            if (estadoNuevo === materiasUtils.estadosPosibles[1]) { // Regular
                 if (materiaActual.correlativas.length > 0) {
                     regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas);
                 }
-            } else if (estadoInicial === materiasUtils.estadosPosibles[1] && estadoNuevo === materiasUtils.estadosPosibles[2]) {
+            } else if (estadoNuevo === materiasUtils.estadosPosibles[2]) { // Aprobado
                 if (materiaActual.correlativas.length > 0) {
                     aprobarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas);
                 }
-            } else if (estadoInicial === materiasUtils.estadosPosibles[2] && estadoNuevo === materiasUtils.estadosPosibles[0]) {
+            } else if (estadoNuevo === materiasUtils.estadosPosibles[0] || estadoNuevo === materiasUtils.bloquear) { 
+                // Disponible o Bloqueado (Ej: Reiniciar)
                 bloquearDependencias(codigoMateria, nuevoProgreso);
             }
         }

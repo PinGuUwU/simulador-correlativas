@@ -1,6 +1,6 @@
 import { Card, CardBody } from '@heroui/card'
 import { CircularProgress, useDisclosure } from '@heroui/react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import FiltroMateriasModal from './modals/FiltroMateriasModal'
 
 function MateriasProgreso({ progreso, materias }) {
@@ -113,7 +113,7 @@ function MateriasProgreso({ progreso, materias }) {
     }
 
     // Manejo el evento de que en celu haga para atrás, que cierre el modal y no se salga de la página
-    React.useEffect(() => {
+    useEffect(() => {
         const handlePopState = () => {
             // Si el modal de detalle está abierto, no cerrarmos el filtro (lo maneja su propio listener)
             if (!isDetailOpen) {
@@ -143,7 +143,7 @@ function MateriasProgreso({ progreso, materias }) {
                     default: "text-default-500"
                 }
                 const textColorClass = textColors[stat.color] || "text-default-500"
-                
+
                 return (
                     <Card
                         isPressable

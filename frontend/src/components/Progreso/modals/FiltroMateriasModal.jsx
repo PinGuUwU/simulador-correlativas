@@ -88,9 +88,25 @@ function FiltroMateriasModal({ estado, materias, progreso, isOpen, onOpenChange,
 
                                         )
                                     } else {
+                                        let emptyText = "No hay materias en este estado."
+                                        switch (estado) {
+                                            case "Aprobado":
+                                                emptyText = "Aún no tenés materias aprobadas."
+                                                break
+                                            case "Disponible":
+                                                emptyText = "No hay materias disponibles para cursar en esta sección."
+                                                break
+                                            case "Regular":
+                                                emptyText = "No tenés materias regulares (pendientes de final)."
+                                                break
+                                            case "Bloqueado":
+                                                emptyText = "¡Excelente! No tenés materias bloqueadas."
+                                                break
+                                        }
+
                                         return (
-                                            <div className='text-foreground/80 italic mt-2 bg-default-100 px-3 py-1 rounded-lg'>
-                                                No requiere correlativas previas
+                                            <div className='text-default-500 italic mt-4 text-center py-6 bg-default-50/50 border border-default-100 rounded-xl'>
+                                                {emptyText}
                                             </div>
                                         )
                                     }

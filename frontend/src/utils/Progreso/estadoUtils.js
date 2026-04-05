@@ -9,6 +9,12 @@ const ESTADO_CONFIG = {
         color: "primary",
         icono: "fa-solid fa-lock-open",
     },
+    Cursando: {
+        estilo: "bg-indigo-500/15 border-indigo-500 border-[3px] shadow-[0_0_10px_2px_rgba(99,102,241,0.35)] hover:bg-indigo-500/25 text-indigo-950 dark:text-indigo-100 font-bold",
+        color: "secondary",
+        icono: "fa-solid fa-pencil",
+        pulso: true,
+    },
     Regular: {
         estilo: "bg-warning/10 border-warning/40 hover:bg-warning/20 hover:border-warning/50 text-warning-950 dark:text-warning-100",
         color: "warning",
@@ -19,6 +25,11 @@ const ESTADO_CONFIG = {
         color: "success",
         icono: "fa-regular fa-circle-check",
     },
+    Libre: {
+        estilo: "bg-danger/10 border-danger/40 hover:bg-danger/20 hover:border-danger/50 text-danger-950 dark:text-danger-100 font-bold",
+        color: "danger",
+        icono: "fa-solid fa-user-slash",
+    }
 };
 
 export default {

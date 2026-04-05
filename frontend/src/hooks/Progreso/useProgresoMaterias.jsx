@@ -71,9 +71,10 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
     }
 
     const desbloquearDependencias = (codigoMateria, nuevoProgreso) => {
+        const ESTADOS_VALIDOS_DESBLOQUEO = [materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2], 'Cursando'];
         materias.forEach((m) => {
-            const todasBien = m.correlativas.every(c => ([materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2]].includes(nuevoProgreso[c])));
-            const buenEstado = [materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2]].includes(nuevoProgreso[m.codigo]);
+            const todasBien = m.correlativas.every(c => ESTADOS_VALIDOS_DESBLOQUEO.includes(nuevoProgreso[c]));
+            const buenEstado = ESTADOS_VALIDOS_DESBLOQUEO.includes(nuevoProgreso[m.codigo]);
             if (m.correlativas.includes(codigoMateria) && todasBien && !buenEstado) {
                 nuevoProgreso[m.codigo] = materiasUtils.estadosPosibles[0];
             }
@@ -119,12 +120,13 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
         let materiasModificadas = [materiaActual.codigo];
 
         // LOGICA DE LA TESINA (Aprobado Forzoso)
-        // Si el usuario toca la tesina y su nuevo estado es Regular (1) o Aprobado (2)
         if (materiaActual.tesis && (estadoNuevo === materiasUtils.estadosPosibles[1] || estadoNuevo === materiasUtils.estadosPosibles[2])) {
             aprobarTodas(nuevoProgreso, materiasModificadas);
         } else {
-            // Lógica normal para el resto de materias
-            if (estadoNuevo === materiasUtils.estadosPosibles[1]) { // Regular
+            // Cursando: estado neutro, no dispara cascada de correlativas
+            if (estadoNuevo === 'Cursando') {
+                // Solo actualizar el estado, sin tocar dependencias
+            } else if (estadoNuevo === materiasUtils.estadosPosibles[1]) { // Regular
                 if (materiaActual.correlativas.length > 0) {
                     regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas);
                 }
@@ -132,7 +134,7 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
                 if (materiaActual.correlativas.length > 0) {
                     aprobarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas);
                 }
-            } else if (estadoNuevo === materiasUtils.estadosPosibles[0] || estadoNuevo === materiasUtils.bloquear) { 
+            } else if (estadoNuevo === materiasUtils.estadosPosibles[0] || estadoNuevo === materiasUtils.bloquear) {
                 // Disponible o Bloqueado (Ej: Reiniciar)
                 bloquearDependencias(codigoMateria, nuevoProgreso);
             }

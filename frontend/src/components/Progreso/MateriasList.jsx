@@ -3,12 +3,13 @@ import MateriaCard from './MateriaCard.jsx'
 import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tab, Tabs, useDisclosure } from '@heroui/react'
 import DetalleMateriaModal from './modals/DetalleMateriaModal.jsx'
 import ConfirmarCambioModal from './modals/ConfirmarCambioModal.jsx'
+import CapturaTransicionModal from './modals/CapturaTransicionModal.jsx'
 import { useNavigate } from 'react-router-dom'
 import materiasUtils from '../../utils/Progreso/materiasUtils.js'
 import useProgresoMaterias from '../../hooks/Progreso/useProgresoMaterias.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 
-function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan }) {
+function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan }) {
     const { updateAuthProgreso } = useAuth();
     const [infoMateria, setInfoMateria] = useState()
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)
@@ -57,6 +58,15 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
         onOpenChange: onConfirmationOpenChange,
         onClose: onConfirmationClose
     } = useDisclosure()
+
+    // Para el modal de captura de datos por transición de estado
+    const {
+        isOpen: isCapturaOpen,
+        onOpen: onCapturaOpen,
+        onOpenChange: onCapturaOpenChange,
+        onClose: onCapturaClose
+    } = useDisclosure()
+    const [capturaConfig, setCapturaConfig] = useState({ tipo: null, materia: null, pendingState: null })
 
     //Abrir la info de una materia con Drawer de HeroUI
     const abrirInfo = (materia) => {
@@ -130,9 +140,10 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
             }
         })
 
-        updateAuthProgreso(plan, progresoInicial);
+        updateAuthProgreso(plan, progresoInicial, {});
         // Actualizo el progreso
         setProgreso(progresoInicial)
+        if (setProgresoDetalles) setProgresoDetalles({})
         onResetClose()
     }
     //Abrir el modal de confirmar el reestablecer progreso
@@ -147,22 +158,95 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
 
     const handleCambioDeEstado = (codigo, targetState) => {
         const mappedState = targetState === "Promocionado" ? "Aprobado" : targetState;
+        const materia = materias.find(m => m.codigo === codigo);
+        const estadoActual = progreso[codigo];
 
         if (mappedState === "Reiniciar") {
-            const materia = materias.find(m => m.codigo === codigo);
-            const baseState = materia.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0];
+            const baseState = materia?.correlativas?.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0];
             cambioDeEstado(codigo, baseState);
             return;
         }
 
-        // Chequear si se requiere mostrar el Warning Modal para estos estados
-        if (mostrar && (mappedState === "Regular" || mappedState === "Aprobado")) {
-            setTargetStateModal(mappedState);
+        // Determinar tipo de captura según la transición
+        let tipoCaptura = null;
+
+        if (mappedState === "Cursando") {
+            tipoCaptura = 'hacia_cursando';
+        } else if (mappedState === "Regular") {
+            tipoCaptura = estadoActual === 'Cursando' ? 'desde_cursando_hacia_reg' : 'hacia_regular';
+        } else if (mappedState === "Aprobado") {
+            if (estadoActual === 'Regular' || estadoActual === 'Cursando') {
+                tipoCaptura = 'hacia_aprobado_desde_reg';
+            } else {
+                tipoCaptura = 'hacia_aprobado_directo';
+            }
+        }
+
+        if (tipoCaptura) {
+            setCapturaConfig({ tipo: tipoCaptura, materia, pendingState: mappedState });
             setCodigoMateria(codigo);
-            onConfirmationOpen();
-            window.history.pushState({ modalOpen: true }, "");
-        } else {
-            cambioDeEstado(codigo, mappedState);
+            onCapturaOpen();
+            return;
+        }
+
+        // Estados sin formulario (Libre directo, etc.)
+        cambioDeEstado(codigo, mappedState);
+    }
+
+    const handleCapturaConfirm = (payload) => {
+        // _sugerirLibre: el usuario eligio "Marcar como Libre" desde la alerta de nota reprobatoria
+        if (payload?._sugerirLibre) {
+            if (codigoMateria) {
+                const detallesActuales = progresoDetalles?.[codigoMateria] || {};
+                const updatedDetalles = {
+                    ...progresoDetalles,
+                    [codigoMateria]: { ...detallesActuales, notaRegularizacion: payload.notaRegularizacion }
+                };
+                if (setProgresoDetalles) setProgresoDetalles(updatedDetalles);
+                updateAuthProgreso(plan, progreso, updatedDetalles);
+            }
+            onCapturaClose();
+            cambioDeEstado(codigoMateria, 'Libre');
+            return;
+        }
+
+        if (payload && codigoMateria) {
+            const detallesActuales = progresoDetalles?.[codigoMateria] || {};
+
+            const nuevosDetalles = {
+                ...detallesActuales,
+                ...(payload.fechaRegularidad !== undefined && { fechaRegularidad: payload.fechaRegularidad }),
+                ...(payload.fechaInicioCursada !== undefined && { fechaInicioCursada: payload.fechaInicioCursada }),
+                ...(payload.notaFinal !== undefined && { notaFinal: payload.notaFinal }),
+                ...(payload.notaRegularizacion !== undefined && { notaRegularizacion: payload.notaRegularizacion }),
+            };
+
+            // Si transición 'desde_cursando_hacia_reg', copiar fechaInicioCursada como fechaRegularidad si no la tiene
+            if (capturaConfig.tipo === 'desde_cursando_hacia_reg' && !nuevosDetalles.fechaRegularidad && detallesActuales.fechaInicioCursada) {
+                nuevosDetalles.fechaRegularidad = detallesActuales.fechaInicioCursada;
+            }
+
+            if (payload.notaFinal != null && capturaConfig.pendingState === 'Aprobado') {
+                const nuevoIntento = {
+                    nota: payload.notaFinal,
+                    estado: payload.notaFinal >= 4 ? 'aprobado' : 'reprobado',
+                    fecha: new Date().toISOString()
+                };
+                nuevosDetalles.intentosFinal = [
+                    ...(detallesActuales.intentosFinal || []),
+                    nuevoIntento
+                ];
+            }
+
+            const updatedDetalles = { ...progresoDetalles, [codigoMateria]: nuevosDetalles };
+            if (setProgresoDetalles) setProgresoDetalles(updatedDetalles);
+            updateAuthProgreso(plan, progreso, updatedDetalles);
+        }
+
+        onCapturaClose();
+        // Aplicar el cambio de estado siempre
+        if (capturaConfig.pendingState) {
+            cambioDeEstado(codigoMateria, capturaConfig.pendingState);
         }
     }
 
@@ -388,6 +472,10 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                 infoMateria={infoMateria}
                 materias={materias}
                 progreso={progreso}
+                progresoDetalles={progresoDetalles}
+                setProgresoDetalles={setProgresoDetalles}
+                cambioDeEstado={cambioDeEstado}
+                plan={plan}
                 onOpenChange={onDetailOpenChange}
             />
 
@@ -399,6 +487,15 @@ function MateriasList({ progreso, setProgreso, materias, isProgressSticky, plan 
                 onOpenChange={onConfirmationOpenChange}
                 onClose={onConfirmationClose}
                 targetState={targetStateModal}
+            />
+
+            {/* Modal de captura de datos por transición */}
+            <CapturaTransicionModal
+                isOpen={isCapturaOpen}
+                onOpenChange={onCapturaOpenChange}
+                tipo={capturaConfig.tipo}
+                materia={capturaConfig.materia}
+                onConfirm={handleCapturaConfirm}
             />
 
         </div >

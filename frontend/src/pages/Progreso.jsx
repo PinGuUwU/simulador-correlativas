@@ -11,7 +11,7 @@ import materiasUtils from '../utils/Progreso/materiasUtils';
 import { useAuth } from '../context/AuthContext';
 
 function Progreso({ plan }) {
-    const { getProgresoLocal, updateAuthProgreso } = useAuth();
+    const { getProgresoLocal, getProgresoDetallesLocal, updateAuthProgreso } = useAuth();
     
     // Inicialización síncrona para anular el bloqueo de renderizado (Mejora radical de LCP y FCP)
     const [materias, setMaterias] = useState(() => {
@@ -31,6 +31,11 @@ function Progreso({ plan }) {
             else progresoInicial[m.codigo] = (m.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0]);
         });
         return progresoInicial;
+    });
+
+    const [progresoDetalles, setProgresoDetalles] = useState(() => {
+        const storageData = getProgresoDetallesLocal(plan);
+        return storageData || {};
     });
 
     const [cargando, setCargando] = useState(false);
@@ -53,16 +58,19 @@ function Progreso({ plan }) {
         setMaterias(planData.materias);
         
         let localProgreso = getProgresoLocal(plan);
+        let localDetalles = getProgresoDetallesLocal(plan);
         if (!localProgreso) {
             localProgreso = {};
+            localDetalles = {};
             planData.materias.forEach(m => {
                 if (m.tesis) localProgreso[m.codigo] = materiasUtils.bloquear;
                 else localProgreso[m.codigo] = (m.correlativas.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0]);
             });
-            updateAuthProgreso(plan, localProgreso);
+            updateAuthProgreso(plan, localProgreso, localDetalles);
         }
         setProgreso(localProgreso);
-    }, [plan, getProgresoLocal, updateAuthProgreso]);
+        setProgresoDetalles(localDetalles || {});
+    }, [plan, getProgresoLocal, getProgresoDetallesLocal, updateAuthProgreso]);
 
     //Calcular el progreso total para pasarselo al componente
     const totalProgreso = () => {
@@ -115,6 +123,8 @@ function Progreso({ plan }) {
                             plan={plan}
                             progreso={progreso}
                             setProgreso={setProgreso}
+                            progresoDetalles={progresoDetalles}
+                            setProgresoDetalles={setProgresoDetalles}
                             materias={materias}
                             cargando={cargando}
                             isProgressSticky={isSticky}

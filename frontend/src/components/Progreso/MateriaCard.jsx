@@ -22,7 +22,7 @@ function MateriaCard({ materia, estado, actualizarEstados, abrirInfo, vista = 'g
     const cardContent = (
         <Card
             isPressable={false}
-            className={`w-full border-3 transition-all duration-300 font-medium ${config.estilo} ${vista === 'list' ? 'flex-row items-center justify-between p-2 h-auto' : ''} ${estado === 'Bloqueado' ? 'opacity-70 grayscale-[0.3]' : ''}`}
+            className={`w-full border-3 transition-all duration-300 font-medium ${config.estilo} ${vista === 'list' ? 'flex-row items-center justify-between p-2 h-auto' : ''} ${estado === 'Bloqueado' ? 'opacity-70 grayscale-[0.3]' : ''} ${estado === 'Cursando' ? 'ring-2 ring-indigo-400 ring-offset-1 ring-offset-background animate-pulse' : ''}`}
         >
             <CardHeader className={`flex justify-between shrink-0 ${vista === 'list' ? 'w-auto gap-4 p-2' : ''}`}>
                 <Chip color={config.color} variant="flat">
@@ -79,9 +79,18 @@ function MateriaCard({ materia, estado, actualizarEstados, abrirInfo, vista = 'g
                     )}
 
                     <div className="flex flex-col gap-2 w-full mt-1">
-                        <Button size="sm" color="warning" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-clock w-4" />} onPress={() => handleAction('estado', 'Regular')}>
-                            Regular
-                        </Button>
+                        {/* Solo mostrar Cursando si está Disponible o Bloqueado */}
+                        {(estado === 'Disponible' || estado === 'Bloqueado') && (
+                            <Button size="sm" color="secondary" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-pencil w-4" />} onPress={() => handleAction('estado', 'Cursando')}>
+                                Cursando
+                            </Button>
+                        )}
+                        {/* Desde Cursando hacia Regular */}
+                        {estado !== 'Aprobado' && (
+                            <Button size="sm" color="warning" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-clock w-4" />} onPress={() => handleAction('estado', 'Regular')}>
+                                Regular
+                            </Button>
+                        )}
                         <Button size="sm" color="success" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-check w-4" />} onPress={() => handleAction('estado', 'Aprobado')}>
                             Aprobado
                         </Button>

@@ -107,6 +107,13 @@ export function AuthProvider({ children }) {
         } catch { return null; }
     }, []);
 
+    const getProgresoDetallesLocal = useCallback((plan) => {
+        try {
+            const data = localStorage.getItem(`detalles_progreso+${plan}`);
+            return data ? JSON.parse(data) : null;
+        } catch { return null; }
+    }, []);
+
     const getSimulacionLocal = useCallback((plan) => {
         try {
             const data = localStorage.getItem(`simulacion+${plan}`);
@@ -252,11 +259,14 @@ export function AuthProvider({ children }) {
         setPendingSyncData(null);
     }, [pendingSyncData, user]);
 
-    const updateAuthProgreso = useCallback((plan, nuevoProgreso) => {
+    const updateAuthProgreso = useCallback((plan, nuevoProgreso, progresoDetalles = null) => {
         localStorage.setItem(`progreso+${plan}`, JSON.stringify(nuevoProgreso));
+        if (progresoDetalles) {
+            localStorage.setItem(`detalles_progreso+${plan}`, JSON.stringify(progresoDetalles));
+        }
         
         if (user) {
-            syncProgreso(user.uid, plan, nuevoProgreso);
+            syncProgreso(user.uid, plan, nuevoProgreso); // Nota: idealmente también sincronizaríamos detalles
         }
     }, [user]);
 
@@ -279,6 +289,7 @@ export function AuthProvider({ children }) {
         resolveSync,
         updateAuthProgreso,
         getProgresoLocal,
+        getProgresoDetallesLocal,
         getSimulacionLocal,
         setSimulacionLocal,
         refetchUserData,
@@ -318,8 +329,9 @@ AuthProvider.propTypes = {
  *   showSyncModal: boolean,
  *   setShowSyncModal: (show: boolean) => void,
  *   resolveSync: (choice: 'upload' | 'download') => void,
- *   updateAuthProgreso: (plan: string, nuevoProgreso: object) => void,
+ *   updateAuthProgreso: (plan: string, nuevoProgreso: object, progresoDetalles?: object) => void,
  *   getProgresoLocal: (plan: string) => object | null,
+ *   getProgresoDetallesLocal: (plan: string) => object | null,
  *   getSimulacionLocal: (plan: string) => object | null,
  *   setSimulacionLocal: (plan: string, data: object) => void,
  *   userData: object | null,

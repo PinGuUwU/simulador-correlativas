@@ -1,0 +1,11 @@
+{
+  "cuatrimestres": [
+    { "nombre": "1° Cuatrimestre", "inicio": "03-01", "fin": "06-30" },
+    { "nombre": "2° Cuatrimestre", "inicio": "08-01", "fin": "11-30" }
+  ],
+  "instancias_final": ["Febrero", "Mayo", "Julio-Agosto", "Septiembre", "Diciembre"],
+  "limites": {
+    "cuatrimestres_regularidad": 5,
+    "intentos_final": 5
+  }
+}

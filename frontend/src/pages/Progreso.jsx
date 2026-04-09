@@ -5,7 +5,6 @@ import MateriasProgreso from '../components/Progreso/MateriasProgreso';
 import ProgresoTotal from '../components/Progreso/ProgresoTotal';
 import { Spinner, Button, addToast } from '@heroui/react';
 import LeyendaEstados from '../components/Progreso/LeyendaEstados';
-import TutorialTour from '../components/Tutorial/TutorialTour';
 import planService from '../services/planService';
 import materiasUtils from '../utils/Progreso/materiasUtils';
 import { useAuth } from '../context/AuthContext';
@@ -42,7 +41,6 @@ function Progreso({ plan }) {
     const carrera = "Licenciatura en Sistemas de Información";
     const headerRef = useRef(null);
     const [isSticky, setIsSticky] = useState(false);
-    const [mostrarTutorial, setMostrarTutorial] = useState(false);
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' });
@@ -84,24 +82,8 @@ function Progreso({ plan }) {
     }
     const progress = Math.round((totalProgreso() * 100) / materias.length)
 
-    const handleTutorialComplete = () => {
-        setMostrarTutorial(false)
-        localStorage.setItem(`tutorial_progreso`, 'true')
-    }
-
-    // Escuchar el evento 'start-tutorial' disparado desde el botón "Repetir Tutorial" del NavBar
-    useEffect(() => {
-        const handleStartTutorial = () => {
-            window.scrollTo({ top: 0, behavior: 'instant' });
-            setMostrarTutorial(true);
-        };
-        window.addEventListener('start-tutorial', handleStartTutorial);
-        return () => window.removeEventListener('start-tutorial', handleStartTutorial);
-    }, []);
-
     return (
         <div className="overflow-hidden bg-default-100">
-            {mostrarTutorial && <TutorialTour onComplete={handleTutorialComplete} onCancel={handleTutorialComplete} />}
             {cargando && (
                 <div className='flex justify-center items-center h-screen'>
                     < Spinner />
@@ -113,6 +95,7 @@ function Progreso({ plan }) {
                         carrera={carrera}
                         progress={progress}
                         progreso={progreso}
+                        progresoDetalles={progresoDetalles}
                         materias={materias}
                         isSticky={isSticky}
                         headerRef={headerRef}
@@ -136,18 +119,9 @@ function Progreso({ plan }) {
             {/* Breve descripción de lo que significa cada estado posible */}
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between pb-6 mx-5 md:mx-10 lg:mx-15">
                 <LeyendaEstados materias={materias} />
-                <Button
-                    color="primary"
-                    variant="flat"
-                    onPress={() => setMostrarTutorial(true)}
-                    startContent={<i className="fa-solid fa-circle-question" />}
-                    className="font-bold w-full md:w-auto"
-                >
-                    Ver Tutorial
-                </Button>
             </div>
         </div>
     );
 }
 
-export default Progreso;
+export default Progreso;

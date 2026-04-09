@@ -167,8 +167,8 @@ export const useEquivalencias = () => {
         modoEdicion, setModoEdicion, toggleEstado, guardarSimulacion, cargarSimulacion, cargarProgresoReal,
         comparativaHoras,
         stats: {
-            porcentajeViejo: Math.round(((planViejo?.materias.length - (comparativaHoras?.viejo.restantes / 96)) * 100) / planViejo?.materias.length), // Aproximación por UI
-            porcentajeNuevo: Math.round(((planNuevo?.materias.length - (comparativaHoras?.nuevo.restantes / 96)) * 100) / planNuevo?.materias.length),
+            porcentajeViejo: comparativaHoras?.viejo.totales ? Math.round(((comparativaHoras.viejo.totales - comparativaHoras.viejo.restantes) * 100) / comparativaHoras.viejo.totales) : 0,
+            porcentajeNuevo: comparativaHoras?.nuevo.totales ? Math.round(((comparativaHoras.nuevo.totales - comparativaHoras.nuevo.restantes) * 100) / comparativaHoras.nuevo.totales) : 0,
             totalNuevas: planNuevo?.materias.length || 0,
             aprobadasNuevas: planNuevo?.materias.filter(m => {
                 const equivs = equivalenciasData[m.codigo];

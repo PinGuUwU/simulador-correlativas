@@ -1,9 +1,12 @@
-import { Progress, Button } from '@heroui/react'
+import { Progress, Button, Tooltip, Chip } from '@heroui/react'
 import { useEffect, useRef, useState } from 'react'
 import MateriasProgreso from './MateriasProgreso'
+import regularidadUtils from '../../utils/Progreso/regularidadUtils'
 
-function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, headerRef, setIsSticky }) {
+function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias, isSticky, headerRef, setIsSticky }) {
     const [isStatsExpanded, setIsStatsExpanded] = useState(false);
+    
+    const promedios = regularidadUtils.calcularPromedioGeneral(progresoDetalles, progreso);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -50,9 +53,36 @@ function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, header
                         Mi Progreso Académico
                     </h1>
 
-                    <p className="text-foreground/70 font-medium text-base max-w-2xl leading-relaxed">
+                    <p className="text-foreground/70 font-medium text-base max-w-2xl leading-relaxed mb-4">
                         Gestioná tu progreso académico de la <span className="text-foreground font-bold underline decoration-primary/40 decoration-2">Licenciatura en Sistemas de Información</span> llevando el control de tus materias aprobadas y regulares.
                     </p>
+                    
+                    {/* Sección Promedios */}
+                    <div className="flex flex-wrap gap-3 items-center justify-center md:justify-start pt-2">
+                        <Tooltip content="Promedio de notas de exámenes finales aprobados unicamente." placement="top">
+                            <Chip
+                                color="success"
+                                variant="flat"
+                                size="md"
+                                className="font-bold border border-success/30"
+                                startContent={<i className="fa-solid fa-chart-line ml-1" />}
+                            >
+                                Promedio (Sin Aplazos): {promedios.promedioSinAplazos || '-'}
+                            </Chip>
+                        </Tooltip>
+                        
+                        <Tooltip content="Promedio de notas de todos los intentos de exámenes finales (aprobados y reprobados)." placement="top">
+                            <Chip
+                                color="danger"
+                                variant="flat"
+                                size="md"
+                                className="font-bold border border-danger/30"
+                                startContent={<i className="fa-solid fa-chart-area ml-1" />}
+                            >
+                                Promedio (Con Aplazos): {promedios.promedioConAplazos || '-'}
+                            </Chip>
+                        </Tooltip>
+                    </div>
                 </div>
             </div>
             {/* Materias Progreso (Cards) */}

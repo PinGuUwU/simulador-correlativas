@@ -191,6 +191,10 @@ function Equivalencias() {
                                 fullWidth 
                                 selectedKey={filtro} 
                                 onSelectionChange={setFiltro}
+                                classNames={{ 
+                                    tabList: "flex-wrap", 
+                                    tabContent: "text-xs font-bold w-full text-center truncate" 
+                                }}
                             >
                                 <Tab key="todas" title="Todas" />
                                 <Tab key="aprobadas" title="Aprobadas" />

@@ -88,24 +88,65 @@ export function obtenerPlanificacionInstancias(fechaRegularidad, intentosFinal) 
  * @returns {{ promedio: number|null, materiasContadas: number, totalNotas: number }}
  */
 export function calcularPromedioGeneral(progresoDetalles, progreso) {
-    if (!progresoDetalles || !progreso) return { promedio: null, materiasContadas: 0, totalNotas: 0 };
+    if (!progresoDetalles || !progreso) return { promedio: null, promedioConAplazos: null, promedioSinAplazos: null, materiasContadas: 0, totalNotas: 0 };
 
-    let totalNotas = 0;
-    let materiasContadas = 0;
+    let sumaAprobados = 0;
+    let cantAprobados = 0;
+    let sumaTodos = 0;
+    let cantTodos = 0;
 
     Object.entries(progresoDetalles).forEach(([codigo, detalles]) => {
         const estado = progreso[codigo];
-        // Solo contar materias terminadas (Aprobado) con nota cargada
-        if (estado === 'Aprobado' && detalles?.notaFinal != null) {
-            totalNotas += detalles.notaFinal;
-            materiasContadas++;
+        
+        // Juntar todos los intentos de esta cursada y del historial
+        const intentos = [];
+        if (detalles.historial) {
+            detalles.historial.forEach(cursada => {
+                if (cursada.intentosFinal) {
+                    intentos.push(...cursada.intentosFinal);
+                }
+            });
+        }
+        if (detalles.intentosFinal) {
+            intentos.push(...detalles.intentosFinal);
+        }
+
+        let notaAprobadaCounted = false;
+
+        // Sumar todos los intentos con nota (aprobados y reprobados)
+        intentos.forEach(intento => {
+            if (intento.nota != null && (intento.estado === 'aprobado' || intento.estado === 'reprobado')) {
+                const notaNum = Number(intento.nota);
+                sumaTodos += notaNum;
+                cantTodos++;
+                
+                if (intento.estado === 'aprobado') {
+                    sumaAprobados += notaNum;
+                    cantAprobados++;
+                    notaAprobadaCounted = true;
+                }
+            }
+        });
+
+        // Si la materia está aprobada pero no tenía el intento cargado (por ej: aprobación directa / equivalencia)
+        if (estado === 'Aprobado' && detalles.notaFinal != null && !notaAprobadaCounted) {
+            const notaNum = Number(detalles.notaFinal);
+            sumaTodos += notaNum;
+            cantTodos++;
+            sumaAprobados += notaNum;
+            cantAprobados++;
         }
     });
 
+    const promedioSinAplazos = cantAprobados > 0 ? Math.round((sumaAprobados / cantAprobados) * 100) / 100 : null;
+    const promedioConAplazos = cantTodos > 0 ? Math.round((sumaTodos / cantTodos) * 100) / 100 : null;
+
     return {
-        promedio: materiasContadas > 0 ? Math.round((totalNotas / materiasContadas) * 100) / 100 : null,
-        materiasContadas,
-        totalNotas
+        promedio: promedioSinAplazos, // Backward compatibility
+        promedioSinAplazos,
+        promedioConAplazos,
+        materiasContadas: cantAprobados,
+        totalNotas: sumaAprobados
     };
 }
 

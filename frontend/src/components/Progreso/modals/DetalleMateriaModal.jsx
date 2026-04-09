@@ -308,7 +308,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                                                 {statusPlan.intentosRestantes} intento{statusPlan.intentosRestantes !== 1 ? 's' : ''} restante{statusPlan.intentosRestantes !== 1 ? 's' : ''}
                                                             </span>
                                                         </div>
-                                                        {intentosFinal.length < 5 && (
+                                                        {intentosFinal.length < 5 && !intentosFinal.some(i => i.estado === 'aprobado') && (
                                                             <Button size="sm" color="primary" variant="flat" onPress={() => { setShowNotaForm(!showNotaForm); setNotaError(""); }}>
                                                                 {showNotaForm ? 'Cancelar' : '+ Agregar'}
                                                             </Button>

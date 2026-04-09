@@ -74,18 +74,20 @@ function Inicio() {
     return (
         <div className="flex flex-col gap-24 py-16 px-6 md:px-12 max-w-7xl mx-auto animate-in fade-in duration-500">
             {/* Hero Section */}
-            <section className="flex flex-col items-center text-center gap-8 mt-10">
-                <h1 className="text-5xl md:text-7xl font-black text-foreground tracking-tight max-w-5xl leading-tight">
+            <section className="flex flex-col items-center text-center gap-8 mt-10 relative">
+                {/* Decorative background blob */}
+                <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+                <h1 className="text-5xl md:text-7xl font-black text-foreground tracking-tight max-w-5xl leading-tight relative z-10">
                     Planificá tu carrera en Sistemas <br className="hidden md:block" />
                     <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-secondary to-primary bg-300% animate-gradient">
                         sin errores ni sorpresas
                     </span>
                 </h1>
-                <p className="text-xl md:text-2xl text-foreground/80 max-w-3xl leading-relaxed">
+                <p className="text-xl md:text-2xl text-foreground/70 max-w-3xl leading-relaxed relative z-10">
                     Visualizá tu progreso, simula correlatividades automáticamente y tomá decisiones informadas sobre tu futuro académico.
                 </p>
 
-                <div className="flex flex-wrap justify-center gap-4 mt-8 w-full">
+                <div className="flex flex-wrap justify-center gap-4 mt-6 w-full relative z-10">
                     {buttonItems.map((item, index) => (
                         <Button
                             key={index}
@@ -108,7 +110,7 @@ function Inicio() {
                     <h2 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
                         ¿Cómo te ayuda esta herramienta?
                     </h2>
-                    <p className="text-foreground/80 text-lg max-w-2xl mx-auto">
+                    <p className="text-foreground/70 text-lg max-w-2xl mx-auto">
                         Resolvemos los problemas más comunes que enfrentan los estudiantes al planificar su carrera universitaria.
                     </p>
                 </div>
@@ -117,17 +119,17 @@ function Inicio() {
                     {infoItems.map((item, index) => (
                         <Card
                             key={index}
-                            className={`shadow-sm border border-default-200 transition-all duration-300 hover:-translate-y-2 ${item.color}`}
+                            className={`bg-background/70 backdrop-blur-sm shadow-sm border border-default-200/60 transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group ${item.color}`}
                         >
                             <CardHeader className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 px-4 xl:px-6 pt-8">
-                                <div className="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center bg-background shadow-sm shadow-default-200">
+                                <div className="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center bg-background/80 shadow-sm shadow-default-200 border border-default-200/60 group-hover:scale-110 transition-transform duration-300">
                                     <i className={`${item.icon} text-2xl`}></i>
                                 </div>
                                 <h3 className="text-lg xl:text-xl font-bold text-foreground leading-tight">
                                     {item.title}
                                 </h3>
                             </CardHeader>
-                            <CardBody className="px-6 pb-8 pt-2 text-default-600 font-medium leading-relaxed">
+                            <CardBody className="px-6 pb-8 pt-2 text-default-500 font-medium leading-relaxed">
                                 {item.description}
                             </CardBody>
                         </Card>
@@ -146,7 +148,7 @@ function Inicio() {
                     </p>
                 </div>
 
-                <Card className="w-full max-w-xl shadow-xl border border-default-100 bg-background/60 backdrop-blur-xl">
+                <Card className="w-full max-w-xl shadow-xl border border-default-200/60 bg-background/70 backdrop-blur-xl">
                     <CardBody className="p-8 md:p-10">
                         <Form
                             ref={form}

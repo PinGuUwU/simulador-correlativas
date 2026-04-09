@@ -266,15 +266,15 @@ const NavLinks = ({ onItemClick }) => {
                             key={item.path}
                             id={item.id}
                             onClick={() => handleClick(item.path)}
-                            className={`flex items-center gap-3 p-3 rounded-xl transition-all group ${isActive
-                                ? 'bg-primary/10 text-primary font-bold shadow-sm border border-primary/20'
-                                : 'text-foreground/80 hover:bg-default-100 hover:text-primary'
+                            className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group ${isActive
+                                ? 'bg-primary/10 text-primary font-bold shadow-sm border border-primary/20 backdrop-blur-sm'
+                                : 'text-foreground/70 hover:bg-default-100/80 hover:text-primary hover:translate-x-0.5'
                                 }`}
                         >
-                            <i className={`fa-solid ${item.icon} w-5 text-lg ${isActive ? 'text-primary' : 'group-hover:scale-110 transition-transform'}`} />
+                            <i className={`fa-solid ${item.icon} w-5 text-lg ${isActive ? 'text-primary drop-shadow-sm' : 'group-hover:scale-110 transition-transform'}`} />
                             <span className="text-sm font-medium">{item.name}</span>
                             {isActive && !item.isDeactivated && (
-                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-sm shadow-primary/50" />
+                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_6px_2px] shadow-primary/60 animate-pulse" />
                             )}
                         </button>
                     );
@@ -304,8 +304,8 @@ const SidebarFooter = ({ setPlan, plan, onSignInPress, id_prefix = 'desktop' }) 
     const location = useLocation();
 
     return (
-        <div className="mt-auto p-4 border-t border-divider">
-            <div className="bg-default-50 rounded-2xl p-3 border border-default-200 flex flex-col gap-3">
+        <div className="mt-auto p-4 border-t border-default-200/40">
+            <div className="bg-background/60 backdrop-blur-md rounded-2xl p-3 border border-default-200/50 flex flex-col gap-3 shadow-sm">
                 {/* Tema */}
                 <div id={`selector-tema-${id_prefix}`}>
                     <ThemeSwitcher />
@@ -414,10 +414,10 @@ export default function NavBar({ setPlan, plan }) {
             </div>
 
             {/* Sidebar Desktop */}
-            <aside className="hidden 2xl:flex flex-col w-64 h-screen sticky left-0 top-0 bg-background border-r border-default-200 z-40 overflow-y-auto">
-                <div className="p-6 mb-2 flex items-center gap-3">
+            <aside className="hidden 2xl:flex flex-col w-64 h-screen sticky left-0 top-0 bg-background/85 backdrop-blur-xl border-r border-default-200/60 z-40 overflow-y-auto shadow-xl shadow-black/5">
+                <div className="p-6 mb-2 flex items-center gap-3 border-b border-default-200/40">
                     <div
-                        className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 cursor-pointer"
+                        className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/40 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 hover:shadow-primary/50 transition-all duration-300"
                         onClick={() => navigate('/')}
                     >
                         <i className="fa-solid fa-graduation-cap text-white text-xl" />

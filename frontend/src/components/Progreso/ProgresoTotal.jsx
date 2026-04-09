@@ -31,11 +31,11 @@ function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, header
     }, [isSticky, progreso]) // Re-medir si cambian las materias o el estado sticky
 
     return (
-        <header ref={headerRef} className="bg-background border border-default-100 shadow-sm rounded-2xl p-6 md:p-8 flex flex-col gap-6 transition-all hover:shadow-md">
+        <header ref={headerRef} className="bg-background/80 backdrop-blur-md border border-default-200/60 shadow-sm hover:shadow-md rounded-2xl p-6 md:p-8 flex flex-col gap-6 transition-all duration-300">
             {/* Sección Superior: Logo y Títulos */}
             <div className="flex flex-col md:flex-row items-center gap-5 text-center md:text-start">
                 {/* Icono/Logo Estilizado */}
-                <div className="bg-primary w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0 2xl:hidden">
+                <div className="bg-primary w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 shrink-0 2xl:hidden ring-2 ring-primary/15">
                     <i className="fa-solid fa-graduation-cap text-white text-3xl"></i>
                 </div>
 
@@ -50,8 +50,8 @@ function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, header
                         Mi Progreso Académico
                     </h1>
 
-                    <p className="text-foreground font-medium text-base max-w-2xl leading-relaxed">
-                        Gestioná tu progreso académico de la <span className="text-default-900 font-bold underline decoration-primary/30">Licenciatura en Sistemas de Información</span> llevando el control de tus materias aprobadas y regulares.
+                    <p className="text-foreground/70 font-medium text-base max-w-2xl leading-relaxed">
+                        Gestioná tu progreso académico de la <span className="text-foreground font-bold underline decoration-primary/40 decoration-2">Licenciatura en Sistemas de Información</span> llevando el control de tus materias aprobadas y regulares.
                     </p>
                 </div>
             </div>
@@ -78,7 +78,7 @@ function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, header
             {/* Sección Inferior: Barra de Progreso */}
             {/* Contenedor envolvente con altura mínima para evitar saltos de layout */}
             <div
-                className={`transition-all duration-300 ${!isSticky ? "pt-6 border-t" : ""}`}
+                className={`transition-all duration-300 ${!isSticky ? "pt-6 border-t border-default-200/50" : ""}`}
                 style={{ minHeight: isSticky ? `${barHeight}px` : "auto" }}
             >
                 <div
@@ -86,20 +86,19 @@ function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, header
                     ref={barRef}
                     className={
                         isSticky
-                            ? "fixed top-0 right-0 z-30 backdrop-blur-md p-4 bg-background/95 shadow-md border-b border-default-200 animate-in slide-in-from-top duration-300 left-0"
+                            ? "fixed top-0 right-0 z-30 backdrop-blur-xl p-4 bg-background/90 shadow-md border-b border-default-200/60 animate-in slide-in-from-top duration-300 left-0"
                             : "w-full"
                     }
                 >
                     <div className={isSticky ? "max-w-7xl mx-auto 2xl:pl-64" : ""}>
                         <div className="flex px-10 sm:p-0 justify-between items-end mb-3">
-                            <div className="space-y-1">
-                                <span className="text-default-900 text-xs uppercase tracking-widest font-black">Estado Actual</span>
+                            <div className="space-y-0.5">
+                                <span className="text-default-500 text-xs uppercase tracking-widest font-black">Estado Actual</span>
                                 <p className="text-foreground font-bold">Progreso de la carrera</p>
                             </div>
                             <div className="text-right">
-                                {/* Eliminé los pr-[8%] y pr-[20%] manuales para usar un layout más fluido */}
-                                <span className="text-2xl font-black text-secondary">{progress}%</span>
-                                <span className="text-foreground font-bold text-sm ml-1 hidden sm:inline-block">completado</span>
+                                <span className="text-2xl font-black text-secondary tabular-nums">{progress}%</span>
+                                <span className="text-foreground/60 font-bold text-sm ml-1 hidden sm:inline-block">completado</span>
                             </div>
                         </div>
 
@@ -107,8 +106,12 @@ function ProgresoTotal({ carrera, progress, progreso, materias, isSticky, header
                             value={progress}
                             aria-label="Progreso total de la carrera"
                             color="secondary"
-                            className="h-3 shadow-sm"
+                            className="h-2.5"
                             showValueLabel={false}
+                            classNames={{
+                                track: "bg-default-200/60",
+                                indicator: "bg-gradient-to-r from-secondary to-primary"
+                            }}
                         />
                     </div>
                 </div>

@@ -154,13 +154,20 @@ function MateriasProgreso({ progreso, materias }) {
                     success: "text-success",
                     default: "text-default-500"
                 }
+                const glowColors = {
+                    primary: "shadow-primary/20",
+                    warning: "shadow-warning/20",
+                    success: "shadow-success/20",
+                    default: "shadow-default-300/20"
+                }
                 const textColorClass = textColors[stat.color] || "text-default-500"
+                const glowClass = glowColors[stat.color] || "shadow-default-300/20"
 
                 return (
                     <Card
                         isPressable
                         key={index}
-                        className="bg-content2/50 border border-default-200/50 hover:border-default-300 transition-colors duration-200 shadow-none w-full"
+                        className={`bg-background/70 backdrop-blur-sm border border-default-200/60 hover:border-default-300/80 transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${glowClass} w-full group`}
                         onPress={() => handleClick(stat.estado, stat.label)}
                     >
                         <CardBody className="py-3 px-4 flex flex-row items-center gap-4 overflow-visible">
@@ -171,16 +178,17 @@ function MateriasProgreso({ progreso, materias }) {
                                 showValueLabel={false}
                                 aria-label={`Progreso circular ${stat.label}`}
                                 classNames={{
-                                    svg: "w-10 h-10 drop-shadow-sm",
+                                    svg: "w-10 h-10 drop-shadow-sm group-hover:scale-105 transition-transform duration-200",
                                     track: "stroke-default-200/50",
                                 }}
                             />
 
                             <div className="flex flex-col text-left">
-                                <span className="text-[10px] sm:text-xs font-bold text-foreground/70 leading-tight">{stat.label}</span>
-                                <span className={`text-sm sm:text-base font-black ${textColorClass}`}>
+                                <span className="text-[10px] sm:text-xs font-bold text-foreground/60 leading-tight">{stat.label}</span>
+                                <span className={`text-sm sm:text-base font-black ${textColorClass} tabular-nums`}>
                                     {porcentaje}%
                                 </span>
+                                <span className="text-[9px] font-bold text-foreground/40 tabular-nums">{stat.count} mat.</span>
                             </div>
                         </CardBody>
                     </Card>
@@ -192,15 +200,17 @@ function MateriasProgreso({ progreso, materias }) {
                 const colorMap = {
                     secondary: {
                         bg: "bg-secondary/10",
-                        border: "border-secondary/20",
+                        border: "border-secondary/25",
                         text: "text-secondary",
-                        value: "text-secondary-600"
+                        value: "text-secondary",
+                        glow: "shadow-secondary/15"
                     },
                     danger: {
                         bg: "bg-danger/10",
-                        border: "border-danger/20",
+                        border: "border-danger/25",
                         text: "text-danger",
-                        value: "text-danger-600"
+                        value: "text-danger",
+                        glow: "shadow-danger/15"
                     }
                 }
                 const styles = colorMap[resumen.color] || colorMap.secondary
@@ -208,16 +218,16 @@ function MateriasProgreso({ progreso, materias }) {
                 return (
                     <Card
                         key={`resumen-${index}`}
-                        className="bg-content2/30 border border-default-200/50 shadow-none w-full"
+                        className={`bg-background/70 backdrop-blur-sm border border-default-200/60 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${styles.glow} transition-all duration-200 w-full`}
                     >
                         <CardBody className="py-3 px-4 flex flex-row items-center gap-4 overflow-visible">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${styles.bg} ${styles.border} ${styles.text}`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${styles.bg} border ${styles.border} ${styles.text} shadow-sm`}>
                                 <i className={resumen.icon}></i>
                             </div>
                             <div className="flex flex-col text-left">
-                                <span className="text-[10px] sm:text-xs font-bold text-foreground/70 leading-tight">{resumen.label}</span>
+                                <span className="text-[10px] sm:text-xs font-bold text-foreground/60 leading-tight">{resumen.label}</span>
                                 <div className="flex items-baseline gap-1">
-                                    <span className={`text-sm sm:text-base font-black ${styles.value}`}>
+                                    <span className={`text-sm sm:text-base font-black ${styles.value} tabular-nums`}>
                                         {resumen.value}
                                     </span>
                                     <span className="text-[9px] font-bold text-foreground/40">{resumen.sublabel}</span>

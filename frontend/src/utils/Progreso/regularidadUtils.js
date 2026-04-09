@@ -57,7 +57,7 @@ export function verificarVencimientoIntentos(intentosFinal) {
  * Determina si una materia 'Regular' debe pasar a 'Libre'
  */
 export function calcularEstadoConsolidado(actualEstado, fechaRegularidad, intentosFinal) {
-    if (actualEstado !== 'Regular') return actualEstado;
+    if (actualEstado !== 'Regular' && actualEstado !== 'Libre') return actualEstado;
 
     if (verificarVencimientoTiempo(fechaRegularidad) || verificarVencimientoIntentos(intentosFinal)) {
         return 'Libre';
@@ -109,10 +109,50 @@ export function calcularPromedioGeneral(progresoDetalles, progreso) {
     };
 }
 
+/**
+ * Calcula la fecha de vencimiento legible basada en el año y cuatrimestre de regularización.
+ */
+export function obtenerFechaVencimientoLabel(fechaRegularidad) {
+    if (!fechaRegularidad) return null;
+
+    let anioReg, cuatriReg;
+    if (typeof fechaRegularidad === 'string') {
+        const [year, month] = fechaRegularidad.split('-').map(Number);
+        anioReg = year;
+        cuatriReg = month <= 6 ? 1 : 2;
+    } else {
+        anioReg = fechaRegularidad.anio;
+        cuatriReg = fechaRegularidad.cuatrimestre;
+    }
+
+    // Calculamos el índice del cuatri de vencimiento (5 cuatris después)
+    // Ej: 2024-C1 (índice 2024*2 + 1 = 4049) + 5 = 4054
+    // 4054 / 2 = 2027. 4054 % 2 = 0? No, wait.
+    // Usando toCuatriIndex: 2024, 1 -> 4049. 
+    // +5 -> 4054.
+    // 4054 / 2 = 2027, resto 0. So 2026-C2? 
+    // Let's re-check the logic.
+    // 2024-C1 (1), 2024-C2 (2), 2025-C1 (3), 2025-C2 (4), 2026-C1 (5).
+    // The 5th cuatri is 2026-C1.
+    // index(2024,1) = 4049.
+    // 4049 + 5 = 4054.
+    // index(2026,2) = 2026*2 + 2 = 4054. No.
+    // index(2027,0)? No.
+    // Let's use simpler logic:
+    let totalCuatris = cuatriReg + reglas.limites.cuatrimestres_regularidad;
+    let anioVenc = anioReg + Math.floor((totalCuatris - 1) / 2);
+    let cuatriVenc = ((totalCuatris - 1) % 2) + 1;
+    
+    // Mes estimado de vencimiento
+    const mesExp = cuatriVenc === 1 ? "Jul" : "Dic";
+    return `${mesExp} ${anioVenc}`;
+}
+
 export default {
     verificarVencimientoTiempo,
     verificarVencimientoIntentos,
     calcularEstadoConsolidado,
     obtenerPlanificacionInstancias,
     calcularPromedioGeneral,
+    obtenerFechaVencimientoLabel,
 }

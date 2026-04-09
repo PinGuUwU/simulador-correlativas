@@ -8,11 +8,42 @@ import { useNavigate } from 'react-router-dom'
 import materiasUtils from '../../utils/Progreso/materiasUtils.js'
 import useProgresoMaterias from '../../hooks/Progreso/useProgresoMaterias.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
+import regularidadUtils from '../../utils/Progreso/regularidadUtils.js'
 
 function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan }) {
     const { updateAuthProgreso } = useAuth();
     const [infoMateria, setInfoMateria] = useState()
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)
+    
+    // Efecto para verificar vencimientos pasivos al cargar
+    useEffect(() => {
+        if (!progreso || !progresoDetalles) return;
+        
+        let huboCambios = false;
+        const nuevoProgreso = { ...progreso };
+        
+        Object.entries(progreso).forEach(([codigo, estado]) => {
+            if (estado === 'Regular') {
+                const detalles = progresoDetalles[codigo];
+                if (detalles?.fechaRegularidad) {
+                    const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
+                        "Regular",
+                        detalles.fechaRegularidad,
+                        detalles.intentosFinal
+                    );
+                    if (estadoActualizado === 'Libre') {
+                        nuevoProgreso[codigo] = 'Libre';
+                        huboCambios = true;
+                    }
+                }
+            }
+        });
+        
+        if (huboCambios) {
+            setProgreso(nuevoProgreso);
+            updateAuthProgreso(plan, nuevoProgreso, progresoDetalles);
+        }
+    }, []);
     const [confirmacion, setConfirmacion] = useState(false)
     const [mostrar, setMostrar] = useState(true)
     //Logica para mostrar u ocultar las materias de un año
@@ -212,9 +243,42 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
 
         if (payload && codigoMateria) {
             const detallesActuales = progresoDetalles?.[codigoMateria] || {};
+            const estadoActual = progreso[codigoMateria];
+            
+            // ¿Es una recursada? (viniendo de Libre o Aprobado y queriendo regularizar/cursar de nuevo)
+            const viniendoDeEstadoFinal = ['Libre', 'Aprobado'].includes(estadoActual);
+            const yendoAEstadoActivo = ['Cursando', 'Regular', 'Aprobado'].includes(capturaConfig.pendingState);
+            const esRecursada = viniendoDeEstadoFinal && yendoAEstadoActivo;
+
+            let nuevosDetallesBase = { ...detallesActuales };
+
+            if (esRecursada) {
+                // Archivar la cursada actual en el historial
+                const { historial, ...datosAArchivar } = detallesActuales;
+                
+                // Solo archivar si realmente hay algo significativo (intentos o fecha de regularidad)
+                if ((datosAArchivar.intentosFinal && datosAArchivar.intentosFinal.length > 0) || datosAArchivar.fechaRegularidad) {
+                    nuevosDetallesBase = {
+                        historial: [
+                            ...(historial || []),
+                            { 
+                                ...datosAArchivar, 
+                                estadoFinal: estadoActual, // Guardamos que terminó como Libre o Aprobado
+                                fechaFin: new Date().toISOString()
+                            }
+                        ],
+                        // Limpiamos los datos actuales para la nueva cursada
+                        intentosFinal: [],
+                        fechaRegularidad: null,
+                        notaRegularizacion: null,
+                        fechaInicioCursada: null,
+                        notaFinal: null
+                    };
+                }
+            }
 
             const nuevosDetalles = {
-                ...detallesActuales,
+                ...nuevosDetallesBase,
                 ...(payload.fechaRegularidad !== undefined && { fechaRegularidad: payload.fechaRegularidad }),
                 ...(payload.fechaInicioCursada !== undefined && { fechaInicioCursada: payload.fechaInicioCursada }),
                 ...(payload.notaFinal !== undefined && { notaFinal: payload.notaFinal }),
@@ -222,8 +286,8 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             };
 
             // Si transición 'desde_cursando_hacia_reg', copiar fechaInicioCursada como fechaRegularidad si no la tiene
-            if (capturaConfig.tipo === 'desde_cursando_hacia_reg' && !nuevosDetalles.fechaRegularidad && detallesActuales.fechaInicioCursada) {
-                nuevosDetalles.fechaRegularidad = detallesActuales.fechaInicioCursada;
+            if (capturaConfig.tipo === 'desde_cursando_hacia_reg' && !nuevosDetalles.fechaRegularidad && nuevosDetallesBase.fechaInicioCursada) {
+                nuevosDetalles.fechaRegularidad = nuevosDetallesBase.fechaInicioCursada;
             }
 
             if (payload.notaFinal != null && capturaConfig.pendingState === 'Aprobado') {
@@ -233,7 +297,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                     fecha: new Date().toISOString()
                 };
                 nuevosDetalles.intentosFinal = [
-                    ...(detallesActuales.intentosFinal || []),
+                    ...(nuevosDetallesBase.intentosFinal || []),
                     nuevoIntento
                 ];
             }
@@ -444,6 +508,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                                                                             <MateriaCard
                                                                                 materia={materia}
                                                                                 estado={progreso[materia.codigo]}
+                                                                                detalles={progresoDetalles?.[materia.codigo]}
                                                                                 actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
                                                                                 abrirInfo={() => abrirInfo(materia)}
                                                                                 vista={vista}

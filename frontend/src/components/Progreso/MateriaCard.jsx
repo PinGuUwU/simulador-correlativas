@@ -1,8 +1,9 @@
 import { Card, CardHeader, CardBody, CardFooter, Chip, Popover, PopoverTrigger, PopoverContent, Button, Divider } from "@heroui/react"
 import { useState } from "react";
 import estadoUtils from "../../utils/Progreso/estadoUtils";
+import regularidadUtils from "../../utils/Progreso/regularidadUtils";
 
-function MateriaCard({ materia, estado, actualizarEstados, abrirInfo, vista = 'grid' }) {
+function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, vista = 'grid' }) {
     const [isOpen, setIsOpen] = useState(false);
 
     if (!estado) return <p>Cargando Materia...</p>
@@ -22,7 +23,7 @@ function MateriaCard({ materia, estado, actualizarEstados, abrirInfo, vista = 'g
     const cardContent = (
         <Card
             isPressable={false}
-            className={`w-full border-3 transition-all duration-300 font-medium ${config.estilo} ${vista === 'list' ? 'flex-row items-center justify-between p-2 h-auto' : ''} ${estado === 'Bloqueado' ? 'opacity-70 grayscale-[0.3]' : ''} ${estado === 'Cursando' ? 'ring-2 ring-indigo-400 ring-offset-1 ring-offset-background animate-pulse' : ''}`}
+            className={`w-full border transition-all duration-300 font-medium ${config.estilo} ${vista === 'list' ? 'flex-row items-center justify-between p-2 h-auto' : ''} ${estado === 'Bloqueado' ? 'opacity-60 grayscale-[0.2]' : ''} ${estado === 'Cursando' ? 'shadow-[0_0_14px_3px_rgba(99,102,241,0.30)] border-indigo-400/80' : 'shadow-sm hover:shadow-md hover:-translate-y-0.5'}`}
         >
             <CardHeader className={`flex justify-between shrink-0 ${vista === 'list' ? 'w-auto gap-4 p-2' : ''}`}>
                 <Chip color={config.color} variant="flat">
@@ -31,6 +32,17 @@ function MateriaCard({ materia, estado, actualizarEstados, abrirInfo, vista = 'g
                 <Chip color={config.color} variant="flat">
                     <span className="font-bold">{estado}</span>
                 </Chip>
+                {estado === 'Regular' && !detalles?.fechaRegularidad && (
+                    <Chip color="danger" variant="flat" size="sm" className="animate-pulse">
+                        <i className="fa-solid fa-calendar-circle-exclamation mr-1" />
+                        Falta Año
+                    </Chip>
+                )}
+                {estado === 'Regular' && detalles?.fechaRegularidad && (
+                    <Chip color="warning" variant="dot" size="sm" className="font-bold">
+                        Vence: {regularidadUtils.obtenerFechaVencimientoLabel(detalles.fechaRegularidad)}
+                    </Chip>
+                )}
             </CardHeader>
 
             <CardBody className={`${vista === 'list' ? 'flex-row items-center flex-1 justify-between p-2 overflow-hidden gap-4' : ''}`}>

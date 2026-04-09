@@ -13,9 +13,12 @@ const ESTADOS_CON_HISTORIAL = ['Regular', 'Libre', 'Aprobado'];
 function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progresoDetalles, setProgresoDetalles, plan, onOpenChange, cambioDeEstado }) {
     const { updateAuthProgreso } = useAuth();
     const [showNotaForm, setShowNotaForm] = useState(false);
+    const [showHistorial, setShowHistorial] = useState(false);
     const [notaVal, setNotaVal] = useState("");
     const [estadoVal, setEstadoVal] = useState("rendido");
+    const [fechaIntento, setFechaIntento] = useState(new Date().toISOString().split('T')[0]);
     const [notaError, setNotaError] = useState("");
+    const [editingHistorialIndex, setEditingHistorialIndex] = useState(null);
 
     const estiloEstado = (estado) => {
         switch (estado) {
@@ -36,11 +39,34 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
     const handleCambioAnio = (e) => {
         const currentData = progresoDetalles[infoMateria?.codigo] || { intentosFinal: [] };
         const anioN = Number(e.target.value);
+        
+        // No procesar si el año es inválido o se está escribiendo (ej: "2")
+        if (anioN < 2000) {
+            guardarDetalles({
+                ...currentData,
+                fechaRegularidad: { anio: anioN, cuatrimestre: 1 }
+            });
+            return;
+        }
+
         const cuatriAuto = infoMateria?.cuatrimestre ? (Number(infoMateria.cuatrimestre) % 2 === 0 ? 2 : 1) : 1;
+        const nuevaFecha = { anio: anioN, cuatrimestre: cuatriAuto };
+        
         guardarDetalles({
             ...currentData,
-            fechaRegularidad: { anio: anioN, cuatrimestre: cuatriAuto }
+            fechaRegularidad: nuevaFecha
         });
+
+        // Verificar cambio de estado automático (Vencimiento o Rehabilitación)
+        const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
+            estadoActual,
+            nuevaFecha,
+            currentData.intentosFinal
+        );
+
+        if (estadoActualizado !== estadoActual) {
+            cambioDeEstado(infoMateria.codigo, estadoActualizado);
+        }
     }
 
     const handleCambioNotaCursada = (val) => {
@@ -72,7 +98,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
         const newIntentos = [...intentosActuales, {
             nota: notaParsed,
             estado: status,
-            fecha: new Date().toISOString()
+            fecha: fechaIntento // Usamos la fecha seleccionada
         }];
 
         // Guardar el intento + actualizar notaFinal si es aprobatorio
@@ -86,6 +112,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
         setShowNotaForm(false);
         setNotaVal("");
         setEstadoVal("rendido");
+        setFechaIntento(new Date().toISOString().split('T')[0]); // Reset fecha
 
         // Evaluar cambio de estado automático
         if (status === 'aprobado') {
@@ -100,6 +127,57 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                 cambioDeEstado(infoMateria.codigo, 'Libre');
             }
         }
+    }
+
+    const handleEliminarIntento = (index) => {
+        const currentData = progresoDetalles[infoMateria?.codigo];
+        if (!currentData || !currentData.intentosFinal) return;
+
+        const newIntentos = currentData.intentosFinal.filter((_, i) => i !== index);
+        const fueAprobado = currentData.intentosFinal[index]?.estado === 'aprobado';
+
+        const updatedData = {
+            ...currentData,
+            intentosFinal: newIntentos,
+            ...(fueAprobado && { notaFinal: null }) // Si borramos el aprobado, reseteamos notaFinal
+        };
+        guardarDetalles(updatedData);
+
+        // Evaluar cambio de estado automático
+        if (fueAprobado) {
+            cambioDeEstado(infoMateria.codigo, 'Regular');
+        } else {
+            const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
+                estadoActual,
+                currentData.fechaRegularidad,
+                newIntentos
+            );
+            if (estadoActualizado !== estadoActual) {
+                cambioDeEstado(infoMateria.codigo, estadoActualizado);
+            }
+        }
+    }
+
+    const handleUpdateCursadaHistorial = (index, dataActualizada) => {
+        const currentData = { ...(progresoDetalles[infoMateria?.codigo] || {}) };
+        const newHistorial = [...(currentData.historial || [])];
+        newHistorial[index] = dataActualizada;
+        
+        guardarDetalles({
+            ...currentData,
+            historial: newHistorial
+        });
+        setEditingHistorialIndex(null);
+    }
+
+    const handleEliminarCursadaHistorial = (index) => {
+        const currentData = { ...(progresoDetalles[infoMateria?.codigo] || {}) };
+        const newHistorial = (currentData.historial || []).filter((_, i) => i !== index);
+        
+        guardarDetalles({
+            ...currentData,
+            historial: newHistorial
+        });
     }
 
     // Datos calculados
@@ -192,8 +270,10 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                                     </div>
                                                     {estadoActual === 'Regular' && detallesLocales.fechaRegularidad && (
                                                         <div className="text-xs text-default-500 mt-1">
-                                                            Vencimiento: <span className={statusPlan.cuatrimestresRestantes > 1 ? "text-success font-bold" : "text-danger font-bold"}>
-                                                                {statusPlan.cuatrimestresRestantes} cuatri. restantes
+                                                            Vencimiento: <span className={statusPlan.cuatrimestresRestantes >= 2 ? "text-success font-bold" : "text-danger font-bold"}>
+                                                                {statusPlan.cuatrimestresRestantes === 0 
+                                                                    ? "¡Vence este cuatrimestre!" 
+                                                                    : `${statusPlan.cuatrimestresRestantes} cuatri. restantes`}
                                                             </span>
                                                         </div>
                                                     )}
@@ -237,32 +317,46 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
 
                                                     {/* Formulario agregar intento */}
                                                     {showNotaForm && (
-                                                        <div className="flex flex-col gap-2 p-3 bg-default-100/50 rounded-xl border border-default-200 animate-in fade-in slide-in-from-top-2">
-                                                            <div className="flex gap-2">
-                                                                <Select
-                                                                    aria-label="Estado del examen"
-                                                                    size="sm"
-                                                                    selectedKeys={[estadoVal]}
-                                                                    onChange={(e) => setEstadoVal(e.target.value)}
-                                                                >
-                                                                    <SelectItem key="rendido" value="rendido">Rindió examen</SelectItem>
-                                                                    <SelectItem key="ausente" value="ausente">Estuvo Ausente</SelectItem>
-                                                                </Select>
-                                                                {estadoVal === 'rendido' && (
-                                                                    <Input
-                                                                        type="number"
-                                                                        placeholder="Nota (0-10)"
-                                                                        size="sm"
-                                                                        value={notaVal}
-                                                                        onValueChange={setNotaVal}
-                                                                        isInvalid={!!notaError}
-                                                                        errorMessage={notaError}
-                                                                        min="0"
-                                                                        max="10"
-                                                                    />
-                                                                )}
+                                                        <div className="flex flex-col gap-3 p-4 bg-default-100/50 rounded-xl border border-default-200 animate-in fade-in slide-in-from-top-2">
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                <Input
+                                                                    type="date"
+                                                                    label="Fecha del Examen"
+                                                                    labelPlacement="outside"
+                                                                    value={fechaIntento}
+                                                                    onChange={(e) => setFechaIntento(e.target.value)}
+                                                                    className="w-full"
+                                                                />
+                                                                <div className="flex gap-2 items-end">
+                                                                    <Select
+                                                                        label="Estado"
+                                                                        labelPlacement="outside"
+                                                                        aria-label="Estado del examen"
+                                                                        selectedKeys={[estadoVal]}
+                                                                        onChange={(e) => setEstadoVal(e.target.value)}
+                                                                        className="flex-[2]"
+                                                                    >
+                                                                        <SelectItem key="rendido" value="rendido">Rindió examen</SelectItem>
+                                                                        <SelectItem key="ausente" value="ausente">Estuvo Ausente</SelectItem>
+                                                                    </Select>
+                                                                    {estadoVal === 'rendido' && (
+                                                                        <Input
+                                                                            type="number"
+                                                                            label="Nota"
+                                                                            labelPlacement="outside"
+                                                                            placeholder="0-10"
+                                                                            value={notaVal}
+                                                                            onValueChange={setNotaVal}
+                                                                            isInvalid={!!notaError}
+                                                                            errorMessage={notaError}
+                                                                            min="0"
+                                                                            max="10"
+                                                                            className="flex-1"
+                                                                        />
+                                                                    )}
+                                                                </div>
                                                             </div>
-                                                            <Button size="sm" color="secondary" className="w-full font-bold" onPress={handleGuardarIntento}>
+                                                            <Button size="md" color="secondary" className="w-full font-bold shadow-sm" onPress={handleGuardarIntento}>
                                                                 Registrar Intento
                                                             </Button>
                                                         </div>
@@ -298,17 +392,32 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
 
                                                     {/* Legenda de notas */}
                                                     {intentosFinal.length > 0 && (
-                                                        <div className="flex flex-col gap-1 mt-1">
+                                                        <div className="flex flex-col gap-1.5 mt-2">
                                                             {intentosFinal.map((intento, i) => (
-                                                                <div key={i} className="flex items-center justify-between text-xs text-default-600 bg-default-100 rounded-lg px-3 py-1.5">
-                                                                    <span className="font-medium">{i + 1}° intento</span>
-                                                                    <span className={
-                                                                        intento.estado === 'aprobado' ? "text-success font-bold" :
-                                                                            intento.estado === 'reprobado' ? "text-danger font-bold" :
-                                                                                "text-warning font-bold"
-                                                                    }>
-                                                                        {intento.estado === 'ausente' ? 'Ausente' : `Nota: ${intento.nota}`}
-                                                                    </span>
+                                                                <div key={i} className="flex items-center justify-between text-xs text-default-600 bg-default-100/50 hover:bg-default-100 rounded-lg pl-3 pr-1 py-1 group transition-colors">
+                                                                    <div className="flex-1 flex justify-between mr-2">
+                                                                        <div className="flex flex-col">
+                                                                            <span className="font-bold">{i + 1}° intento</span>
+                                                                            <span className="text-[10px] text-default-400">{intento.fecha || 'Sin fecha'}</span>
+                                                                        </div>
+                                                                        <span className={
+                                                                            intento.estado === 'aprobado' ? "text-success font-black" :
+                                                                                intento.estado === 'reprobado' ? "text-danger font-black" :
+                                                                                    "text-warning font-black"
+                                                                        }>
+                                                                            {intento.estado === 'ausente' ? 'Ausente' : `Nota: ${intento.nota}`}
+                                                                        </span>
+                                                                    </div>
+                                                                    <Button 
+                                                                        isIconOnly 
+                                                                        size="sm" 
+                                                                        variant="light" 
+                                                                        color="danger" 
+                                                                        className="h-7 w-7 opacity-20 group-hover:opacity-100 transition-opacity"
+                                                                        onPress={() => handleEliminarIntento(i)}
+                                                                    >
+                                                                        <i className="fa-solid fa-trash-can text-[10px]" />
+                                                                    </Button>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -326,6 +435,149 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                                 )}
                                             </div>
                                         </Card>
+                                    )}
+
+                                    {/* ── MÓDULO HISTORIAL DE CURSADAS ANTERIORES ── */}
+                                    {detallesLocales.historial && detallesLocales.historial.length > 0 && (
+                                        <div className="flex flex-col gap-2">
+                                            <Button
+                                                variant="flat"
+                                                size="sm"
+                                                className="justify-between px-3 h-10 font-bold text-default-600 bg-default-100 hover:bg-default-200"
+                                                onPress={() => setShowHistorial(!showHistorial)}
+                                                endContent={<i className={`fa-solid fa-chevron-${showHistorial ? 'up' : 'down'} text-xs`} />}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <i className="fa-solid fa-clock-rotate-left text-primary" />
+                                                    <span className="text-xs uppercase tracking-wider">Historial de Cursadas ({detallesLocales.historial.length})</span>
+                                                </div>
+                                            </Button>
+
+                                            {showHistorial && (
+                                                <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                    {[...detallesLocales.historial].reverse().map((cursada, idx) => {
+                                                        const actualIdx = detallesLocales.historial.length - 1 - idx;
+                                                        const isEditing = editingHistorialIndex === actualIdx;
+                                                        
+                                                        return (
+                                                            <Card key={idx} className="bg-default-50 border border-default-200 shadow-none p-4 relative group">
+                                                                {/* Botón Eliminar Cursada */}
+                                                                {!isEditing && (
+                                                                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                        <Button 
+                                                                            isIconOnly 
+                                                                            size="sm" 
+                                                                            variant="flat" 
+                                                                            className="h-6 w-6"
+                                                                            onPress={() => setEditingHistorialIndex(actualIdx)}
+                                                                        >
+                                                                            <i className="fa-solid fa-pen text-[10px]" />
+                                                                        </Button>
+                                                                        <Button 
+                                                                            isIconOnly 
+                                                                            size="sm" 
+                                                                            variant="flat" 
+                                                                            color="danger" 
+                                                                            className="h-6 w-6"
+                                                                            onPress={() => handleEliminarCursadaHistorial(actualIdx)}
+                                                                        >
+                                                                            <i className="fa-solid fa-trash-can text-[10px]" />
+                                                                        </Button>
+                                                                    </div>
+                                                                )}
+
+                                                                <div className="flex justify-between items-start mb-3">
+                                                                    <div className="flex flex-col gap-0.5">
+                                                                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">
+                                                                            Cursada #{detallesLocales.historial.length - idx}
+                                                                        </span>
+                                                                        {isEditing ? (
+                                                                            <div className="flex gap-2 mt-1">
+                                                                                <Input 
+                                                                                    size="sm" 
+                                                                                    label="Año" 
+                                                                                    type="number" 
+                                                                                    defaultValue={cursada.fechaRegularidad?.anio}
+                                                                                    className="w-20"
+                                                                                    onBlur={(e) => {
+                                                                                        const newCursada = { ...cursada, fechaRegularidad: { ...cursada.fechaRegularidad, anio: Number(e.target.value) } };
+                                                                                        handleUpdateCursadaHistorial(actualIdx, newCursada);
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="text-xs font-bold text-foreground/70">
+                                                                                {cursada.fechaRegularidad?.anio || 'Año N/A'} • {cursada.fechaRegularidad?.cuatrimestre}° Cuatri
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    <Chip size="sm" color={estiloEstado(cursada.estadoFinal)} variant="flat" className="h-6 font-bold text-[10px]">
+                                                                        Finalizó: {cursada.estadoFinal}
+                                                                    </Chip>
+                                                                </div>
+
+                                                                {/* Mini barras de intentos pasados */}
+                                                                <div className="flex gap-1.5 mb-3">
+                                                                    {[0, 1, 2, 3, 4].map(i => {
+                                                                        const intent = cursada.intentosFinal?.[i];
+                                                                        let bg = "bg-default-200";
+                                                                        if (intent) {
+                                                                            if (intent.estado === 'aprobado') bg = "bg-success/50";
+                                                                            else if (intent.estado === 'reprobado') bg = "bg-danger/50";
+                                                                            else if (intent.estado === 'ausente') bg = "bg-warning/50";
+                                                                        }
+                                                                        return (
+                                                                            <div key={i} className={`h-2 flex-1 rounded-full ${bg} transition-colors`} 
+                                                                                 title={intent ? `Nota: ${intent.nota || '-'} (${intent.fecha || 'Sin fecha'})` : 'No usado'} 
+                                                                            />
+                                                                        )
+                                                                    })}
+                                                                </div>
+
+                                                                <div className="flex justify-between items-center bg-default-100/50 rounded-lg px-3 py-2 border border-default-100">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[9px] text-default-400 font-bold uppercase">Nota Cursada</span>
+                                                                        {isEditing ? (
+                                                                            <Input 
+                                                                                size="sm" 
+                                                                                variant="underlined"
+                                                                                type="number"
+                                                                                defaultValue={cursada.notaRegularizacion}
+                                                                                className="w-12 h-6"
+                                                                                onBlur={(e) => {
+                                                                                    const newCursada = { ...cursada, notaRegularizacion: Number(e.target.value) };
+                                                                                    handleUpdateCursadaHistorial(actualIdx, newCursada);
+                                                                                }}
+                                                                            />
+                                                                        ) : (
+                                                                            <span className="text-sm font-bold text-default-700">{cursada.notaRegularizacion || '-'}</span>
+                                                                        )}
+                                                                    </div>
+                                                                    {cursada.notaFinal && (
+                                                                        <div className="flex flex-col items-end">
+                                                                            <span className="text-[9px] text-success-500 font-bold uppercase">Nota Final</span>
+                                                                            <span className="text-sm font-black text-success-700">{cursada.notaFinal}</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                
+                                                                {isEditing && (
+                                                                    <Button 
+                                                                        size="sm" 
+                                                                        variant="solid" 
+                                                                        color="primary" 
+                                                                        className="w-full mt-3 h-8 font-bold"
+                                                                        onPress={() => setEditingHistorialIndex(null)}
+                                                                    >
+                                                                        Finalizar Edición
+                                                                    </Button>
+                                                                )}
+                                                            </Card>
+                                                        )
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
                                     )}
 
                                     {/* ── MÓDULO CORRELATIVAS ─────────────── */}

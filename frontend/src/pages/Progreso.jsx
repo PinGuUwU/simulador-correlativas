@@ -8,17 +8,20 @@ import LeyendaEstados from '../components/Progreso/LeyendaEstados';
 import planService from '../services/planService';
 import materiasUtils from '../utils/Progreso/materiasUtils';
 import { useAuth } from '../context/AuthContext';
+import PlanSelectionModal from '../components/Progreso/modals/PlanSelectionModal';
 
-function Progreso({ plan }) {
+function Progreso({ plan, setPlan }) {
     const { getProgresoLocal, getProgresoDetallesLocal, updateAuthProgreso } = useAuth();
-    
-    // Inicialización síncrona para anular el bloqueo de renderizado (Mejora radical de LCP y FCP)
+
+    // Inicialización síncrona
     const [materias, setMaterias] = useState(() => {
+        if (!plan) return [];
         const planData = planService.getPlanByNumber(plan);
         return planData ? planData.materias : [];
     });
 
     const [progreso, setProgreso] = useState(() => {
+        if (!plan) return {};
         const planData = planService.getPlanByNumber(plan);
         if (!planData) return {};
         const storageData = getProgresoLocal(plan);
@@ -33,6 +36,7 @@ function Progreso({ plan }) {
     });
 
     const [progresoDetalles, setProgresoDetalles] = useState(() => {
+        if (!plan) return {};
         const storageData = getProgresoDetallesLocal(plan);
         return storageData || {};
     });
@@ -48,13 +52,15 @@ function Progreso({ plan }) {
 
     // Actualizar si el plan cambia dinámicamente
     useEffect(() => {
+        if (!plan) return;
+
         const planData = planService.getPlanByNumber(plan);
         if (!planData) {
             addToast({ title: 'Plan no encontrado', description: `No existe el plan "${plan}".`, color: 'danger' });
             return;
         }
         setMaterias(planData.materias);
-        
+
         let localProgreso = getProgresoLocal(plan);
         let localDetalles = getProgresoDetallesLocal(plan);
         if (!localProgreso) {
@@ -83,13 +89,19 @@ function Progreso({ plan }) {
     const progress = Math.round((totalProgreso() * 100) / materias.length)
 
     return (
-        <div className="overflow-hidden bg-default-100">
+        <div className="overflow-hidden bg-default-100 min-h-screen">
+            <PlanSelectionModal 
+                isOpen={!plan} 
+                onSelect={(selectedPlan) => setPlan(selectedPlan)} 
+            />
+
             {cargando && (
                 <div className='flex justify-center items-center h-screen'>
                     < Spinner />
                 </div>
             )}
-            {!cargando && (
+
+            {!cargando && plan && (
                 <div>
                     <ProgresoTotal
                         carrera={carrera}
@@ -113,15 +125,15 @@ function Progreso({ plan }) {
                             isProgressSticky={isSticky}
                         />
                     </div>
+
+                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between pb-6 mx-5 md:mx-10 lg:mx-15">
+                        <LeyendaEstados materias={materias} />
+                    </div>
                 </div>
             )}
-
-            {/* Breve descripción de lo que significa cada estado posible */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between pb-6 mx-5 md:mx-10 lg:mx-15">
-                <LeyendaEstados materias={materias} />
-            </div>
         </div>
     );
 }
 
-export default Progreso;
+export default Progreso;
+

@@ -25,11 +25,11 @@ const Rutas = ({ plan, setPlan }) => {
         },
         {
             path: "/progreso",
-            element: <Progreso plan={plan} />
+            element: <Progreso plan={plan} setPlan={setPlan} />
         },
         {
             path: "/simulador",
-            element: <Simulador plan={plan} />
+            element: <Simulador plan={plan} setPlan={setPlan} />
         },
         {
             path: "/equivalencias",

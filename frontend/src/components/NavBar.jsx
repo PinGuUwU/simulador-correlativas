@@ -166,16 +166,29 @@ const UserPanel = ({ onSignInPress }) => {
 
     if (!isAuthenticated) {
         return (
-            <Button
-                id="btn-iniciar-sesion"
-                color="primary"
-                variant="flat"
-                className="w-full font-bold"
-                startContent={<i className="fa-brands fa-google" />}
-                onPress={onSignInPress}
-            >
-                Iniciar Sesión
-            </Button>
+            <div className="flex flex-col gap-2">
+                <Button
+                    id="btn-iniciar-sesion"
+                    color="primary"
+                    variant="flat"
+                    className="w-full font-bold"
+                    startContent={<i className="fa-brands fa-google" />}
+                    onPress={onSignInPress}
+                >
+                    Iniciar Sesión
+                </Button>
+                
+                <Button
+                    id="btn-configuracion-guest"
+                    variant="flat"
+                    color="default"
+                    className="w-full justify-start font-semibold text-sm"
+                    startContent={<i className="fa-solid fa-gear" />}
+                    onPress={() => navigate('/config')}
+                >
+                    Configuración
+                </Button>
+            </div>
         );
     }
 

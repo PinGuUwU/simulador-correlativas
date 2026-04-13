@@ -207,11 +207,13 @@ export function AuthProvider({ children }) {
 
             if (warning) setFirestoreWarning(warning);
 
+            return loggedUser;
+
         } catch (err) {
             clearSession(); // revertimos el saveSession preventivo
 
             // Cancelación intencional: no mostrar error al usuario
-            if (isIntentionalAuthCancel(err)) return;
+            if (isIntentionalAuthCancel(err)) return null;
 
             // Loguea en Firestore (fire-and-forget, nunca rompe la app)
             logError(err, { route: window?.location?.pathname });

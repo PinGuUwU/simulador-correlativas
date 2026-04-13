@@ -35,7 +35,17 @@ function AppContent({ plan, setPlan }) {
 }
 
 function App() {
-    const [plan, setPlan] = useState("17.14")
+    // Inicializar el plan desde localStorage si existe
+    const [plan, setPlan] = useState(() => {
+        return localStorage.getItem('plan_activo');
+    })
+
+    // Persistir el plan cada vez que cambie
+    useEffect(() => {
+        if (plan) {
+            localStorage.setItem('plan_activo', plan);
+        }
+    }, [plan]);
 
     return (
         <AuthProvider>

@@ -48,9 +48,6 @@ export default function PlanSelectionModal({ isOpen, onSelect }) {
                                         Recomendado para ingresantes recientes y quienes migraron al nuevo diseño curricular.
                                     </p>
                                 </div>
-                                <Button color="primary" variant="flat" size="sm" className="font-bold w-full mt-2">
-                                    Seleccionar
-                                </Button>
                             </CardBody>
                         </Card>
 
@@ -69,9 +66,6 @@ export default function PlanSelectionModal({ isOpen, onSelect }) {
                                         Plan de estudios histórico para estudiantes que mantienen su regularidad en el diseño anterior.
                                     </p>
                                 </div>
-                                <Button color="primary" variant="flat" size="sm" className="font-bold w-full mt-2">
-                                    Seleccionar
-                                </Button>
                             </CardBody>
                         </Card>
                     </div>

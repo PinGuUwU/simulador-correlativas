@@ -10,6 +10,7 @@ const Equivalencias = lazy(() => import('../pages/Equivalencias'))
 const ChatBot = lazy(() => import('../pages/ChatBot'))
 const ComoUsar = lazy(() => import('../pages/ComoUsar'))
 const SettingsPage = lazy(() => import('../pages/SettingsPage'))
+const Contacto = lazy(() => import('../pages/Contacto'))
 
 const LoadingFallback = () => (
     <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -46,6 +47,10 @@ const Rutas = ({ plan, setPlan }) => {
         {
             path: "/config",
             element: <SettingsPage plan={plan} setPlan={setPlan} />
+        },
+        {
+            path: "/contacto",
+            element: <Contacto />
         }
     ])
     return (

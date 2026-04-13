@@ -258,6 +258,7 @@ const NavLinks = ({ onItemClick }) => {
         { name: 'Equivalencias entre planes', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: false },
         { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot', isDeactivated: true },
         { name: 'Cómo usar', icon: 'fa-circle-question', path: '/como-usar', isDeactivated: false, id: 'btn-como-usar' },
+        { name: 'Reportar error', icon: 'fa-bug', path: '/contacto', isDeactivated: false },
     ];
 
     const handleClick = (path) => {

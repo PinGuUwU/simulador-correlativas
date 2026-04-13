@@ -7,6 +7,7 @@ import materiasUtils from "../../../utils/Progreso/materiasUtils";
 import { useState } from "react";
 import regularidadUtils from "../../../utils/Progreso/regularidadUtils";
 import { useAuth } from "../../../context/AuthContext";
+import ConsejoMateria from "./ConsejoMateria";
 
 const ESTADOS_CON_HISTORIAL = ['Regular', 'Libre', 'Aprobado'];
 
@@ -621,6 +622,13 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                             })()}
                                         </div>
                                     </div>
+
+                                    <ConsejoMateria 
+                                        estadoActual={estadoActual}
+                                        statusPlan={statusPlan}
+                                        detallesLocales={detallesLocales}
+                                        infoMateria={infoMateria}
+                                    />
                                 </DrawerBody>
                             </>
                         ) : <DrawerBody>Cargando contenido...</DrawerBody>}

@@ -253,6 +253,7 @@ const NavLinks = ({ onItemClick }) => {
     const navigate = useNavigate();
 
     const menuItems = [
+        { name: 'Inicio', icon: 'fa-house', path: '/', isDeactivated: false },
         { name: 'Progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
         { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
         { name: 'Equivalencias entre planes', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: false },
@@ -269,9 +270,6 @@ const NavLinks = ({ onItemClick }) => {
 
     return (
         <nav className="flex flex-col gap-2 p-4">
-            <div className="text-foreground/60 font-bold text-[10px] uppercase tracking-[0.15em] mb-2 px-3">
-                Menú Principal
-            </div>
             {menuItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 if (isActive || !item.isDeactivated) {
@@ -313,10 +311,8 @@ NavLinks.propTypes = {
     onItemClick: PropTypes.func,
 };
 
-// ─── Sidebar Footer  (tema + plan + auth) ────────────────────────────────────
-const SidebarFooter = ({ setPlan, plan, onSignInPress, id_prefix = 'desktop' }) => {
-    const location = useLocation();
-
+// ─── Sidebar Footer  (tema + auth) ────────────────────────────────────
+const SidebarFooter = ({ onSignInPress, id_prefix = 'desktop' }) => {
     return (
         <div className="mt-auto p-4 border-t border-default-200/40">
             <div className="bg-background/60 backdrop-blur-md rounded-2xl p-3 border border-default-200/50 flex flex-col gap-3 shadow-sm">
@@ -325,44 +321,20 @@ const SidebarFooter = ({ setPlan, plan, onSignInPress, id_prefix = 'desktop' }) 
                     <ThemeSwitcher />
                 </div>
 
-                {/* Plan (solo en /progreso) */}
-                {location.pathname === '/progreso' && (
-                    <div id={`selector-plan-${id_prefix}`} className="border-t border-default-200/50 pt-3">
-                        <p className="text-[12px] text-foreground/80 font-bold uppercase mb-3 px-1 tracking-wider">
-                            Plan de Estudios
-                        </p>
-                        <div className="flex bg-default-200/50 p-1 rounded-xl gap-1">
-                            {['17.14', '17.13'].map((id) => (
-                                <button
-                                    key={id}
-                                    onClick={() => setPlan(id)}
-                                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${plan === id
-                                        ? 'bg-background text-primary shadow-sm ring-1 ring-default-200'
-                                        : 'text-foreground/80 hover:text-foreground hover:bg-default-200'
-                                        }`}
-                                >
-                                    {id}
-                                </button>
-                            ))}
-                        </div>
-                        <p className="text-[12px] text-foreground/60 mt-3 px-1 text-center italic">
-                            * Cambiar el plan reseteará los filtros
-                        </p>
-                        <div className="mt-3">
-                            <Button
-                                id={`btn-ver-tutorial-${id_prefix}`}
-                                size="sm"
-                                variant="flat"
-                                color="primary"
-                                className="w-full font-bold uppercase tracking-wider text-[10px]"
-                                startContent={<i className="fa-solid fa-circle-question" />}
-                                onPress={() => window.dispatchEvent(new CustomEvent('start-tutorial'))}
-                            >
-                                Repetir Tutorial
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                {/* Tutorial y Ayuda */}
+                <div className="border-t border-default-200/50 pt-3">
+                    <Button
+                        id={`btn-ver-tutorial-${id_prefix}`}
+                        size="sm"
+                        variant="ghost"
+                        color="default"
+                        className="w-full font-bold text-[10px] uppercase tracking-wider h-8 opacity-70 hover:opacity-100"
+                        startContent={<i className="fa-solid fa-circle-question" />}
+                        onPress={() => window.dispatchEvent(new CustomEvent('start-tutorial'))}
+                    >
+                        Repetir Tutorial
+                    </Button>
+                </div>
 
                 {/* Auth */}
                 <div className="border-t border-default-200/50 pt-3">
@@ -374,8 +346,6 @@ const SidebarFooter = ({ setPlan, plan, onSignInPress, id_prefix = 'desktop' }) 
 };
 
 SidebarFooter.propTypes = {
-    setPlan: PropTypes.func.isRequired,
-    plan: PropTypes.string.isRequired,
     onSignInPress: PropTypes.func.isRequired,
     id_prefix: PropTypes.string,
 };
@@ -445,8 +415,6 @@ export default function NavBar({ setPlan, plan }) {
                 <NavLinks />
 
                 <SidebarFooter
-                    setPlan={setPlan}
-                    plan={plan}
                     onSignInPress={onLoginOpen}
                     id_prefix="desktop"
                 />
@@ -481,8 +449,6 @@ export default function NavBar({ setPlan, plan }) {
 
                             <DrawerFooter className="p-0 block">
                                 <SidebarFooter
-                                    setPlan={setPlan}
-                                    plan={plan}
                                     onSignInPress={() => { onClose(); onLoginOpen(); }}
                                     id_prefix="mobile"
                                 />

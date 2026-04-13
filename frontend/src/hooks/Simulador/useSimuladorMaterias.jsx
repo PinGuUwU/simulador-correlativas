@@ -1,56 +1,69 @@
 import { useMemo } from 'react'
 
-const useSimuladorMaterias = (materias, progreso, cuatri, setProgreso, progresoBase, anioActual) => {
+const useSimuladorMaterias = (materias, progreso, cuatri, setProgreso, progresoBase, anioActual, semestreActualPlan) => {
 
-    // Evaluamos las materias posibles SÓLO al inicio usando el progresoBase (la "foto" de progreso inicial).
-    // Esto asegura que al volver atrás en el historial, las que marcaste no desaparezcan de la vista.
-    const materiasCursables = useMemo(() => {
-        if (!progresoBase || Object.keys(progresoBase).length === 0) return [];
+    // Separamos la lógica en cursables y bloqueadas
+    const { materiasCursables, materiasBloqueadas } = useMemo(() => {
+        if (!progresoBase || Object.keys(progresoBase).length === 0) return { materiasCursables: [], materiasBloqueadas: [] };
 
-        // Filtramos para que no sean del futuro Y respeten la época del año (impar = 1, par = 2)
-        let nextMaterias = materias.filter(m => {
+        // 1. Filtramos por temporada (paridad de cuatrimestre) y que no estén cursadas
+        const materiasCandidatas = materias.filter(m => {
             const numCuatri = Number(m.cuatrimestre);
             const esImpar = numCuatri % 2 !== 0;
             const esPar = numCuatri % 2 === 0;
 
-            if (cuatri === "1" && esImpar) return true;
-            if (cuatri === "2" && esPar) return true;
+            const coincideTemporada = (cuatri === "1" && esImpar) || (cuatri === "2" && esPar);
+            const noCursada = progresoBase[m.codigo] === "No Cursado";
 
-            return false; // Si no coincide la temporada, no se muestra
-        })
-        // Me quedo solo con las que no se cursaron (mirando la foto ANTES de este cuatrimestre)
-        nextMaterias = nextMaterias.filter(m => progresoBase[m.codigo] === "No Cursado")
-        const posibles = []
-        // Filtro por correlativas usando el progresoBase
-        nextMaterias.forEach((materia) => {
-            const esTesina = materia.tesis
+            return coincideTemporada && noCursada;
+        });
+
+        const cursables = [];
+        const bloqueadas = [];
+
+        materiasCandidatas.forEach((materia) => {
+            const esTesina = materia.tesis;
+            let esCursable = false;
+            let correlativasFaltantes = [];
 
             if (esTesina) {
-                // La tesina requiere que absolutamente TODAS las demás materias estén cursadas
                 const hayPendientes = materias.some(m =>
                     m.codigo !== materia.codigo && progresoBase[m.codigo] !== "Cursado"
                 );
-                if (!hayPendientes) posibles.push(materia);
+                esCursable = !hayPendientes;
+                if (!esCursable) {
+                    correlativasFaltantes = ["Todas las materias previas"];
+                }
             } else {
-                // Materias regulares: revisamos sus correlativas normalmente
                 if (materia.correlativas.length > 0) {
-                    let todasBien = true
                     materia.correlativas.forEach(codigo => {
                         if (progresoBase[codigo] !== "Cursado") {
-                            todasBien = false
+                            const correlativa = materias.find(mat => mat.codigo === codigo);
+                            correlativasFaltantes.push(correlativa?.nombre || codigo);
                         }
-                    })
-                    if (todasBien) {
-                        posibles.push(materia)
-                    }
+                    });
+                    esCursable = correlativasFaltantes.length === 0;
                 } else {
-                    posibles.push(materia)
+                    esCursable = true;
                 }
             }
-        })
 
-        return posibles;
-    }, [cuatri, anioActual, materias, progresoBase])
+            if (esCursable) {
+                cursables.push(materia);
+            } else {
+                // SÓLO agregamos a bloqueadas si es del cuatrimestre EXACTO actual
+                // para evitar llenar la pantalla de advertencias de años anteriores o futuros.
+                if (Number(materia.cuatrimestre) === semestreActualPlan) {
+                    bloqueadas.push({
+                        ...materia,
+                        correlativasFaltantes
+                    });
+                }
+            }
+        });
+
+        return { materiasCursables: cursables, materiasBloqueadas: bloqueadas };
+    }, [cuatri, anioActual, materias, progresoBase, semestreActualPlan])
 
     const cambioDeEstado = (codigoMateria) => {
         const nuevoEstado = progreso[codigoMateria] === "Cursado" ? "No Cursado" : "Cursado"
@@ -58,7 +71,7 @@ const useSimuladorMaterias = (materias, progreso, cuatri, setProgreso, progresoB
         setProgreso(nuevoProgreso)
     }
 
-    return { cambioDeEstado, materiasCursables }
+    return { cambioDeEstado, materiasCursables, materiasBloqueadas }
 }
 
 export default useSimuladorMaterias

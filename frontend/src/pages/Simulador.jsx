@@ -37,6 +37,7 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
         cuatri,
         anioActual,
         historialSemestres, setHistorialSemestres,
+        semestreActualPlan,
         estadoAnterior,
         estadoSiguiente,
         simulacionTerminada, setSimulacionTerminada,
@@ -45,13 +46,14 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
     } = useSimuladorEstado({ plan, modo, anioInicio, cuatriInicio })
 
     // ─── Materias disponibles para el cuatrimestre actual ────────────────────
-    const { cambioDeEstado, materiasCursables } = useSimuladorMaterias(
+    const { cambioDeEstado, materiasCursables, materiasBloqueadas } = useSimuladorMaterias(
         materias,
         progresoSimulado || {},
         cuatri,
         setProgresoSimulado,
         progresoBase || {},
-        anioActual
+        anioActual,
+        semestreActualPlan
     )
 
     // ─── PDF ─────────────────────────────────────────────────────────────────
@@ -186,7 +188,7 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                         </div>
 
                                         {/* Grilla de materias */}
-                                        {materiasCursables.length === 0 ? (
+                                        {materiasCursables.length === 0 && materiasBloqueadas.length === 0 ? (
                                             <div className="p-8 text-center text-foreground/80 bg-default-50 rounded-2xl border-2 border-dashed border-default-200">
                                                 <i className="fa-regular fa-folder-open text-4xl mb-3 text-default-300" />
                                                 <p>No tienes materias disponibles para este cuatrimestre.</p>
@@ -195,6 +197,7 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                         ) : (
                                             <MateriasSimulador
                                                 materiasCursables={materiasCursables}
+                                                materiasBloqueadas={materiasBloqueadas}
                                                 cambioDeEstado={cambioDeEstado}
                                                 progreso={progresoSimulado}
                                             />

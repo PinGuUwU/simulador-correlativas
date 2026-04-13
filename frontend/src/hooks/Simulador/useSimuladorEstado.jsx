@@ -16,6 +16,9 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio }) => {
     const [estadoSiguiente, setEstadoSiguiente] = useState(true)
     const [simulacionTerminada, setSimulacionTerminada] = useState(false)
 
+    // Calculamos el semestre del plan (1 a 10) basándonos en el historial
+    const semestreActualPlan = historialSemestres.length + 1;
+
     // ─── Carga de materias e inicialización ──────────────────────────────────
     useEffect(() => {
         if (!plan) return
@@ -190,6 +193,7 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio }) => {
         anioActual,
         historialSemestres,
         setHistorialSemestres,
+        semestreActualPlan,
         estadoAnterior,
         estadoSiguiente,
         simulacionTerminada,

@@ -17,7 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { trackCambioTema } from '../services/analyticsService';
 
 // ─── Selector de Temas ─────────────────────────────────────────────────────────
-const ThemeSwitcher = () => {
+const ThemeSwitcher = ({ isCollapsed }) => {
     const [mounted, setMounted] = useState(false);
     const { theme, setTheme } = useTheme();
 
@@ -25,14 +25,36 @@ const ThemeSwitcher = () => {
     if (!mounted) return null;
 
     const themes = [
-        { key: 'light', label: 'Claro ☀️' },
-        { key: 'dark', label: 'Oscuro 🌙' },
-        { key: 'girlie', label: 'Girlie 🌸' },
-        { key: 'pastel', label: 'Pastel 🎨' },
+        { key: 'light', label: 'Claro', icon: 'fa-sun' },
+        { key: 'dark', label: 'Oscuro', icon: 'fa-moon' },
+        { key: 'girlie', label: 'Girlie', icon: 'fa-heart' },
+        { key: 'pastel', label: 'Pastel', icon: 'fa-palette' },
     ];
 
+    if (isCollapsed) {
+        const currentTheme = themes.find(t => t.key === theme) || themes[0];
+        return (
+            <div className="flex justify-center w-full">
+                <Tooltip content={`Tema: ${currentTheme.label}`} placement="right">
+                    <Button
+                        isIconOnly
+                        size="sm"
+                        variant="flat"
+                        onPress={() => {
+                            const nextIndex = (themes.findIndex(t => t.key === theme) + 1) % themes.length;
+                            setTheme(themes[nextIndex].key);
+                            trackCambioTema({ tema: themes[nextIndex].key });
+                        }}
+                    >
+                        <i className={`fa-solid ${currentTheme.icon}`} />
+                    </Button>
+                </Tooltip>
+            </div>
+        );
+    }
+
     return (
-        <div className="pb-3 px-1">
+        <div className="pb-3 px-1 transition-opacity duration-300">
             <Select
                 label="Tema Visual"
                 size="sm"
@@ -50,11 +72,17 @@ const ThemeSwitcher = () => {
                 classNames={{ trigger: 'bg-default-100 hover:bg-default-200' }}
             >
                 {themes.map((t) => (
-                    <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>
+                    <SelectItem key={t.key} value={t.key} startContent={<i className={`fa-solid ${t.icon} w-4`} />}>
+                        {t.label}
+                    </SelectItem>
                 ))}
             </Select>
         </div>
     );
+};
+
+ThemeSwitcher.propTypes = {
+    isCollapsed: PropTypes.bool,
 };
 
 // ─── Modal de inicio de sesión con "Recordarme" ────────────────────────────────
@@ -70,8 +98,6 @@ const LoginModal = ({ isOpen, onClose, onConfirm }) => {
             await onConfirm(rememberMe);
             onClose();
         } catch {
-            // El error ya fue seteado en el contexto por signIn().
-            // Si authError es null, fue una cancelación intencional → no hacemos nada.
         } finally {
             setLoading(false);
         }
@@ -88,7 +114,6 @@ const LoginModal = ({ isOpen, onClose, onConfirm }) => {
                 </ModalHeader>
 
                 <ModalBody>
-                    {/* Banner de error (traducido, sin códigos técnicos) */}
                     {authError && (
                         <div className="flex items-start gap-2 bg-danger-50 border border-danger-200 text-danger-700 rounded-xl px-3 py-2.5 text-sm">
                             <i className="fa-solid fa-circle-exclamation mt-0.5 shrink-0" />
@@ -96,7 +121,6 @@ const LoginModal = ({ isOpen, onClose, onConfirm }) => {
                         </div>
                     )}
 
-                    {/* Botón Google */}
                     <button
                         onClick={handleLogin}
                         disabled={loading}
@@ -115,7 +139,6 @@ const LoginModal = ({ isOpen, onClose, onConfirm }) => {
                         {loading ? 'Conectando…' : 'Continuar con Google'}
                     </button>
 
-                    {/* Toggle Recordarme */}
                     <div className="flex items-center justify-between px-1 py-2 border-t border-default-200 mt-2">
                         <div className="flex flex-col">
                             <span className="text-sm font-semibold">Recordarme</span>
@@ -147,108 +170,164 @@ LoginModal.propTypes = {
 };
 
 // ─── Panel de usuario (sección inferior del sidebar) ──────────────────────────
-const UserPanel = ({ onSignInPress }) => {
+const UserPanel = ({ onSignInPress, isCollapsed }) => {
     const { user, userData, loading, isAuthenticated, signOut } = useAuth();
     const navigate = useNavigate();
 
-    // Skeleton mientras Firebase verifica la sesión
     if (loading) {
         return (
-            <div className="flex items-center gap-3 p-3 rounded-xl animate-pulse">
-                <div className="w-8 h-8 rounded-full bg-default-200" />
-                <div className="flex flex-col gap-1 flex-1">
-                    <div className="h-2.5 w-24 bg-default-200 rounded" />
-                    <div className="h-2 w-16 bg-default-100 rounded" />
-                </div>
+            <div className={`flex items-center gap-3 p-3 rounded-xl animate-pulse ${isCollapsed ? 'justify-center' : ''}`}>
+                <div className="w-8 h-8 rounded-full bg-default-200 shrink-0" />
+                {!isCollapsed && (
+                    <div className="flex flex-col gap-1 flex-1">
+                        <div className="h-2.5 w-24 bg-default-200 rounded" />
+                        <div className="h-2 w-16 bg-default-100 rounded" />
+                    </div>
+                )}
             </div>
         );
     }
 
     if (!isAuthenticated) {
         return (
-            <div className="flex flex-col gap-2">
-                <Button
-                    id="btn-iniciar-sesion"
-                    color="primary"
-                    variant="flat"
-                    className="w-full font-bold"
-                    startContent={<i className="fa-brands fa-google" />}
-                    onPress={onSignInPress}
-                >
-                    Iniciar Sesión
-                </Button>
+            <div className={`flex flex-col gap-2 ${isCollapsed ? 'items-center w-full' : ''}`}>
+                {isCollapsed ? (
+                    <Tooltip content="Iniciar Sesión" placement="right">
+                        <Button
+                            isIconOnly
+                            color="primary"
+                            variant="flat"
+                            onPress={onSignInPress}
+                            className="min-w-0"
+                        >
+                            <i className="fa-brands fa-google" />
+                        </Button>
+                    </Tooltip>
+                ) : (
+                    <Button
+                        id="btn-iniciar-sesion"
+                        color="primary"
+                        variant="flat"
+                        className="w-full font-bold"
+                        startContent={<i className="fa-brands fa-google" />}
+                        onPress={onSignInPress}
+                    >
+                        Iniciar Sesión
+                    </Button>
+                )}
                 
-                <Button
-                    id="btn-configuracion-guest"
-                    variant="flat"
-                    color="default"
-                    className="w-full justify-start font-semibold text-sm"
-                    startContent={<i className="fa-solid fa-gear" />}
-                    onPress={() => navigate('/config')}
-                >
-                    Configuración
-                </Button>
+                {isCollapsed ? (
+                    <Tooltip content="Configuración" placement="right">
+                        <Button
+                            isIconOnly
+                            variant="flat"
+                            color="default"
+                            onPress={() => navigate('/config')}
+                            className="min-w-0"
+                        >
+                            <i className="fa-solid fa-gear" />
+                        </Button>
+                    </Tooltip>
+                ) : (
+                    <Button
+                        id="btn-configuracion-guest"
+                        variant="flat"
+                        color="default"
+                        className="w-full justify-start font-semibold text-sm"
+                        startContent={<i className="fa-solid fa-gear" />}
+                        onPress={() => navigate('/config')}
+                    >
+                        Configuración
+                    </Button>
+                )}
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col gap-2">
-            {/* Info usuario */}
-            <div className="flex items-center gap-3 px-1 py-2 overflow-hidden">
-                <Avatar
-                    src={user.photoURL}
-                    name={user.displayName}
-                    size="sm"
-                    isBordered
-                    color="primary"
-                    className="shrink-0"
-                />
-                <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-sm font-bold text-foreground truncate leading-tight">
-                        {userData?.config?.alias || (user.displayName?.split(' ')[0] ?? 'Usuario')}
-                    </span>
-                    <span className="text-[10px] text-foreground/50 truncate w-full">{user.email}</span>
-                </div>
+        <div className={`flex flex-col gap-2 ${isCollapsed ? 'items-center w-full' : ''}`}>
+            <div className={`flex items-center gap-3 px-1 py-2 overflow-hidden ${isCollapsed ? 'justify-center' : ''}`}>
+                <Tooltip content={isCollapsed ? (userData?.config?.alias || user.displayName) : ""} placement="right">
+                    <Avatar
+                        src={user.photoURL}
+                        name={user.displayName}
+                        size="sm"
+                        isBordered
+                        color="primary"
+                        className="shrink-0"
+                    />
+                </Tooltip>
+                {!isCollapsed && (
+                    <div className="flex flex-col min-w-0 flex-1 transition-opacity duration-300">
+                        <span className="text-sm font-bold text-foreground truncate leading-tight">
+                            {userData?.config?.alias || (user.displayName?.split(' ')[0] ?? 'Usuario')}
+                        </span>
+                        <span className="text-[10px] text-foreground/50 truncate w-full">{user.email}</span>
+                    </div>
+                )}
             </div>
 
-            {/* Acciones */}
-            <Tooltip content="Configuración de la cuenta" placement="right">
-                <Button
-                    id="btn-configuracion"
-                    variant="flat"
-                    color="default"
-                    className="w-full justify-start font-semibold text-sm"
-                    startContent={<i className="fa-solid fa-gear" />}
-                    onPress={() => navigate('/config')}
-                >
-                    Configuración
-                </Button>
-            </Tooltip>
+            {isCollapsed ? (
+                <>
+                    <Tooltip content="Configuración" placement="right">
+                        <Button isIconOnly variant="flat" onPress={() => navigate('/config')} className="min-w-0">
+                            <i className="fa-solid fa-gear" />
+                        </Button>
+                    </Tooltip>
+                    <Tooltip content="Cerrar Sesión" placement="right">
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            color="danger"
+                            onPress={async () => {
+                                await signOut();
+                                addToast({ title: 'Sesión cerrada', description: '¡Hasta la próxima!', color: 'success' });
+                            }}
+                            className="min-w-0"
+                        >
+                            <i className="fa-solid fa-right-from-bracket" />
+                        </Button>
+                    </Tooltip>
+                </>
+            ) : (
+                <>
+                    <Button
+                        id="btn-configuracion"
+                        variant="flat"
+                        color="default"
+                        className="w-full justify-start font-semibold text-sm"
+                        startContent={<i className="fa-solid fa-gear" />}
+                        onPress={() => navigate('/config')}
+                    >
+                        Configuración
+                    </Button>
 
-            <Button
-                id="btn-cerrar-sesion"
-                variant="light"
-                color="danger"
-                className="w-full justify-start font-semibold text-sm"
-                startContent={<i className="fa-solid fa-right-from-bracket" />}
-                onPress={async () => {
-                    await signOut();
-                    addToast({ title: 'Sesión cerrada', description: '¡Hasta la próxima!', color: 'success' });
-                }}
-            >
-                Cerrar Sesión
-            </Button>
+                    <Button
+                        id="btn-cerrar-sesion"
+                        variant="light"
+                        color="danger"
+                        className="w-full justify-start font-semibold text-sm"
+                        startContent={<i className="fa-solid fa-right-from-bracket" />}
+                        onPress={async () => {
+                            await signOut();
+                            addToast({ title: 'Sesión cerrada', description: '¡Hasta la próxima!', color: 'success' });
+                        }}
+                    >
+                        Cerrar Sesión
+                    </Button>
+                </>
+            )}
         </div>
     );
 };
 
 UserPanel.propTypes = {
     onSignInPress: PropTypes.func.isRequired,
+    isCollapsed: PropTypes.bool,
 };
 
 // ─── Links de navegación ───────────────────────────────────────────────────────
-const NavLinks = ({ onItemClick }) => {
+const NavLinks = ({ onItemClick, isCollapsed }) => {
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -256,7 +335,7 @@ const NavLinks = ({ onItemClick }) => {
         { name: 'Inicio', icon: 'fa-house', path: '/', isDeactivated: false },
         { name: 'Progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
         { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
-        { name: 'Equivalencias entre planes', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: false },
+        { name: 'Equivalencias', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: false },
         { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot', isDeactivated: true },
         { name: 'Cómo usar', icon: 'fa-circle-question', path: '/como-usar', isDeactivated: false, id: 'btn-como-usar' },
         { name: 'Reportar error', icon: 'fa-bug', path: '/contacto', isDeactivated: false },
@@ -269,39 +348,39 @@ const NavLinks = ({ onItemClick }) => {
     };
 
     return (
-        <nav className="flex flex-col gap-2 p-4">
+        <nav className={`flex flex-col gap-2 transition-all duration-300 ${isCollapsed ? 'px-2' : 'p-4'}`}>
             {menuItems.map((item) => {
                 const isActive = location.pathname === item.path;
-                if (isActive || !item.isDeactivated) {
-                    return (
-                        <button
-                            key={item.path}
-                            id={item.id}
-                            onClick={() => handleClick(item.path)}
-                            className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group ${isActive
+                const isDisabled = !isActive && item.isDeactivated;
+
+                const content = (
+                    <button
+                        key={item.path}
+                        id={item.id}
+                        onClick={() => isDisabled ? addToast({ title: 'En progreso', description: 'Esta página aún no está disponible', color: 'warning' }) : handleClick(item.path)}
+                        className={`flex items-center gap-3 rounded-xl transition-all duration-200 group relative ${isCollapsed ? 'p-3 justify-center' : 'p-3'} ${isActive
                                 ? 'bg-primary/10 text-primary font-bold shadow-sm border border-primary/20 backdrop-blur-sm'
-                                : 'text-foreground/70 hover:bg-default-100/80 hover:text-primary hover:translate-x-0.5'
-                                }`}
-                        >
-                            <i className={`fa-solid ${item.icon} w-5 text-lg ${isActive ? 'text-primary drop-shadow-sm' : 'group-hover:scale-110 transition-transform'}`} />
-                            <span className="text-sm font-medium">{item.name}</span>
-                            {isActive && !item.isDeactivated && (
-                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_6px_2px] shadow-primary/60 animate-pulse" />
-                            )}
-                        </button>
-                    );
-                } else {
-                    return (
-                        <button
-                            key={item.path}
-                            onClick={() => addToast({ title: 'En progreso', description: 'Esta página aún no está disponible', color: 'warning' })}
-                            className="flex items-center gap-3 p-3 rounded-xl transition-all group bg-default-200/50 text-foreground/60"
-                        >
-                            <i className={`fa-solid ${item.icon} w-5 text-lg group-hover:scale-110 transition-transform`} />
-                            <span className="text-sm font-medium">{item.name}</span>
-                        </button>
-                    );
-                }
+                                : isDisabled 
+                                    ? 'bg-default-200/50 text-foreground/60 cursor-not-allowed'
+                                    : 'text-foreground/70 hover:bg-default-100/80 hover:text-primary hover:translate-x-0.5'
+                            }`}
+                    >
+                        <i className={`fa-solid ${item.icon} w-5 text-lg shrink-0 ${isActive ? 'text-primary drop-shadow-sm' : 'group-hover:scale-110 transition-transform'}`} />
+                        {!isCollapsed && <span className="text-sm font-medium transition-opacity duration-300 whitespace-nowrap overflow-hidden">{item.name}</span>}
+                        {isActive && !isCollapsed && (
+                            <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_6px_2px] shadow-primary/60 animate-pulse" />
+                        )}
+                        {isActive && isCollapsed && (
+                             <div className="absolute right-1 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-primary" />
+                        )}
+                    </button>
+                );
+
+                return isCollapsed ? (
+                    <Tooltip key={item.path} content={item.name} placement="right">
+                        {content}
+                    </Tooltip>
+                ) : content;
             })}
         </nav>
     );
@@ -309,36 +388,20 @@ const NavLinks = ({ onItemClick }) => {
 
 NavLinks.propTypes = {
     onItemClick: PropTypes.func,
+    isCollapsed: PropTypes.bool,
 };
 
 // ─── Sidebar Footer  (tema + auth) ────────────────────────────────────
-const SidebarFooter = ({ onSignInPress, id_prefix = 'desktop' }) => {
+const SidebarFooter = ({ onSignInPress, id_prefix = 'desktop', isCollapsed }) => {
     return (
-        <div className="mt-auto p-4 border-t border-default-200/40">
-            <div className="bg-background/60 backdrop-blur-md rounded-2xl p-3 border border-default-200/50 flex flex-col gap-3 shadow-sm">
-                {/* Tema */}
+        <div className={`mt-auto border-t border-default-200/40 transition-all duration-300 ${isCollapsed ? 'p-2' : 'p-4'}`}>
+            <div className={`bg-background/60 backdrop-blur-md rounded-2xl border border-default-200/50 flex flex-col gap-3 shadow-sm transition-all duration-300 ${isCollapsed ? 'p-1 py-3' : 'p-3'}`}>
                 <div id={`selector-tema-${id_prefix}`}>
-                    <ThemeSwitcher />
+                    <ThemeSwitcher isCollapsed={isCollapsed} />
                 </div>
 
-                {/* Tutorial y Ayuda */}
-                <div className="border-t border-default-200/50 pt-3">
-                    <Button
-                        id={`btn-ver-tutorial-${id_prefix}`}
-                        size="sm"
-                        variant="ghost"
-                        color="default"
-                        className="w-full font-bold text-[10px] uppercase tracking-wider h-8 opacity-70 hover:opacity-100"
-                        startContent={<i className="fa-solid fa-circle-question" />}
-                        onPress={() => window.dispatchEvent(new CustomEvent('start-tutorial'))}
-                    >
-                        Repetir Tutorial
-                    </Button>
-                </div>
-
-                {/* Auth */}
-                <div className="border-t border-default-200/50 pt-3">
-                    <UserPanel onSignInPress={onSignInPress} />
+                <div className={`${!isCollapsed ? 'border-t border-default-200/50 pt-3' : 'w-full flex justify-center'}`}>
+                    <UserPanel onSignInPress={onSignInPress} isCollapsed={isCollapsed} />
                 </div>
             </div>
         </div>
@@ -348,6 +411,7 @@ const SidebarFooter = ({ onSignInPress, id_prefix = 'desktop' }) => {
 SidebarFooter.propTypes = {
     onSignInPress: PropTypes.func.isRequired,
     id_prefix: PropTypes.string,
+    isCollapsed: PropTypes.bool,
 };
 
 // ─── NavBar principal ─────────────────────────────────────────────────────────
@@ -355,35 +419,34 @@ export default function NavBar({ setPlan, plan }) {
     const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onOpenChange: onDrawerOpenChange } = useDisclosure();
     const { isOpen: isLoginOpen, onOpen: onLoginOpen, onClose: onLoginClose } = useDisclosure();
     const { signIn, firestoreWarning, clearFirestoreWarning } = useAuth();
+    const [isCollapsed, setIsCollapsed] = useState(() => {
+        const saved = localStorage.getItem('sidebar_collapsed');
+        return saved ? JSON.parse(saved) : false;
+    });
     const navigate = useNavigate();
+
+    useEffect(() => {
+        localStorage.setItem('sidebar_collapsed', JSON.stringify(isCollapsed));
+    }, [isCollapsed]);
 
     const handleSignIn = async (rememberMe) => {
         try {
             await signIn(rememberMe);
-            // signIn solo llega acá si el login fue exitoso
             addToast({ title: '¡Bienvenido!', description: 'Sesión iniciada correctamente', color: 'success' });
-            // firestoreWarning ya está seteado en el contexto si Firestore falló
             if (firestoreWarning) {
-                addToast({
-                    title: 'Aviso de sincronización',
-                    description: firestoreWarning,
-                    color: 'warning',
-                });
+                addToast({ title: 'Aviso de sincronización', description: firestoreWarning, color: 'warning' });
                 clearFirestoreWarning();
             }
         } catch {
-            // El error (si no es cancelación) ya está en authError
-            // El LoginModal lo muestra inline → no duplicamos con toast
         }
     };
 
     return (
         <>
-            {/* Modal de login */}
             <LoginModal isOpen={isLoginOpen} onClose={onLoginClose} onConfirm={handleSignIn} />
 
             {/* Botón Hamburguesa Móvil */}
-            <div className="2xl:hidden fixed top-3 right-3 z-50">
+            <div className="lg:hidden fixed top-3 right-3 z-50">
                 <Button
                     isIconOnly
                     radius="full"
@@ -398,25 +461,46 @@ export default function NavBar({ setPlan, plan }) {
             </div>
 
             {/* Sidebar Desktop */}
-            <aside className="hidden 2xl:flex flex-col w-64 h-screen sticky left-0 top-0 bg-background/85 backdrop-blur-xl border-r border-default-200/60 z-40 overflow-y-auto shadow-xl shadow-black/5">
-                <div className="p-6 mb-2 flex items-center gap-3 border-b border-default-200/40">
+            <aside 
+                className={`hidden lg:flex flex-col h-screen sticky left-0 top-0 bg-background/85 backdrop-blur-xl border-r border-default-200/60 z-40 shadow-xl shadow-black/5 transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-64'}`}
+            >
+                {/* Botón Toggle - Movido fuera del overflow y con z-index más alto */}
+                <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    radius="full"
+                    onPress={() => setIsCollapsed(!isCollapsed)}
+                    className={`hidden lg:flex absolute -right-3 top-10 -translate-y-1/2 bg-background border border-default-200 shadow-md z-[60] hover:bg-default-100 transition-all duration-300 ${isCollapsed ? 'rotate-180 -right-4' : ''}`}
+                >
+                    <i className="fa-solid fa-chevron-left text-[10px]" />
+                </Button>
+
+                {/* Header */}
+                <div className={`p-4 mb-2 flex items-center border-b border-default-200/40 relative h-20 shrink-0 ${isCollapsed ? 'justify-center' : 'gap-3 px-6'}`}>
                     <div
-                        className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/40 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 hover:shadow-primary/50 transition-all duration-300"
+                        className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/40 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 hover:shadow-primary/50 transition-all duration-300 shrink-0"
                         onClick={() => navigate('/')}
                     >
                         <i className="fa-solid fa-graduation-cap text-white text-xl" />
                     </div>
-                    <div className="flex flex-col">
-                        <span className="font-black text-foreground text-xl tracking-tight leading-none">UNLu</span>
-                        <span className="text-primary font-bold text-[10px] tracking-widest uppercase">Simulador</span>
-                    </div>
+                    
+                    {!isCollapsed && (
+                        <div className="flex flex-col transition-opacity duration-300">
+                            <span className="font-black text-foreground text-xl tracking-tight leading-none">UNLu</span>
+                            <span className="text-primary font-bold text-[10px] tracking-widest uppercase">Simulador</span>
+                        </div>
+                    )}
                 </div>
 
-                <NavLinks />
+                <div className="flex-1 overflow-y-auto overflow-x-hidden">
+                    <NavLinks isCollapsed={isCollapsed} />
+                </div>
 
                 <SidebarFooter
                     onSignInPress={onLoginOpen}
                     id_prefix="desktop"
+                    isCollapsed={isCollapsed}
                 />
             </aside>
 
@@ -444,13 +528,14 @@ export default function NavBar({ setPlan, plan }) {
                             </DrawerHeader>
 
                             <DrawerBody className="py-4">
-                                <NavLinks onItemClick={onClose} />
+                                <NavLinks onItemClick={onClose} isCollapsed={false} />
                             </DrawerBody>
 
                             <DrawerFooter className="p-0 block">
                                 <SidebarFooter
                                     onSignInPress={() => { onClose(); onLoginOpen(); }}
                                     id_prefix="mobile"
+                                    isCollapsed={false}
                                 />
                             </DrawerFooter>
                         </>
@@ -462,6 +547,6 @@ export default function NavBar({ setPlan, plan }) {
 }
 
 NavBar.propTypes = {
-    setPlan: PropTypes.func.isRequired,
-    plan: PropTypes.string.isRequired,
+    setPlan: PropTypes.func,
+    plan: PropTypes.string,
 };

@@ -339,6 +339,7 @@ const NavLinks = ({ onItemClick, isCollapsed }) => {
         { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot', isDeactivated: true },
         { name: 'Cómo usar', icon: 'fa-circle-question', path: '/como-usar', isDeactivated: false, id: 'btn-como-usar' },
         { name: 'Reportar error', icon: 'fa-bug', path: '/contacto', isDeactivated: false },
+        { name: 'CODES', imgIcon: '/imgs/logo-codes.png', path: 'https://www.codesunlu.tech/', isExternal: true, isDeactivated: false },
     ];
 
     const handleClick = (path) => {
@@ -350,8 +351,35 @@ const NavLinks = ({ onItemClick, isCollapsed }) => {
     return (
         <nav className={`flex flex-col gap-2 transition-all duration-300 ${isCollapsed ? 'px-2' : 'p-4'}`}>
             {menuItems.map((item) => {
-                const isActive = location.pathname === item.path;
+                const isActive = !item.isExternal && location.pathname === item.path;
                 const isDisabled = !isActive && item.isDeactivated;
+
+                if (item.isExternal) {
+                    const content = (
+                        <a
+                            key={item.path}
+                            href={item.path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex items-center gap-3 rounded-xl transition-all duration-200 group relative ${isCollapsed ? 'p-3 justify-center' : 'p-3'} text-foreground/70 hover:bg-primary/10 hover:text-primary hover:translate-x-0.5 border border-transparent hover:border-primary/20`}
+                        >
+                            {item.imgIcon ? (
+                                <div className="w-6 h-6 bg-white rounded-md flex items-center justify-center p-0.5 shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+                                    <img src={item.imgIcon} alt={item.name} className="w-full h-full object-contain" />
+                                </div>
+                            ) : (
+                                <i className={`fa-solid ${item.icon} w-5 text-lg shrink-0 group-hover:scale-110 transition-transform`} />
+                            )}
+                            {!isCollapsed && <span className="text-sm font-medium transition-opacity duration-300 whitespace-nowrap overflow-hidden">{item.name}</span>}
+                            {!isCollapsed && <i className="fa-solid fa-arrow-up-right-from-square text-[10px] ml-auto opacity-50 group-hover:opacity-100" />}
+                        </a>
+                    );
+                    return isCollapsed ? (
+                        <Tooltip key={item.path} content={item.name} placement="right">
+                            {content}
+                        </Tooltip>
+                    ) : content;
+                }
 
                 const content = (
                     <button

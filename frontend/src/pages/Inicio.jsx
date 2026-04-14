@@ -108,6 +108,36 @@ function Inicio() {
                 </div>
             </section>
 
+            {/* Promo CODES Section */}
+            <section className="flex flex-col items-center gap-6 mb-0 w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+                <div className="bg-linear-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 max-w-4xl w-full shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+                    <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl pointer-events-none group-hover:bg-primary/30 transition-colors" />
+                    <div className="shrink-0 bg-white p-3 rounded-2xl shadow-sm border border-default-200 z-10 transform group-hover:scale-105 transition-transform duration-500">
+                        <img src="/imgs/logo-codes.png" alt="Logo CODES" className="w-20 h-20 md:w-24 md:h-24 object-contain" />
+                    </div>
+                    <div className="flex-1 text-center md:text-left space-y-2 z-10">
+                        <h3 className="text-2xl font-bold text-foreground">Centro de Estudiantes (CODES)</h3>
+                        <p className="text-foreground/80 text-md max-w-xl font-medium">
+                            ¿Tenés dudas sobre correlativas, inscripciones o trámites? ¡Acercate al CODES! El centro de estudiantes de Sistemas está para ayudarte y guiarte en tu camino universitario.
+                        </p>
+                    </div>
+                    <div className="z-10 shrink-0">
+                        <Button
+                            as="a"
+                            href="https://www.codesunlu.tech/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            color="primary"
+                            variant="shadow"
+                            className="font-bold rounded-full px-8 h-12 shadow-lg shadow-primary/30 hover:scale-105 transition-transform"
+                            endContent={<i className="fa-solid fa-arrow-up-right-from-square text-xs ml-1" />}
+                        >
+                            Visitar Página
+                        </Button>
+                    </div>
+                </div>
+            </section>
+
             {/* Contact Form Section */}
             <section className="flex flex-col items-center gap-10 mb-10 w-full">
                 <div className="text-center space-y-4">

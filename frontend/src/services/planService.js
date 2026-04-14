@@ -1,51 +1,38 @@
-import plansData, { careers } from '../data/plansData';
+import { careers } from '../data/plansData';
 
 /**
- * Servicio para gestionar los planes de estudio y materias.
+ * Servicio para gestionar los planes de estudio y materias con carga dinámica.
  */
 const planService = {
     /**
-     * Obtiene todas las materias de una carrera específica.
-     * @param {string} careerName - Nombre de la carrera (ej. "Sistemas", "Civil")
-     * @returns {Array} - Array de planes de la carrera
-     * @throws {Error} - Si la carrera no existe
-     */
-    getPlansByCareer(careerName) {
-        if (!careers[careerName]) {
-            throw new Error(`La carrera "${careerName}" no existe en el sistema.`);
-        }
-        return careers[careerName];
-    },
-
-    /**
-     * Obtiene un plan específico por su número.
-     * @param {string} planNumber - Número del plan (ej. "17.14")
-     * @returns {Object|null} - El objeto del plan o null si no existe
-     */
-    getPlanByNumber(planNumber) {
-        return plansData.find(p => p.plan_numero === planNumber) || null;
-    },
-
-    /**
-     * Obtiene el listado de materias de un plan específico.
+     * Obtiene el listado de materias de un plan específico de forma asíncrona.
      * @param {string} planNumber - Número del plan
-     * @returns {Array} - Array de materias
-     * @throws {Error} - Si el plan no existe
+     * @returns {Promise<Array>} - Promise con el array de materias
      */
-    getMateriasByPlan(planNumber) {
-        const plan = this.getPlanByNumber(planNumber);
-        if (!plan) {
-            throw new Error(`El plan "${planNumber}" no existe.`);
+    async getMateriasByPlan(planNumber) {
+        let planData = null;
+        
+        // Carga dinámica de los JSON para mejorar el rendimiento inicial (LCP)
+        if (planNumber.startsWith("17")) {
+            const data = await import('../data/sistemas.json');
+            planData = data.default.find(p => p.plan_numero === planNumber);
+        } else if (planNumber.startsWith("20")) {
+            const data = await import('../data/civil.json');
+            planData = data.default.find(p => p.plan_numero === planNumber);
         }
-        return plan.materias;
+
+        if (!planData) {
+            throw new Error(`El plan "${planNumber}" no existe o no pudo ser cargado.`);
+        }
+        return planData.materias;
     },
 
     /**
-     * Devuelve todos los planes disponibles.
+     * Devuelve los encabezados de todos los planes disponibles (sin cargar todas las materias).
      * @returns {Array}
      */
     getAllPlans() {
-        return plansData;
+        return Object.values(careers).flat();
     }
 };
 

@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 window.React = React; // Polyfill para librerías que esperan React global en React 19
 import { HeroUIProvider, ToastProvider } from '@heroui/react'
 import { ThemeProvider as NextThemesProvider } from "next-themes"
-import '@fortawesome/fontawesome-free/css/all.min.css';
 import App from './App.jsx'
 import './main.css'
 

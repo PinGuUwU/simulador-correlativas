@@ -56,9 +56,9 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
             backdrop="blur"
             classNames={{
                 base: "sm:rounded-3xl rounded-t-3xl border-0 shadow-2xl max-h-[90vh]",
-                header: "border-b border-default-100 p-6",
-                body: "p-4 sm:p-6 gap-6",
-                footer: "border-t border-default-100 p-6",
+                header: "border-b border-default-100 p-4 sm:p-6",
+                body: "p-3 sm:p-6 gap-4 sm:gap-6",
+                footer: "border-t border-default-100 p-4 sm:p-6",
                 closeButton: "hover:bg-default-100 active:bg-default-200 transition-colors",
             }}
         >
@@ -152,7 +152,7 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                             </div>
 
                             {/* Sección: Modo de Simulación */}
-                            <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-3 sm:gap-4">
                                 <div className="flex items-center gap-2 text-foreground">
                                     <div className="w-1 h-5 bg-primary rounded-full"></div>
                                     <h3 className="font-bold text-md">Modo de simulación</h3>
@@ -162,14 +162,14 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                     defaultValue={"viejo"}
                                     aria-label="Modo de simulación"
                                     onValueChange={setConfiModo}
-                                    classNames={{ wrapper: "gap-3" }}
+                                    classNames={{ wrapper: "gap-2" }}
                                 >
                                     <Radio
                                         value="viejo"
                                         classNames={{
-                                            base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
+                                            base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-xl gap-3 p-3 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
                                             label: "text-foreground font-bold text-sm",
-                                            description: "text-foreground/80 text-[11px] leading-tight",
+                                            description: "text-foreground/80 text-[10px] leading-tight",
                                         }}
                                         description="Cargá tus materias aprobadas y regulares automáticamente."
                                     >
@@ -178,9 +178,9 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                     <Radio
                                         value="nuevo"
                                         classNames={{
-                                            base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
+                                            base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-xl gap-3 p-3 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
                                             label: "text-foreground font-bold text-sm",
-                                            description: "text-foreground/80 text-[11px] leading-tight",
+                                            description: "text-foreground/80 text-[10px] leading-tight",
                                         }}
                                         description="Iniciá una planificación limpia desde el primer año."
                                     >
@@ -190,9 +190,9 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                         <Radio
                                             value="guardado"
                                             classNames={{
-                                                base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-2xl gap-4 p-4 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
+                                                base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-xl gap-3 p-3 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
                                                 label: "text-foreground font-bold text-sm",
-                                                description: "text-foreground/80 text-[11px] leading-tight",
+                                                description: "text-foreground/80 text-[10px] leading-tight",
                                             }}
                                             description="Continuá tu simulación exactamente donde la dejaste."
                                         >

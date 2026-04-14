@@ -109,7 +109,7 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
                         <Button size="sm" color="success" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-ranking-star w-4" />} onPress={() => handleAction('estado', 'Promocionado')}>
                             Promocionado
                         </Button>
-                        <Divider className="my-1"/>
+                        <Divider className="my-1" />
                         <Button size="sm" color="default" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-circle-info w-4" />} onPress={() => handleAction('detalles', materia)}>
                             Detalles
                         </Button>

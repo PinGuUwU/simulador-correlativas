@@ -1,5 +1,5 @@
 import {
-    Card, Chip, Divider,
+    Card, CardHeader, Chip, Divider,
     Drawer, DrawerBody, DrawerContent, DrawerHeader,
     Button, Input, Select, SelectItem
 } from "@heroui/react";
@@ -12,7 +12,7 @@ import { useState } from "react";
 const ESTADOS_CON_HISTORIAL = ['Regular', 'Libre', 'Aprobado'];
 
 function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progresoDetalles, setProgresoDetalles, plan, onOpenChange, cambioDeEstado }) {
-    
+
     const estadoActual = infoMateria ? progreso[infoMateria.codigo] : null;
     const [showHistorial, setShowHistorial] = useState(false);
 
@@ -31,12 +31,12 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
         handleUpdateCursadaHistorial,
         handleEliminarCursadaHistorial
     } = useDetalleMateria(
-        infoMateria, 
-        progresoDetalles, 
-        setProgresoDetalles, 
-        plan, 
-        progreso, 
-        cambioDeEstado, 
+        infoMateria,
+        progresoDetalles,
+        setProgresoDetalles,
+        plan,
+        progreso,
+        cambioDeEstado,
         estadoActual
     );
 
@@ -53,7 +53,11 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
     if (!infoMateria) return null;
 
     const detallesLocales = progresoDetalles?.[infoMateria.codigo] || {};
-    const statusPlan = regularidadUtils.obtenerPlanificacionInstancias(detallesLocales.fechaRegularidad, detallesLocales.intentosFinal);
+    const statusPlanFallback = { cuatrimestresRestantes: 5, intentosRestantes: 5 };
+    let statusPlan = statusPlanFallback;
+    try {
+        statusPlan = regularidadUtils.obtenerPlanificacionInstancias(detallesLocales.fechaRegularidad, detallesLocales.intentosFinal) ?? statusPlanFallback;
+    } catch (_) { /* datos de regularidad inválidos */ }
     const mostrarMóduloRegularidad = ESTADOS_CON_HISTORIAL.includes(estadoActual);
     const intentosFinal = detallesLocales.intentosFinal || [];
     const arr5 = [0, 1, 2, 3, 4];
@@ -61,8 +65,8 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
     const cuatriAsignado = infoMateria?.cuatrimestre ? (Number(infoMateria.cuatrimestre) % 2 === 0 ? 2 : 1) : 1;
 
     return (
-        <Drawer isOpen={isOpen} onOpenChange={onOpenChange}>
-            <DrawerContent className="pb-4">
+        <Drawer isOpen={isOpen} onOpenChange={onOpenChange} placement="bottom" size="5xl">
+            <DrawerContent className="pb-4 max-h-[92dvh] overflow-hidden">
                 {() => (
                     <>
                         <DrawerHeader className="flex flex-col gap-1 pb-1">
@@ -97,7 +101,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                             </div>
                         </DrawerHeader>
 
-                        <DrawerBody className="gap-6 mt-2">
+                        <DrawerBody className="gap-6 mt-2 overflow-y-auto">
                             {mostrarMóduloRegularidad && (
                                 <Card className="bg-default-50 border border-default-200 shadow-sm overflow-visible p-4">
                                     <h4 className="font-bold text-foreground mb-4 text-base flex items-center gap-2">

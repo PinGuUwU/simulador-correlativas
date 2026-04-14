@@ -4,7 +4,7 @@ const useSimuladorMaterias = (materias, progreso, cuatri, setProgreso, progresoB
 
     // Separamos la lógica en cursables y bloqueadas
     const { materiasCursables, materiasBloqueadas } = useMemo(() => {
-        if (!progresoBase || Object.keys(progresoBase).length === 0) return { materiasCursables: [], materiasBloqueadas: [] };
+        if (progresoBase === null || progresoBase === undefined) return { materiasCursables: [], materiasBloqueadas: [] };
 
         // 1. Filtramos por temporada (paridad de cuatrimestre) y que no estén cursadas
         const materiasCandidatas = materias.filter(m => {

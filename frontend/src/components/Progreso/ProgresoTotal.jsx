@@ -5,7 +5,7 @@ import regularidadUtils from '../../utils/Progreso/regularidadUtils'
 
 function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias, isSticky, headerRef, setIsSticky }) {
     const [isStatsExpanded, setIsStatsExpanded] = useState(false);
-    
+
     const promedios = regularidadUtils.calcularPromedioGeneral(progresoDetalles, progreso);
 
     useEffect(() => {
@@ -58,7 +58,7 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
                         <p className="text-foreground/70 font-medium text-base max-w-2xl leading-relaxed mb-4">
                             Gestioná tu progreso académico de la <span className="text-foreground font-bold underline decoration-primary/40 decoration-2">Licenciatura en Sistemas de Información</span> llevando el control de tus materias aprobadas y regulares.
                         </p>
-                        
+
                         {/* Sección Promedios */}
                         <div className="flex flex-wrap gap-3 items-center justify-center md:justify-start pt-2">
                             <Tooltip content="Promedio de notas de exámenes finales aprobados unicamente." placement="top">
@@ -72,7 +72,7 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
                                     Promedio (Sin Aplazos): {promedios.promedioSinAplazos || '-'}
                                 </Chip>
                             </Tooltip>
-                            
+
                             <Tooltip content="Promedio de notas de todos los intentos de exámenes finales (aprobados y reprobados)." placement="top">
                                 <Chip
                                     color="danger"

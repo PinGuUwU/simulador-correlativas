@@ -1,9 +1,20 @@
 import { careers } from '../data/plansData';
+import plansData from '../data/plansData';
 
 /**
  * Servicio para gestionar los planes de estudio y materias con carga dinámica.
  */
 const planService = {
+    /**
+     * Obtiene un plan completo (con materias) de forma SÍNCRONA.
+     * Usa el bundle ya cargado en plansData.
+     * @param {string} planNumber - Número del plan (ej: "17.14")
+     * @returns {{ plan_numero: string, materias: Array }|null}
+     */
+    getPlanByNumber(planNumber) {
+        return plansData.find(p => p.plan_numero === planNumber) ?? null;
+    },
+
     /**
      * Obtiene el listado de materias de un plan específico de forma asíncrona.
      * @param {string} planNumber - Número del plan
@@ -36,4 +47,4 @@ const planService = {
     }
 };
 
-export default planService;
+export default planService;

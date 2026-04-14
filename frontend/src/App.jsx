@@ -21,7 +21,7 @@ function AppContent({ plan, setPlan }) {
         initOfflineListener();
     }, []);
     return (
-        <div className='flex min-h-screen'>
+        <div className='flex min-h-screen overflow-x-hidden'>
             <NavBar setPlan={setPlan} plan={plan} />
             <main className='flex-1 min-w-0 relative'>
                 <Rutas plan={plan} setPlan={setPlan} />

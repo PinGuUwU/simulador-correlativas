@@ -319,17 +319,18 @@ export default function NavBar({ setPlan, plan }) {
             <LoginModal isOpen={isLoginOpen} onClose={onLoginClose} onConfirm={handleSignIn} />
 
             {/* Botón Hamburguesa Móvil */}
-            <div className="lg:hidden fixed top-3 right-3 z-50">
+            <div className="lg:hidden fixed top-4 right-4 z-[100]">
                 <Button
                     isIconOnly
                     radius="full"
                     variant="shadow"
                     onPress={onDrawerOpen}
                     id="btn-menu-mobile"
-                    className="bg-background text-primary border border-default-200"
+                    className="bg-background/80 backdrop-blur-md text-primary border border-default-200 shadow-lg"
                     aria-label="Abrir menú principal"
+                    size="lg"
                 >
-                    <i className="fa-solid fa-bars" />
+                    <i className="fa-solid fa-bars text-lg" />
                 </Button>
             </div>
 

@@ -43,18 +43,18 @@ function Inicio() {
     }
 
     return (
-        <div className="flex flex-col gap-24 py-16 px-6 md:px-12 max-w-7xl mx-auto animate-in fade-in duration-500">
+        <div className="flex flex-col gap-12 md:gap-24 py-8 md:py-16 px-4 md:px-12 max-w-7xl mx-auto animate-in fade-in duration-500 overflow-hidden">
             {/* Hero Section */}
-            <section className="flex flex-col items-center text-center gap-8 mt-10 relative">
+            <section className="flex flex-col items-center text-center gap-6 md:gap-8 mt-6 md:mt-10 relative">
                 {/* Decorative background blob */}
-                <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
-                <h1 className="text-5xl md:text-7xl font-black text-foreground tracking-tight max-w-5xl leading-tight relative z-10">
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[300px] md:w-[600px] h-[200px] md:h-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+                <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-foreground tracking-tight max-w-5xl leading-[1.1] md:leading-tight relative z-10">
                     Planificá tu carrera en Sistemas <br className="hidden md:block" />
-                    <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-secondary to-primary bg-300% animate-gradient">
+                    <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-secondary to-primary bg-300% animate-gradient px-1">
                         sin errores ni sorpresas
                     </span>
                 </h1>
-                <p className="text-xl md:text-2xl text-foreground/70 max-w-3xl leading-relaxed relative z-10">
+                <p className="text-lg md:text-2xl text-foreground/70 max-w-2xl leading-relaxed relative z-10 px-2">
                     Visualizá tu progreso, simula correlatividades automáticamente y tomá decisiones informadas sobre tu futuro académico.
                 </p>
 

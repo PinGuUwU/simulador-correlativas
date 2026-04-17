@@ -72,74 +72,71 @@ const ContactForm = () => {
     };
 
     return (
-        <Card className="w-full max-w-xl shadow-xl border border-default-200/60 bg-background/70 backdrop-blur-xl">
-            <CardBody className="p-8 md:p-10">
+        <Card className="w-full max-w-xl shadow-2xl border border-default-200/60 bg-background/70 backdrop-blur-xl mx-auto">
+            <CardBody className="p-5 sm:p-8 md:p-10">
                 <Form
                     ref={form}
                     onSubmit={onSubmit}
                     className="flex flex-col gap-6 w-full"
                     validationBehavior="native"
                 >
-                    <div className="w-full">
-                        <Input
-                            isRequired
-                            name="user_name"
-                            label="Nombre"
-                            placeholder="Tu nombre completo"
-                            labelPlacement="outside"
-                            variant="faded"
-                            radius="lg"
-                            classNames={{ label: "font-semibold mb-1" }}
-                            startContent={<i className="fa-solid fa-user text-foreground/60"></i>}
-                        />
-                    </div>
+                    <Input
+                        isRequired
+                        name="user_name"
+                        label="Nombre"
+                        placeholder="Tu nombre completo"
+                        labelPlacement="outside"
+                        variant="faded"
+                        radius="lg"
+                        size="lg"
+                        classNames={{ label: "font-semibold mb-1" }}
+                        startContent={<i className="fa-solid fa-user text-foreground/60 mr-1"></i>}
+                    />
 
-                    <div className="w-full">
-                        <Input
-                            isRequired
-                            name="user_email"
-                            type="email"
-                            label="Email"
-                            placeholder="tu@email.com"
-                            labelPlacement="outside"
-                            variant="faded"
-                            radius="lg"
-                            classNames={{ label: "font-semibold mb-1" }}
-                            errorMessage="Por favor, ingresa un correo electrónico válido."
-                            startContent={<i className="fa-solid fa-envelope text-foreground/60"></i>}
-                        />
-                    </div>
+                    <Input
+                        isRequired
+                        name="user_email"
+                        type="email"
+                        label="Email"
+                        placeholder="tu@email.com"
+                        labelPlacement="outside"
+                        variant="faded"
+                        radius="lg"
+                        size="lg"
+                        classNames={{ label: "font-semibold mb-1" }}
+                        errorMessage="Por favor, ingresa un correo electrónico válido."
+                        startContent={<i className="fa-solid fa-envelope text-foreground/60 mr-1"></i>}
+                    />
 
-                    <div className="w-full">
-                        <Textarea
-                            isRequired
-                            name="message"
-                            label="Mensaje"
-                            placeholder="Escribe tu mensaje o reporte de error detallado aquí..."
-                            labelPlacement="outside"
-                            variant="faded"
-                            radius="lg"
-                            minRows={5}
-                            classNames={{ label: "font-semibold mb-1" }}
-                        />
-                    </div>
+                    <Textarea
+                        isRequired
+                        name="message"
+                        label="Mensaje"
+                        placeholder="Escribe tu mensaje o reporte de error detallado aquí..."
+                        labelPlacement="outside"
+                        variant="faded"
+                        radius="lg"
+                        size="lg"
+                        minRows={4}
+                        classNames={{ label: "font-semibold mb-1" }}
+                    />
 
-                    <div className="w-full pt-2 text-center">
+                    <div className="w-full pt-2 flex flex-col gap-4">
                         <Button
                             type="submit"
                             color="primary"
                             size="lg"
                             isLoading={isLoading}
-                            className="w-full font-bold shadow-lg shadow-primary/40 text-md"
+                            className="w-full font-bold shadow-lg shadow-primary/40 h-14"
                             endContent={!isLoading && <i className="fa-solid fa-paper-plane ml-2"></i>}
                         >
                             {isLoading ? "Enviando..." : "Enviar mensaje"}
                         </Button>
 
-                        {/* Mensaje de éxito */}
-                        <div className={`min-h-[24px] mt-4 transition-opacity duration-300 ${action ? 'opacity-100' : 'opacity-0'}`}>
+                        {/* Mensaje de éxito/feedback */}
+                        <div className={`transition-all duration-300 ${action ? 'h-auto opacity-100' : 'h-0 opacity-0 overflow-hidden'}`}>
                             {action && (
-                                <div className="text-success-600 flex items-center justify-center gap-2 font-bold text-sm bg-success-50 py-2 px-4 rounded-xl border border-success-200">
+                                <div className="text-success-700 flex items-center justify-center gap-2 font-bold text-sm bg-success/10 py-3 px-4 rounded-xl border border-success/20 animate-in zoom-in duration-300">
                                     <i className="fa-solid fa-circle-check"></i>
                                     {action}
                                 </div>

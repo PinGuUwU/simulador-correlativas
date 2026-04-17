@@ -28,7 +28,7 @@ html, body {
 }
 
 /* Forzar aceleración por hardware en elementos que animan seguido */
-.animate-in, .transition-all, .drawer-content, .sticky-element {
+.animate-in, .drawer-content, .sticky-element {
     will-change: transform, opacity;
     transform: translateZ(0);
 }

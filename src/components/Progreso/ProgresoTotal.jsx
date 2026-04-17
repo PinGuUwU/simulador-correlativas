@@ -39,7 +39,7 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
             <div className="bg-background/80 backdrop-blur-md p-6 md:p-8 pb-3 flex flex-col gap-6 rounded-t-2xl w-full">
                 {/* Sección Superior: Pantalla completa centrada en móvil, horizontal en desktop */}
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6 lg:gap-10">
-                    
+
                     {/* Contenedor de Icono: Más grande en móvil, estándar en desktop */}
                     <div className="relative group shrink-0">
                         <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
@@ -60,7 +60,7 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
                         </h1>
 
                         <p className="text-foreground/70 font-medium text-sm sm:text-base lg:text-lg max-w-3xl leading-relaxed mb-6">
-                            Gestioná tu avance en la <span className="text-foreground font-bold">Licenciatura en Sistemas de Información</span>. 
+                            Gestioná tu avance en la <span className="text-foreground font-bold">Licenciatura en Sistemas de Información</span>.
                             Mantené el control total de tus materias <span className="italic">aprobadas, regulares y pendientes</span> de forma centralizada.
                         </p>
 
@@ -125,12 +125,12 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
                     ref={barRef}
                     className={
                         isSticky
-                            ? "fixed top-0 right-0 z-30 backdrop-blur-xl p-4 bg-background/90 shadow-md border-b border-default-200/60 animate-in slide-in-from-top duration-300 left-0"
+                            ? "fixed top-0 left-0 right-0 z-30 p-4 bg-background shadow-lg border-b border-default-200/60 animate-in slide-in-from-top duration-300"
                             : "w-full"
                     }
                 >
-                    <div className={isSticky ? "max-w-7xl mx-auto 2xl:pl-64" : ""}>
-                        <div className="flex px-10 sm:p-0 justify-between items-end mb-3">
+                    <div className={isSticky ? "max-w-7xl mx-auto lg:pl-64 xl:pl-0 transition-all duration-300" : ""}>
+                        <div className="flex sm:px-10 pr-10 sm:p-0 justify-between items-end mb-3">
                             <div className="space-y-0.5">
                                 <span className="text-default-500 text-xs uppercase tracking-widest font-black">Estado Actual</span>
                                 <p className="text-foreground font-bold">Progreso de la carrera</p>

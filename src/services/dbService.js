@@ -13,20 +13,16 @@ export const saveUserProgreso = async (uid, plan, progreso, detalles = null) => 
     const userRef = doc(db, 'users', uid);
     const currentUser = auth.currentUser;
     
-    // Si el documento se está creando por primera vez, necesitamos estos campos para las reglas
-    const baseData = {
+    // Usamos notación de punto para que Firestore fusione dentro del mapa 
+    // y no sobrescriba los datos de otros planes.
+    const updates = {
         uid: uid,
         email: currentUser?.email || "",
         schemaVersion: SCHEMA_VERSION,
         progresoUpdatedAt: serverTimestamp(),
+        [`progreso.${plan}`]: progreso
     };
 
-    const updates = {
-        ...baseData,
-        [`progreso.${plan}`]: progreso,
-    };
-
-    // Si hay detalles (fechas, intentos), también los guardamos en su campo correspondiente
     if (detalles) {
         updates[`progresoDetalles.${plan}`] = detalles;
     }
@@ -60,16 +56,14 @@ export const updateUserConfig = async (uid, config) => {
     const currentUser = auth.currentUser;
     const { alias, planActivo, tema } = config;
     
-    const baseData = {
+    const updates = {
         uid: uid,
         email: currentUser?.email || "",
         schemaVersion: SCHEMA_VERSION,
         configUpdatedAt: serverTimestamp(),
     };
-
-    const updates = { ...baseData };
     
-    // Solo agregamos las variables si están presentes en la config usando notación de puntos
+    // Usamos notación de punto para actualizar solo los campos específicos de config
     if (alias !== undefined) updates['config.alias'] = alias;
     if (planActivo !== undefined) updates['config.planActivo'] = planActivo;
     if (tema !== undefined) updates['config.tema'] = tema;

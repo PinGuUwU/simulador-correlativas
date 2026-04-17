@@ -7,14 +7,21 @@ import { isIntentionalAuthCancel } from '../utils/errorCodes';
 import { logError } from '../services/logService';
 import { trackLogin, trackLogout } from '../services/analyticsService';
 import { getUserData } from '../services/dbService';
-import { flushSyncQueue, downloadAllProgress, uploadPlanProgress } from '../services/syncService';
+import { uploadPlanProgress, downloadAllProgress } from '../services/syncService';
+import { addToast } from '@heroui/react';
 
-// ─── Constantes de persistencia ────────────────────────────────────────────────
+// ============================================================================
+// CONSTANTES Y HELPERS
+// ============================================================================
+
 const SESSION_KEY = 'auth_session';
-const EXPIRY_SHORT = 24 * 60 * 60 * 1000;      // 24 h  (sin "Recordarme")
-const EXPIRY_LONG = 7 * 24 * 60 * 60 * 1000; //  7 d  (con "Recordarme")
+const EXPIRY_SHORT = 24 * 60 * 60 * 1000;  // 24 horas
+const EXPIRY_LONG = 7 * 24 * 60 * 60 * 1000; // 7 días
 
-// ─── Helpers de localStorage ────────────────────────────────────────────────────
+/**
+ * Guarda la sesión del usuario en localStorage con una fecha de expiración.
+ * @param {boolean} rememberMe - Si es true, la sesión dura 7 días; si no, 24 horas.
+ */
 const saveSession = (rememberMe) => {
     const expiry = Date.now() + (rememberMe ? EXPIRY_LONG : EXPIRY_SHORT);
     localStorage.setItem(SESSION_KEY, JSON.stringify({ expiry, rememberMe }));
@@ -33,31 +40,11 @@ const isSessionExpired = () => {
     }
 };
 
-const getLocalProgress = () => {
-    const localData = {};
-    let hasMeaningfulData = false;
-
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('progreso+')) {
-            const plan = key.split('+')[1];
-            try {
-                const data = JSON.parse(localStorage.getItem(key));
-                localData[plan] = data;
-                
-                const values = Object.values(data || {});
-                if (values.some(v => ['Aprobado', 'Regular', 'Cursado'].includes(v))) {
-                    hasMeaningfulData = true;
-                }
-            } catch {
-                // Ignore parse errors
-            }
-        }
-    }
-
-    return hasMeaningfulData ? localData : null;
-};
-
+/**
+ * Sobrescribe el localStorage local con los datos de la nube.
+ * Dispara un evento 'progress-hydrated' para que la UI reaccione y se actualice.
+ * @param {object} cloudData - Los datos del documento del usuario en Firestore.
+ */
 const hydrateLocalData = (cloudData) => {
     let hasChanged = false;
 
@@ -93,50 +80,142 @@ const hydrateLocalData = (cloudData) => {
         }
     }
     
+    // Solo disparamos el evento si realmente hubo cambios, para evitar re-renders innecesarios.
     if (hasChanged) {
         window.dispatchEvent(new Event('progress-hydrated'));
     }
 };
 
-// ─── Contexto ───────────────────────────────────────────────────────────────────
+// ============================================================================
+// CONTEXTO
+// ============================================================================
+
 const AuthContext = createContext(null);
 
-// ─── Provider ───────────────────────────────────────────────────────────────────
+/**
+ * Hook público para consumir el AuthContext.
+ * Provee acceso al estado de autenticación, datos del usuario y funciones de login/logout/sync.
+ */
+export function useAuth() {
+    const ctx = useContext(AuthContext);
+    if (!ctx) {
+        throw new Error('useAuth debe usarse dentro de un <AuthProvider>');
+    }
+    return ctx;
+}
+
+// ============================================================================
+// PROVIDER
+// ============================================================================
+
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
-    const [userData, setUserData] = useState(null); // Para guardar config, alias, etc.
+    const [userData, setUserData] = useState(null); // Datos de Firestore (config, alias, etc.)
     const [loading, setLoading] = useState(true);
-    /**
-     * authError: mensaje legible para mostrar al usuario (no un código técnico).
-     * null = sin error activo.
-     */
     const [authError, setAuthError] = useState(null);
-    /**
-     * firestoreWarning: aviso no-intrusivo cuando Firestore falla pero Auth ok.
-     * null = sin aviso activo.
-     */
     const [firestoreWarning, setFirestoreWarning] = useState(null);
-
-    // const [showSyncModal, setShowSyncModal] = useState(false);
-    // const [pendingSyncData, setPendingSyncData] = useState(null);
-
-    /**
-     * isCriticalError: identifica si hubo un fallo fatal en la conexión con los servidores de Google.
-     * Si es true, la App muestra una pantalla de error bloqueante.
-     */
     const [isCriticalError, setIsCriticalError] = useState(false);
 
-    // Función para "saltarse" el error de servidor y usar la app localmente
+    // --- Efecto Principal: Observer de Autenticación ---
+    useEffect(() => {
+        if (isSessionExpired()) {
+            logout().catch(() => {});
+            clearSession();
+        }
+
+        const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+            setLoading(true);
+            try {
+                if (firebaseUser && !isSessionExpired()) {
+                    setUser(firebaseUser);
+                    
+                    // Al iniciar sesión, siempre intentamos descargar el progreso de la nube.
+                    // La función downloadAllProgress se encarga de la lógica de hidratación.
+                    await downloadAllProgress(firebaseUser.uid);
+
+                } else {
+                    setUser(null);
+                    setUserData(null);
+                }
+            } catch (err) {
+                console.error("Error en el observer de Auth:", err);
+                logError(err, { route: 'auth/observer' });
+                setFirestoreWarning('Error al sincronizar datos. Podés usar la app offline.');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        return () => unsubscribeAuth();
+    }, []);
+
+    // --- Funciones de Autenticación ---
+
+    const signIn = useCallback(async (rememberMe = false) => {
+        clearAuthError();
+        clearFirestoreWarning();
+        saveSession(rememberMe);
+
+        try {
+            const { user: loggedUser, firestoreWarning: warning } = await loginConGoogle();
+            trackLogin({ userId: loggedUser.uid });
+            if (warning) setFirestoreWarning(warning);
+
+            return loggedUser;
+        } catch (err) {
+            clearSession();
+            if (isIntentionalAuthCancel(err)) return null;
+
+            logError(err, { route: window?.location?.pathname });
+            setAuthError(err?.message ?? 'No se pudo iniciar sesión. Intentá de nuevo.');
+            throw err;
+        }
+    }, []);
+
+    const signOut = useCallback(async () => {
+        clearAuthError();
+        clearFirestoreWarning();
+        try {
+            await logout();
+            trackLogout();
+        } catch {
+            // No hacemos nada si el logout de Firebase falla, la limpieza local es suficiente.
+        } finally {
+            clearSession();
+            // El onAuthStateChanged se encargará de poner el user a null.
+        }
+    }, []);
+
+    // --- Funciones de Datos y Sincronización ---
+
+    const updateAuthProgreso = useCallback((plan, nuevoProgreso, progresoDetalles = null) => {
+        // Esta función ahora solo se encarga de guardar en local.
+        // La subida a la nube es responsabilidad de las funciones manuales.
+        localStorage.setItem(`progreso+${plan}`, JSON.stringify(nuevoProgreso));
+        if (progresoDetalles) {
+            localStorage.setItem(`detalles_progreso+${plan}`, JSON.stringify(progresoDetalles));
+        }
+    }, []);
+
+    const refetchUserData = useCallback(async () => {
+        if (!user) return;
+        try {
+            const cloudData = await getUserData(user.uid);
+            if (cloudData) setUserData(cloudData);
+        } catch (err) {
+            console.error("Error refetching user data:", err);
+        }
+    }, [user]);
+
     const enterOfflineMode = useCallback(() => {
         setIsCriticalError(false);
         setLoading(false);
     }, []);
 
-    // Helper para limpiar errores (útil para que la UI los descarte)
     const clearAuthError = useCallback(() => setAuthError(null), []);
     const clearFirestoreWarning = useCallback(() => setFirestoreWarning(null), []);
 
-    // Funciones globales para evitar el asiduo uso disperso de localStorage
+    // --- Helpers para acceder a localStorage (expuestos para desacoplar) ---
     const getProgresoLocal = useCallback((plan) => {
         try {
             const data = localStorage.getItem(`progreso+${plan}`);
@@ -151,186 +230,30 @@ export function AuthProvider({ children }) {
         } catch { return null; }
     }, []);
 
-    const getSimulacionLocal = useCallback((plan) => {
-        try {
-            const data = localStorage.getItem(`simulacion+${plan}`);
-            return data ? JSON.parse(data) : null;
-        } catch { return null; }
-    }, []);
-
-    const setSimulacionLocal = useCallback((plan, data) => {
-        localStorage.setItem(`simulacion+${plan}`, JSON.stringify(data));
-    }, []);
-
-    // ─── Observer de Firebase: Auth State ─────────────────────────────────────
-    useEffect(() => {
-        if (isSessionExpired()) {
-            logout().catch(() => { });
-            clearSession();
-        }
-
-        const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
-            try {
-                if (firebaseUser) {
-                    if (isSessionExpired()) {
-                        logout().catch(() => { });
-                        clearSession();
-                        setUser(null);
-                        setLoading(false);
-                    } else {
-                        setUser(firebaseUser);
-                        
-                        try {
-                            const cloudData = await getUserData(firebaseUser.uid);
-                            if (cloudData) setUserData(cloudData);
-
-                            // Siempre intentamos descargar los datos de la nube al iniciar sesión
-                            // (si existen) para tener la versión más actualizada.
-                            if (cloudData?.progreso && Object.keys(cloudData.progreso).length > 0) {
-                                hydrateLocalData(cloudData);
-                            } else {
-                                // Si no hay progreso en la nube, pero hay local, forzamos la subida
-                                // (caso de primer login con datos de invitado)
-                                const localProgress = getLocalProgress();
-                                if (localProgress) {
-                                    for (const [plan, prog] of Object.entries(localProgress)) {
-                                        await uploadPlanProgress(firebaseUser.uid, plan);
-                                    }
-                                    addToast({ title: 'Progreso subido', description: 'Tu progreso local se ha sincronizado con la nube.', color: 'success' });
-                                }
-                            }
-
-                            // Flush any pending queue items (might be from previous sessions or offline changes)
-                            flushSyncQueue(firebaseUser.uid);
-
-                        } catch (err) {
-                            logError(err, { route: 'auth/hydration_manual_sync' });
-                            setFirestoreWarning('Error al sincronizar datos. Podés usar la app offline.');
-                        }
-                    }
-                } else {
-                    setUser(null);
-                }
-            } catch (globalErr) {
-                console.error("Critical Auth Initialization Error:", globalErr);
-                logError(globalErr, { route: 'auth/global_init' });
-                setIsCriticalError(true);
-            } finally {
-                setLoading(false);
-            }
-        }, (error) => {
-            console.error("Firebase Auth State Changed Error:", error);
-            setIsCriticalError(true);
-            setLoading(false);
-        });
-
-        return () => unsubscribeAuth();
-    }, []);
-
-    // ─── Acciones expuestas ───────────────────────────────────────────────────
-
-    /**
-     * Inicia sesión con Google OAuth (popup).
-     *
-     * ⚠️  saveSession se llama ANTES del popup para evitar la race condition
-     * con onAuthStateChanged (ver comentario en authService).
-     *
-     * Manejo de errores:
-     * - Cancelación intencional (popup cerrado) → silencioso, sin toast
-     * - Error de Auth                           → setAuthError con mensaje humano
-     * - Error de Firestore                      → setFirestoreWarning (no-intrusivo)
-     *
-     * @param {boolean} rememberMe - true → sesión de 7 días, false → 24 horas
-     * @returns {Promise<void>}
-     */
-    const signIn = useCallback(async (rememberMe = false) => {
-        setAuthError(null);
-        setFirestoreWarning(null);
-
-        // Guardar sesión ANTES del popup (fix race condition con onAuthStateChanged)
-        saveSession(rememberMe);
-
-        try {
-            const { user: loggedUser, firestoreWarning: warning } = await loginConGoogle();
-
-            trackLogin({ userId: loggedUser.uid });
-
-            if (warning) setFirestoreWarning(warning);
-
-            return loggedUser;
-
-        } catch (err) {
-            clearSession(); // revertimos el saveSession preventivo
-
-            // Cancelación intencional: no mostrar error al usuario
-            if (isIntentionalAuthCancel(err)) return null;
-
-            // Loguea en Firestore (fire-and-forget, nunca rompe la app)
-            logError(err, { route: window?.location?.pathname });
-
-            // Error real: exponemos un mensaje legible
-            setAuthError(
-                err?.message ?? 'No se pudo iniciar sesión. Intentá de nuevo.'
-            );
-
-            throw err; // re-lanzamos para que el NavBar pueda resetear su loading
-        }
-    }, []);
-
-    /**
-     * Cierra la sesión del usuario.
-     *
-     * @returns {Promise<void>}
-     const signOut = useCallback(async () => {
-         setAuthError(null);
-         setFirestoreWarning(null);
-         try {
-             await logout();
-             trackLogout();
-         } catch {
-             // El signOut raramente falla; si lo hace simplemente limpiamos local
-         } finally {
-             clearSession();
-             setUser(null);
-         }
-     }, []);
-    const updateAuthProgreso = useCallback((plan, nuevoProgreso, progresoDetalles = null) => {
-        localStorage.setItem(`progreso+${plan}`, JSON.stringify(nuevoProgreso));
-        if (progresoDetalles) {
-            localStorage.setItem(`detalles_progreso+${plan}`, JSON.stringify(progresoDetalles));
-        }
-    }, []);
-
-    // Setter para forzar en refresco de configuraciones
-    const refetchUserData = useCallback(async () => {
-        if (!user) return;
-        try {
-            const cloudData = await getUserData(user.uid);
-            if (cloudData) setUserData(cloudData);
-        } catch {}
-    }, [user]);
-
+    // --- Valor del Contexto ---
     const value = {
         user,
         userData,
         loading,
         isAuthenticated: !!user,
-        updateAuthProgreso,
-        getProgresoLocal,
-        getProgresoDetallesLocal,
-        getSimulacionLocal,
-        setSimulacionLocal,
-        refetchUserData,
         authError,
         firestoreWarning,
         isCriticalError,
+        
+        // Acciones
+        signIn,
+        signOut,
+        updateAuthProgreso,
+        refetchUserData,
+        uploadPlanProgress,
+        downloadAllProgress,
         enterOfflineMode,
         clearAuthError,
         clearFirestoreWarning,
-        signIn,
-        signOut,
-        uploadPlanProgress, // Nueva función de carga manual
-        downloadAllProgress, // Nueva función de descarga manual
+        
+        // Helpers de LocalStorage
+        getProgresoLocal,
+        getProgresoDetallesLocal,
     };
 
     return (
@@ -343,36 +266,3 @@ export function AuthProvider({ children }) {
 AuthProvider.propTypes = {
     children: PropTypes.node.isRequired,
 };
-
-// ─── Hook público ────────────────────────────────────────────────────────────────
-/**
- * Consume el AuthContext. Debe usarse dentro de <AuthProvider>.
- *
- * @returns {{
- *   user: import("firebase/auth").User | null,
- *   loading: boolean,
- *   isAuthenticated: boolean,
- *   authError: string | null,
- *   firestoreWarning: string | null,
- *   clearAuthError: () => void,
- *   clearFirestoreWarning: () => void,
- *   signIn: (rememberMe?: boolean) => Promise<void>,
- *   signOut: () => Promise<void>,
- *   uploadPlanProgress: (uid: string, plan: string) => Promise<boolean>,
- *   downloadAllProgress: (uid: string) => Promise<boolean>,
- *   updateAuthProgreso: (plan: string, nuevoProgreso: object, progresoDetalles?: object) => void,
- *   getProgresoLocal: (plan: string) => object | null,
- *   getProgresoDetallesLocal: (plan: string) => object | null,
- *   getSimulacionLocal: (plan: string) => object | null,
- *   setSimulacionLocal: (plan: string, data: object) => void,
- *   userData: object | null,
- *   refetchUserData: () => Promise<void>
- * }}
- */
-export function useAuth() {
-    const ctx = useContext(AuthContext);
-    if (!ctx) {
-        throw new Error('useAuth debe usarse dentro de <AuthProvider>');
-    }
-    return ctx;
-}

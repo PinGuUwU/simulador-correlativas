@@ -10,6 +10,7 @@ import useProgresoMaterias from '../../hooks/Progreso/useProgresoMaterias.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import regularidadUtils from '../../utils/Progreso/regularidadUtils.js'
 import { Search } from 'lucide-react'
+import SyncCloud from './SyncCloud';
 
 function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan, busqueda = "", filtros = [] }) {
     const { updateAuthProgreso } = useAuth();
@@ -218,14 +219,29 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             return;
         }
 
+        // Si es "Cursando", no preguntamos nada y tomamos el año actual automáticamente
+        if (mappedState === "Cursando") {
+            const cuatrimestreAuto = materia?.cuatrimestre
+                ? (Number(materia.cuatrimestre) % 2 === 0 ? 2 : 1)
+                : 1;
+
+            const payload = {
+                fechaInicioCursada: {
+                    anio: new Date().getFullYear(),
+                    cuatrimestre: cuatrimestreAuto
+                }
+            };
+
+            ejecutarCambioConDatos(codigo, { tipo: 'hacia_cursando', materia, pendingState: mappedState }, payload);
+            return;
+        }
+
         // Determinar tipo de captura según la transición
         let tipoCaptura = null;
 
-        if (mappedState === "Cursando") {
-            tipoCaptura = 'hacia_cursando';
-        } else if (mappedState === "Regular") {
+        if (mappedState === "Regular") {
             tipoCaptura = estadoActual === 'Cursando' ? 'desde_cursando_hacia_reg' : 'hacia_regular';
-        } else if (mappedState === "Aprobado") {
+        } else if (mappedState === "Aprobado" || mappedState === "Promocionado") {
             if (estadoActual === 'Regular' || estadoActual === 'Cursando') {
                 tipoCaptura = 'hacia_aprobado_desde_reg';
             } else {
@@ -244,30 +260,14 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
         cambioDeEstado(codigo, mappedState);
     }
 
-    const handleCapturaConfirm = (payload) => {
-        // _sugerirLibre: el usuario eligio "Marcar como Libre" desde la alerta de nota reprobatoria
-        if (payload?._sugerirLibre) {
-            if (codigoMateria) {
-                const detallesActuales = progresoDetalles?.[codigoMateria] || {};
-                const updatedDetalles = {
-                    ...progresoDetalles,
-                    [codigoMateria]: { ...detallesActuales, notaRegularizacion: payload.notaRegularizacion }
-                };
-                if (setProgresoDetalles) setProgresoDetalles(updatedDetalles);
-                updateAuthProgreso(plan, progreso, updatedDetalles);
-            }
-            onCapturaClose();
-            cambioDeEstado(codigoMateria, 'Libre');
-            return;
-        }
-
-        if (payload && codigoMateria) {
-            const detallesActuales = progresoDetalles?.[codigoMateria] || {};
-            const estadoActual = progreso[codigoMateria];
+    const ejecutarCambioConDatos = (codigo, config, payload) => {
+        if (payload && codigo) {
+            const detallesActuales = progresoDetalles?.[codigo] || {};
+            const estadoActual = progreso[codigo];
 
             // ¿Es una recursada? (viniendo de Libre, Aprobado o Promocionado y queriendo regularizar/cursar de nuevo)
             const viniendoDeEstadoFinal = ['Libre', 'Aprobado', 'Promocionado'].includes(estadoActual);
-            const yendoAEstadoActivo = ['Cursando', 'Regular', 'Aprobado', 'Promocionado'].includes(capturaConfig.pendingState);
+            const yendoAEstadoActivo = ['Cursando', 'Regular', 'Aprobado', 'Promocionado'].includes(config.pendingState);
             const esRecursada = viniendoDeEstadoFinal && yendoAEstadoActivo;
 
             let nuevosDetallesBase = { ...detallesActuales };
@@ -306,15 +306,19 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             };
 
             // Si transición 'desde_cursando_hacia_reg', copiar fechaInicioCursada como fechaRegularidad si no la tiene
-            if (capturaConfig.tipo === 'desde_cursando_hacia_reg' && !nuevosDetalles.fechaRegularidad && nuevosDetallesBase.fechaInicioCursada) {
+            if (config.tipo === 'desde_cursando_hacia_reg' && !nuevosDetalles.fechaRegularidad && nuevosDetallesBase.fechaInicioCursada) {
                 nuevosDetalles.fechaRegularidad = nuevosDetallesBase.fechaInicioCursada;
             }
 
-            if (payload.notaFinal != null && (capturaConfig.pendingState === 'Aprobado' || capturaConfig.pendingState === 'Promocionado')) {
+            if (payload.notaFinal != null && (config.pendingState === 'Aprobado' || config.pendingState === 'Promocionado')) {
+                const fechaExamen = payload.anioExamen 
+                    ? new Date(payload.anioExamen, 11, 31).toISOString() 
+                    : new Date().toISOString();
+
                 const nuevoIntento = {
                     nota: payload.notaFinal,
                     estado: payload.notaFinal >= 4 ? 'aprobado' : 'reprobado',
-                    fecha: new Date().toISOString()
+                    fecha: fechaExamen
                 };
                 nuevosDetalles.intentosFinal = [
                     ...(nuevosDetallesBase.intentosFinal || []),
@@ -322,16 +326,36 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                 ];
             }
 
-            const updatedDetalles = { ...progresoDetalles, [codigoMateria]: nuevosDetalles };
+            const updatedDetalles = { ...progresoDetalles, [codigo]: nuevosDetalles };
             if (setProgresoDetalles) setProgresoDetalles(updatedDetalles);
             updateAuthProgreso(plan, progreso, updatedDetalles);
         }
 
-        onCapturaClose();
-        // Aplicar el cambio de estado siempre
-        if (capturaConfig.pendingState) {
-            cambioDeEstado(codigoMateria, capturaConfig.pendingState);
+        // Aplicar el cambio de estado siempre si hay un estado pendiente
+        if (config.pendingState) {
+            cambioDeEstado(codigo, config.pendingState);
         }
+    }
+
+    const handleCapturaConfirm = (payload) => {
+        // _sugerirLibre: el usuario eligio "Marcar como Libre" desde la alerta de nota reprobatoria
+        if (payload?._sugerirLibre) {
+            if (codigoMateria) {
+                const detallesActuales = progresoDetalles?.[codigoMateria] || {};
+                const updatedDetalles = {
+                    ...progresoDetalles,
+                    [codigoMateria]: { ...detallesActuales, notaRegularizacion: payload.notaRegularizacion }
+                };
+                if (setProgresoDetalles) setProgresoDetalles(updatedDetalles);
+                updateAuthProgreso(plan, progreso, updatedDetalles);
+            }
+            onCapturaClose();
+            cambioDeEstado(codigoMateria, 'Libre');
+            return;
+        }
+
+        ejecutarCambioConDatos(codigoMateria, capturaConfig, payload);
+        onCapturaClose();
     }
 
     useEffect(() => {
@@ -408,57 +432,50 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             </Modal>
 
             {/* Sección de botones */}
-            <div className="grid grid-cols-2 sm:flex sm:justify-between mb-8 gap-2">
-                {/* Botón de Reestablecer */}
-                <div id="wrapper-btn-reset-progreso" className="flex flex-col">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+                {/* Grupo de Acciones Principales */}
+                <div className="flex items-center gap-2">
                     <Button
                         size="sm"
                         variant="flat"
                         color="danger"
-                        className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 w-full"
+                        className="font-bold rounded-xl"
                         startContent={<i className="fa-solid fa-trash-can"></i>}
                         onPress={() => handleBorrado()}
                     >
                         Reestablecer
                     </Button>
-                </div>
-
-                <Button
-                    size='sm'
-                    variant="flat"
-                    color="success"
-                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 text-success-800"
-                    onPress={() => navigate("/simulador")}
-                >Simular Avance</Button>
-
-                <div id="wrapper-btn-mostrar-todos" className="flex flex-col">
                     <Button
                         size='sm'
                         variant="flat"
-                        color="warning"
-                        className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 text-warning-800 w-full"
-                        onPress={() => handleMostrarTodo()}
+                        color="success"
+                        className="font-bold rounded-xl text-success-800"
+                        onPress={() => navigate("/simulador")}
                     >
-                        {isAnioOpen.length > 0 ? "Mostrar todos" : "Ocultar todos"}
+                        Simular Avance
                     </Button>
                 </div>
+                
+                {/* Herramientas de Sincronización y Vista */}
+                <div className="flex items-center gap-3">
+                    <SyncCloud plan={plan} />
 
-                {/* Selector de Vista (Lista vs Cuadrícula) */}
-                <div id="wrapper-view-selector" className="col-span-2 sm:col-span-1 flex justify-center max-md:hidden">
-
-                    <Tabs
-                        size="sm"
-                        variant="bordered"
-                        selectedKey={vista}
-                        onSelectionChange={setVista}
-                        classNames={{
-                            tabList: "rounded-xl border-default-200 bg-background/50",
-                            cursor: "rounded-lg"
-                        }}
-                    >
-                        <Tab key="grid" title={<div className="flex items-center gap-2"><i className="fa-solid fa-table-cells-large"></i><span>Cuadrícula</span></div>} />
-                        <Tab key="list" title={<div className="flex items-center gap-2"><i className="fa-solid fa-list-ul"></i><span>Lista</span></div>} />
-                    </Tabs>
+                    <div id="wrapper-view-selector" className="max-md:hidden">
+                        <Tabs
+                            size="sm"
+                            variant="bordered"
+                            selectedKey={vista}
+                            onSelectionChange={setVista}
+                            classNames={{
+                                tabList: "rounded-xl border-default-200 bg-default-100 p-1",
+                                cursor: "rounded-lg bg-background shadow-sm",
+                                tab: "px-3"
+                            }}
+                        >
+                            <Tab key="grid" title={<div className="flex items-center gap-2"><i className="fa-solid fa-table-cells-large"></i></div>} />
+                            <Tab key="list" title={<div className="flex items-center gap-2"><i className="fa-solid fa-list-ul"></i></div>} />
+                        </Tabs>
+                    </div>
                 </div>
             </div>
             {/* Sección materias o Resultados de búsqueda */}

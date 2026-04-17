@@ -6,7 +6,6 @@ import ScrollToTop from './components/Shared/ScrollToTop'
 import AutoScrollTop from './components/Shared/AutoScrollTop'
 import { AuthProvider } from './context/AuthContext'
 import { usePageTracking } from './hooks/usePageTracking'
-import { initOfflineListener } from './services/syncService'
 
 // Componentes secundarios lazy-loaded para reducir FCP
 const Footer = lazy(() => import('./components/Footer'))
@@ -28,10 +27,6 @@ function AppContent({ plan, setPlan }) {
     useEffect(() => {
         localStorage.setItem('sidebar_collapsed', JSON.stringify(isCollapsed));
     }, [isCollapsed]);
-
-    useEffect(() => {
-        initOfflineListener();
-    }, []);
 
     if (isCriticalError) {
         return <ServerError />;

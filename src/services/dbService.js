@@ -23,12 +23,16 @@ export const saveUserProgreso = async (uid, plan, progreso, detalles = null) => 
 
     const updates = {
         ...baseData,
-        [`progreso.${plan}`]: progreso,
+        progreso: {
+            [plan]: progreso,
+        }
     };
 
     // Si hay detalles (fechas, intentos), también los guardamos en su campo correspondiente
     if (detalles) {
-        updates[`progresoDetalles.${plan}`] = detalles;
+        updates.progresoDetalles = {
+            [plan]: detalles,
+        };
     }
 
     await setDoc(userRef, updates, { merge: true });
@@ -67,12 +71,15 @@ export const updateUserConfig = async (uid, config) => {
         configUpdatedAt: serverTimestamp(),
     };
 
-    const updates = { ...baseData };
-    
-    // Solo agregamos las variables si están presentes en la config usando notación de puntos
-    if (alias !== undefined) updates['config.alias'] = alias;
-    if (planActivo !== undefined) updates['config.planActivo'] = planActivo;
-    if (tema !== undefined) updates['config.tema'] = tema;
+    const configData = {};
+    if (alias !== undefined) configData.alias = alias;
+    if (planActivo !== undefined) configData.planActivo = planActivo;
+    if (tema !== undefined) configData.tema = tema;
+
+    const updates = { 
+        ...baseData,
+        config: configData
+    };
     
     await setDoc(userRef, updates, { merge: true });
 };

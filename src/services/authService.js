@@ -71,7 +71,41 @@ export const loginConGoogle = async () => {
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-            await setDoc(userRef, buildUserDoc(user));
+            const newUserDoc = buildUserDoc(user);
+            
+            // --- Sincronización Inicial ---
+            // Si el usuario tenía progreso local SIGNIFICATIVO como invitado, lo subimos a su nuevo documento.
+            const getMeaningfulLocalProgress = () => {
+                const localData = {};
+                let hasMeaningfulData = false;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('progreso+')) {
+                        const plan = key.split('+')[1];
+                        const data = JSON.parse(localStorage.getItem(key));
+                        localData[plan] = data;
+                        if (Object.values(data).some(s => ['Aprobado', 'Regular', 'Cursando', 'Promocionado'].includes(s))) {
+                            hasMeaningfulData = true;
+                        }
+                    }
+                }
+                return hasMeaningfulData ? localData : null;
+            };
+            
+            const localProgress = getMeaningfulLocalProgress();
+            if (localProgress) {
+                newUserDoc.progreso = {};
+                newUserDoc.progresoDetalles = {};
+                for (const [plan, prog] of Object.entries(localProgress)) {
+                    newUserDoc.progreso[plan] = prog;
+                    const detalles = JSON.parse(localStorage.getItem(`detalles_progreso+${plan}`));
+                    if (detalles) {
+                        newUserDoc.progresoDetalles[plan] = detalles;
+                    }
+                }
+            }
+
+            await setDoc(userRef, newUserDoc);
         }
     } catch (firestoreError) {
         // El login es exitoso; solo marcamos el warning para la UI.

@@ -34,6 +34,7 @@ export default function usePlanData(plan) {
                 let localProgreso = getProgresoLocal(plan);
                 let localDetalles = getProgresoDetallesLocal(plan);
 
+                // 3. Inicialización si es la primera vez que se usa este plan
                 if (!localProgreso) {
                     localProgreso = {};
                     localDetalles = {};

@@ -1,9 +1,9 @@
 import { saveUserProgreso, getUserData } from './dbService';
-import { auth } from './firebase';
-import { addToast } from '@heroui/react';
 
 /**
  * Sube el progreso actual de un plan a la nube de forma manual.
+ * Se asegura de leer tanto el progreso (estados) como los detalles (notas, fechas)
+ * desde el localStorage antes de enviarlos.
  */
 export const uploadPlanProgress = async (uid, plan) => {
     try {
@@ -14,7 +14,8 @@ export const uploadPlanProgress = async (uid, plan) => {
             throw new Error("No hay datos locales para este plan.");
         }
 
-        await saveUserProgreso(uid, plan, progreso, detalles);
+        // Se pasa tanto el progreso como los detalles al servicio de base de datos.
+        await saveUserProgreso(uid, plan, progreso, detalles || {});
         return true;
     } catch (error) {
         console.error("Error al subir datos:", error);
@@ -23,30 +24,55 @@ export const uploadPlanProgress = async (uid, plan) => {
 };
 
 /**
- * Descarga el progreso desde la nube y lo guarda en local.
+ * Descarga TODO el progreso y detalles desde la nube y lo guarda en local.
+ * Esta función es la que se llama al iniciar sesión o al presionar "Cargar".
  */
 export const downloadAllProgress = async (uid) => {
     try {
         const cloudData = await getUserData(uid);
         if (!cloudData) return false;
 
-        if (cloudData.progreso) {
-            for (const [plan, data] of Object.entries(cloudData.progreso)) {
-                localStorage.setItem(`progreso+${plan}`, JSON.stringify(data));
+        let progreso = cloudData.progreso || {};
+        let detalles = cloudData.progresoDetalles || {};
+
+        // Fallback: Si existen claves con puntos literales (ej: "progreso.sistemas") 
+        // por un bug previo en el guardado, las normalizamos.
+        Object.keys(cloudData).forEach(key => {
+            if (key.startsWith('progreso.')) {
+                const plan = key.split('.')[1];
+                if (!progreso[plan]) progreso[plan] = cloudData[key];
             }
+            if (key.startsWith('progresoDetalles.')) {
+                const plan = key.split('.')[1];
+                if (!detalles[plan]) detalles[plan] = cloudData[key];
+            }
+        });
+
+        if (Object.keys(progreso).length === 0) {
+            return false;
         }
 
-        if (cloudData.progresoDetalles) {
-            for (const [plan, data] of Object.entries(cloudData.progresoDetalles)) {
-                localStorage.setItem(`detalles_progreso+${plan}`, JSON.stringify(data));
+        // Limpiamos cualquier progreso local viejo para evitar mezclas indeseadas.
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('progreso+') || key.startsWith('detalles_progreso+')) {
+                localStorage.removeItem(key);
             }
+        });
+        
+        // Escribimos los datos de la nube en el localStorage.
+        for (const [plan, data] of Object.entries(progreso)) {
+            localStorage.setItem(`progreso+${plan}`, JSON.stringify(data));
+        }
+
+        for (const [plan, data] of Object.entries(detalles)) {
+            localStorage.setItem(`detalles_progreso+${plan}`, JSON.stringify(data));
         }
 
         if (cloudData.config?.tema) {
             localStorage.setItem('theme', cloudData.config.tema);
         }
 
-        // Avisar a la UI que los datos cambiaron
+        // Avisamos a la UI que los datos han cambiado y necesita recargarse.
         window.dispatchEvent(new Event('progress-hydrated'));
         window.dispatchEvent(new Event('storage'));
         

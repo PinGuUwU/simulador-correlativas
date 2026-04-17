@@ -35,18 +35,20 @@ export const downloadAllProgress = async (uid) => {
         let progreso = cloudData.progreso || {};
         let detalles = cloudData.progresoDetalles || {};
 
-        // Fallback: Si existen claves con puntos literales (ej: "progreso.sistemas") 
-        // por un bug previo en el guardado, las normalizamos.
+        // Normalización: Si existen llaves con puntos literales (ej: "progreso.sistemas")
+        // les damos prioridad sobre el mapa, ya que suelen ser guardados más recientes.
         Object.keys(cloudData).forEach(key => {
             if (key.startsWith('progreso.')) {
                 const plan = key.split('.')[1];
-                if (!progreso[plan]) progreso[plan] = cloudData[key];
+                progreso[plan] = cloudData[key];
             }
             if (key.startsWith('progresoDetalles.')) {
                 const plan = key.split('.')[1];
-                if (!detalles[plan]) detalles[plan] = cloudData[key];
+                detalles[plan] = cloudData[key];
             }
         });
+
+        console.log("🛠️ Progreso procesado para sincronización:", { progreso, detalles });
 
         if (Object.keys(progreso).length === 0) {
             return false;
@@ -80,7 +82,7 @@ export const downloadAllProgress = async (uid) => {
         window.dispatchEvent(new Event('progress-hydrated'));
         window.dispatchEvent(new Event('storage'));
         
-        return true;
+        return cloudData;
     } catch (error) {
         console.error("Error al descargar datos:", error);
         throw error;

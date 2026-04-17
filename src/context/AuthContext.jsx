@@ -130,8 +130,10 @@ export function AuthProvider({ children }) {
                     setUser(firebaseUser);
                     
                     // Al iniciar sesión, siempre intentamos descargar el progreso de la nube.
-                    // La función downloadAllProgress se encarga de la lógica de hidratación.
-                    await downloadAllProgress(firebaseUser.uid);
+                    const cloudData = await downloadAllProgress(firebaseUser.uid);
+                    if (cloudData) {
+                        setUserData(cloudData);
+                    }
 
                 } else {
                     setUser(null);

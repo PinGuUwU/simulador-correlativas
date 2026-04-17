@@ -1,14 +1,13 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from '../services/firebase';
+import { auth } from '../services/firebase';
 import { loginConGoogle, logout } from '../services/authService';
 import { isIntentionalAuthCancel } from '../utils/errorCodes';
 import { logError } from '../services/logService';
 import { trackLogin, trackLogout } from '../services/analyticsService';
 import { getUserData } from '../services/dbService';
-import { syncProgreso, flushSyncQueue } from '../services/syncService';
+import { flushSyncQueue, downloadAllProgress, uploadPlanProgress } from '../services/syncService';
 
 // ─── Constantes de persistencia ────────────────────────────────────────────────
 const SESSION_KEY = 'auth_session';
@@ -60,18 +59,43 @@ const getLocalProgress = () => {
 };
 
 const hydrateLocalData = (cloudData) => {
+    let hasChanged = false;
+
     if (cloudData?.progreso) {
         for (const [plan, progreso] of Object.entries(cloudData.progreso)) {
-            localStorage.setItem(`progreso+${plan}`, JSON.stringify(progreso));
+            const key = `progreso+${plan}`;
+            const current = localStorage.getItem(key);
+            const next = JSON.stringify(progreso);
+            if (current !== next) {
+                localStorage.setItem(key, next);
+                hasChanged = true;
+            }
+        }
+    }
+
+    if (cloudData?.progresoDetalles) {
+        for (const [plan, detalles] of Object.entries(cloudData.progresoDetalles)) {
+            const key = `detalles_progreso+${plan}`;
+            const current = localStorage.getItem(key);
+            const next = JSON.stringify(detalles);
+            if (current !== next) {
+                localStorage.setItem(key, next);
+                hasChanged = true;
+            }
         }
     }
     
     if (cloudData?.config?.tema) {
-        localStorage.setItem('theme', cloudData.config.tema);
-        window.dispatchEvent(new Event('storage'));
+        const current = localStorage.getItem('theme');
+        if (current !== cloudData.config.tema) {
+            localStorage.setItem('theme', cloudData.config.tema);
+            window.dispatchEvent(new Event('storage'));
+        }
     }
     
-    window.dispatchEvent(new Event('progress-hydrated'));
+    if (hasChanged) {
+        window.dispatchEvent(new Event('progress-hydrated'));
+    }
 };
 
 // ─── Contexto ───────────────────────────────────────────────────────────────────
@@ -93,8 +117,8 @@ export function AuthProvider({ children }) {
      */
     const [firestoreWarning, setFirestoreWarning] = useState(null);
 
-    const [showSyncModal, setShowSyncModal] = useState(false);
-    const [pendingSyncData, setPendingSyncData] = useState(null);
+    // const [showSyncModal, setShowSyncModal] = useState(false);
+    // const [pendingSyncData, setPendingSyncData] = useState(null);
 
     /**
      * isCriticalError: identifica si hubo un fallo fatal en la conexión con los servidores de Google.
@@ -138,10 +162,8 @@ export function AuthProvider({ children }) {
         localStorage.setItem(`simulacion+${plan}`, JSON.stringify(data));
     }, []);
 
-    // ─── Observer de Firebase ─────────────────────────────────────────────────
+    // ─── Observer de Firebase: Auth State ─────────────────────────────────────
     useEffect(() => {
-        let unsubscribeSnapshot = null;
-
         if (isSessionExpired()) {
             logout().catch(() => { });
             clearSession();
@@ -149,12 +171,6 @@ export function AuthProvider({ children }) {
 
         const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
             try {
-                // Limpiar snapshot previo si existía
-                if (unsubscribeSnapshot) {
-                    unsubscribeSnapshot();
-                    unsubscribeSnapshot = null;
-                }
-
                 if (firebaseUser) {
                     if (isSessionExpired()) {
                         logout().catch(() => { });
@@ -164,40 +180,42 @@ export function AuthProvider({ children }) {
                     } else {
                         setUser(firebaseUser);
                         
-                        // ─── SUSCRIPCIÓN EN TIEMPO REAL ───
-                        const userRef = doc(db, 'users', firebaseUser.uid);
-                        unsubscribeSnapshot = onSnapshot(userRef, (docSnap) => {
-                            if (docSnap.exists()) {
-                                const cloudData = docSnap.data();
-                                setUserData(cloudData);
+                        try {
+                            const cloudData = await getUserData(firebaseUser.uid);
+                            if (cloudData) setUserData(cloudData);
 
+                            // Siempre intentamos descargar los datos de la nube al iniciar sesión
+                            // (si existen) para tener la versión más actualizada.
+                            if (cloudData?.progreso && Object.keys(cloudData.progreso).length > 0) {
+                                hydrateLocalData(cloudData);
+                            } else {
+                                // Si no hay progreso en la nube, pero hay local, forzamos la subida
+                                // (caso de primer login con datos de invitado)
                                 const localProgress = getLocalProgress();
-                                const hasCloudProgress = cloudData?.progreso && Object.keys(cloudData.progreso).length > 0;
-
-                                if (hasCloudProgress) {
-                                    hydrateLocalData(cloudData);
-                                } else if (localProgress && !hasCloudProgress) {
+                                if (localProgress) {
                                     for (const [plan, prog] of Object.entries(localProgress)) {
-                                        syncProgreso(firebaseUser.uid, plan, prog);
+                                        await uploadPlanProgress(firebaseUser.uid, plan);
                                     }
+                                    addToast({ title: 'Progreso subido', description: 'Tu progreso local se ha sincronizado con la nube.', color: 'success' });
                                 }
                             }
-                            setLoading(false);
-                        }, (err) => {
-                            console.error("Snapshot error:", err);
-                            setLoading(false);
-                        });
 
-                        flushSyncQueue(firebaseUser.uid);
+                            // Flush any pending queue items (might be from previous sessions or offline changes)
+                            flushSyncQueue(firebaseUser.uid);
+
+                        } catch (err) {
+                            logError(err, { route: 'auth/hydration_manual_sync' });
+                            setFirestoreWarning('Error al sincronizar datos. Podés usar la app offline.');
+                        }
                     }
                 } else {
                     setUser(null);
-                    setLoading(false);
                 }
             } catch (globalErr) {
                 console.error("Critical Auth Initialization Error:", globalErr);
                 logError(globalErr, { route: 'auth/global_init' });
                 setIsCriticalError(true);
+            } finally {
                 setLoading(false);
             }
         }, (error) => {
@@ -206,10 +224,7 @@ export function AuthProvider({ children }) {
             setLoading(false);
         });
 
-        return () => {
-            unsubscribeAuth();
-            if (unsubscribeSnapshot) unsubscribeSnapshot();
-        };
+        return () => unsubscribeAuth();
     }, []);
 
     // ─── Acciones expuestas ───────────────────────────────────────────────────
@@ -266,48 +281,25 @@ export function AuthProvider({ children }) {
      * Cierra la sesión del usuario.
      *
      * @returns {Promise<void>}
-     */
-    const signOut = useCallback(async () => {
-        setAuthError(null);
-        setFirestoreWarning(null);
-        try {
-            // Asegurar que todo lo pendiente se suba antes de irse
-            if (user) await flushSyncQueue(user.uid);
-            await logout();
-            trackLogout();
-        } catch {
-            // El signOut raramente falla; si lo hace simplemente limpiamos local
-        } finally {
-            clearSession();
-            setUser(null);
-        }
-    }, []);
-
-    const resolveSync = useCallback((choice) => {
-        if (!pendingSyncData || !user) return;
-        
-        if (choice === 'upload') {
-            for (const [plan, data] of Object.entries(pendingSyncData.local)) {
-                syncProgreso(user.uid, plan, data);
-            }
-        } else if (choice === 'download') {
-            hydrateLocalData(pendingSyncData.cloud);
-        }
-        
-        setShowSyncModal(false);
-        setPendingSyncData(null);
-    }, [pendingSyncData, user]);
-
+     const signOut = useCallback(async () => {
+         setAuthError(null);
+         setFirestoreWarning(null);
+         try {
+             await logout();
+             trackLogout();
+         } catch {
+             // El signOut raramente falla; si lo hace simplemente limpiamos local
+         } finally {
+             clearSession();
+             setUser(null);
+         }
+     }, []);
     const updateAuthProgreso = useCallback((plan, nuevoProgreso, progresoDetalles = null) => {
         localStorage.setItem(`progreso+${plan}`, JSON.stringify(nuevoProgreso));
         if (progresoDetalles) {
             localStorage.setItem(`detalles_progreso+${plan}`, JSON.stringify(progresoDetalles));
         }
-        
-        if (user) {
-            syncProgreso(user.uid, plan, nuevoProgreso); // Nota: idealmente también sincronizaríamos detalles
-        }
-    }, [user]);
+    }, []);
 
     // Setter para forzar en refresco de configuraciones
     const refetchUserData = useCallback(async () => {
@@ -323,9 +315,6 @@ export function AuthProvider({ children }) {
         userData,
         loading,
         isAuthenticated: !!user,
-        showSyncModal,
-        setShowSyncModal,
-        resolveSync,
         updateAuthProgreso,
         getProgresoLocal,
         getProgresoDetallesLocal,
@@ -340,6 +329,8 @@ export function AuthProvider({ children }) {
         clearFirestoreWarning,
         signIn,
         signOut,
+        uploadPlanProgress, // Nueva función de carga manual
+        downloadAllProgress, // Nueva función de descarga manual
     };
 
     return (
@@ -367,9 +358,8 @@ AuthProvider.propTypes = {
  *   clearFirestoreWarning: () => void,
  *   signIn: (rememberMe?: boolean) => Promise<void>,
  *   signOut: () => Promise<void>,
- *   showSyncModal: boolean,
- *   setShowSyncModal: (show: boolean) => void,
- *   resolveSync: (choice: 'upload' | 'download') => void,
+ *   uploadPlanProgress: (uid: string, plan: string) => Promise<boolean>,
+ *   downloadAllProgress: (uid: string) => Promise<boolean>,
  *   updateAuthProgreso: (plan: string, nuevoProgreso: object, progresoDetalles?: object) => void,
  *   getProgresoLocal: (plan: string) => object | null,
  *   getProgresoDetallesLocal: (plan: string) => object | null,

@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { updateUserConfig } from '../services/dbService';
 import { useTheme } from 'next-themes';
+import { uploadPlanProgress, downloadAllProgress } from '../services/syncService'; // Importar nuevas funciones
 
 export default function SettingsPage({ plan, setPlan }) {
     const {
@@ -25,12 +26,15 @@ export default function SettingsPage({ plan, setPlan }) {
         getProgresoLocal,
         getSimulacionLocal,
         refetchUserData,
-        signIn
+        signIn,
+        downloadAllProgress, // Exponerla del contexto
+        uploadPlanProgress, // Exponerla del contexto
     } = useAuth();
     const { theme, setTheme } = useTheme();
 
     const [alias, setAlias] = useState('');
     const [saving, setSaving] = useState(false);
+    const [syncing, setSyncing] = useState(false); // Nuevo estado para el loading de sync
 
     useEffect(() => {
         if (userData?.config?.alias) {
@@ -66,6 +70,44 @@ export default function SettingsPage({ plan, setPlan }) {
             addToast({ title: 'Error', description: 'No se pudo guardar la configuración.', color: 'danger' });
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleUpload = async () => {
+        if (!user) {
+            addToast({ title: 'Error', description: 'Necesitas iniciar sesión para subir tu progreso.', color: 'warning' });
+            return;
+        }
+        setSyncing(true);
+        try {
+            await uploadPlanProgress(user.uid, plan); // Solo subimos el plan activo
+            addToast({ title: 'Progreso subido', description: 'Tu progreso se guardó en la nube.', color: 'success' });
+        } catch (err) {
+            addToast({ title: 'Error', description: 'No se pudo subir el progreso.', color: 'danger' });
+            console.error(err);
+        } finally {
+            setSyncing(false);
+        }
+    };
+
+    const handleDownload = async () => {
+        if (!user) {
+            addToast({ title: 'Error', description: 'Necesitas iniciar sesión para descargar tu progreso.', color: 'warning' });
+            return;
+        }
+        setSyncing(true);
+        try {
+            const success = await downloadAllProgress(user.uid);
+            if (success) {
+                addToast({ title: 'Progreso descargado', description: 'Tu progreso se actualizó desde la nube.', color: 'success' });
+            } else {
+                addToast({ title: 'Aviso', description: 'No se encontraron datos en la nube para descargar.', color: 'warning' });
+            }
+        } catch (err) {
+            addToast({ title: 'Error', description: 'No se pudo descargar el progreso.', color: 'danger' });
+            console.error(err);
+        } finally {
+            setSyncing(false);
         }
     };
 
@@ -348,16 +390,36 @@ export default function SettingsPage({ plan, setPlan }) {
             {/* Ayuda y Estado */}
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-default-50/50 backdrop-blur-md p-6 rounded-3xl border border-default-200 shadow-sm mt-4">
                 <div className="flex flex-col gap-1 w-full md:w-auto text-center md:text-left">
-                    <p className="text-sm font-bold text-foreground/80">Estado de Sincronización</p>
+                    <p className="text-sm font-bold text-foreground/80">Sincronización en la Nube</p>
                     {!user ? (
                         <div className="flex items-center justify-center md:justify-start gap-2">
                             <i className="fa-solid fa-triangle-exclamation text-warning text-xs" />
-                            <p className="text-xs text-foreground/50">Iniciá sesión para guardar tus ajustes en la nube</p>
+                            <p className="text-xs text-foreground/50">Iniciá sesión para guardar y cargar tu progreso.</p>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center md:justify-start gap-2">
-                            <i className="fa-solid fa-cloud-check text-success text-xs" />
-                            <p className="text-xs text-foreground/50">Tus cambios se sincronizan automáticamente</p>
+                        <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                            <Button
+                                size="sm"
+                                variant="shadow"
+                                color="primary"
+                                onPress={handleUpload}
+                                isLoading={syncing}
+                                startContent={<i className="fa-solid fa-cloud-arrow-up" />}
+                                className="font-bold"
+                            >
+                                Guardar en la Nube
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="flat"
+                                color="primary"
+                                onPress={handleDownload}
+                                isLoading={syncing}
+                                startContent={<i className="fa-solid fa-cloud-arrow-down" />}
+                                className="font-bold"
+                            >
+                                Cargar de la Nube
+                            </Button>
                         </div>
                     )}
                 </div>

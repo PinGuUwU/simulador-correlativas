@@ -7,7 +7,7 @@ const SCHEMA_VERSION = 1;
  * Guarda el progreso del usuario usando setDoc con merge para crear el doc si no existe.
  * Incluimos UID y Email para que las reglas de validación (isValidUserDoc) pasen en caso de creación.
  */
-export const saveUserProgreso = async (uid, plan, progreso) => {
+export const saveUserProgreso = async (uid, plan, progreso, detalles = null) => {
     if (!uid || !plan || !progreso) return;
 
     const userRef = doc(db, 'users', uid);
@@ -21,10 +21,17 @@ export const saveUserProgreso = async (uid, plan, progreso) => {
         progresoUpdatedAt: serverTimestamp(),
     };
 
-    await setDoc(userRef, {
+    const updates = {
         ...baseData,
         [`progreso.${plan}`]: progreso,
-    }, { merge: true });
+    };
+
+    // Si hay detalles (fechas, intentos), también los guardamos en su campo correspondiente
+    if (detalles) {
+        updates[`progresoDetalles.${plan}`] = detalles;
+    }
+
+    await setDoc(userRef, updates, { merge: true });
 };
 
 /**

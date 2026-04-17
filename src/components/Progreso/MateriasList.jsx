@@ -9,11 +9,31 @@ import materiasUtils from '../../utils/Progreso/materiasUtils.js'
 import useProgresoMaterias from '../../hooks/Progreso/useProgresoMaterias.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import regularidadUtils from '../../utils/Progreso/regularidadUtils.js'
+import { Search } from 'lucide-react'
 
-function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan }) {
+function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan, busqueda = "", filtros = [] }) {
     const { updateAuthProgreso } = useAuth();
     const [infoMateria, setInfoMateria] = useState()
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)
+
+    // Lógica de filtrado
+    const isSearching = busqueda.trim().length > 0 || filtros.length > 0;
+
+    const materiasFiltradas = materias.filter(m => {
+        // Función para quitar acentos
+        const normalize = (text) => 
+            text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+        const searchNormalized = normalize(busqueda);
+        
+        const matchBusqueda = busqueda === "" ||
+            normalize(m.nombre).includes(searchNormalized) ||
+            normalize(m.codigo).includes(searchNormalized);
+
+        const matchFiltros = filtros.length === 0 || filtros.includes(progreso[m.codigo]);
+
+        return matchBusqueda && matchFiltros;
+    });
 
     // Efecto para verificar vencimientos pasivos al cargar
     useEffect(() => {
@@ -441,95 +461,141 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                     </Tabs>
                 </div>
             </div>
-            {/* Sección materias */}
-            <div id="tabs-filtro-anio" className="relative">
-                <Tabs aria-label="Filtos por año" items={tabs} className=' w-full mask-[linear-gradient(to_right,black_85%,transparent_100%)] pl-[3%] md:mask-none'>
-                    {(item) => (
-                        <Tab key={item.id} title={item.label} className=''>
-                            <div className="space-y-12 ">
-                                {item.content.map((valor) => {
-                                    let materiasParaMostrar
-                                    //Si el valor es taller
-                                    if (valor === "taller") {
-                                        materiasParaMostrar = talleres
-                                    } else {
-                                        // Me quedo con las materias de este año
-                                        materiasParaMostrar = materias.filter((m) => Number(m.anio) === valor)
-                                    }
+            {/* Sección materias o Resultados de búsqueda */}
+            {isSearching ? (
+                <div className="space-y-8 animate-in fade-in duration-500">
+                    <div className="flex items-center justify-between border-b border-default-200 pb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-8 bg-secondary rounded-full"></div>
+                            <h2 className="text-2xl font-black text-foreground tracking-tight">
+                                Resultados de búsqueda
+                            </h2>
+                        </div>
+                        <Chip variant="flat" color="secondary" className="font-bold">
+                            {materiasFiltradas.length} encontrados
+                        </Chip>
+                    </div>
 
-                                    // Si no hay materias en este año, podríamos evitar renderizarlo (opcional)
-                                    if (materiasParaMostrar.length === 0) return null
-
-                                    return (
-                                        <section key={valor} className={`flex flex-col gap-6`}>
-                                            {/* Cabecera del Año */}
-                                            <div className="flex justify-between ">
-                                                <div className='flex items-center gap-3 border-b border-default-200 pb-2'>
-                                                    <div className="w-1.5 h-8 bg-primary rounded-full shadow-sm"></div>
-                                                    <h2 className="text-2xl font-bold text-foreground tracking-tight">
-                                                        {valor === "taller" ? "Talleres" : `${valor}° Año`}
-                                                    </h2>
-                                                </div>
-                                                <Button onPress={() => handleMostrar(valor)}>{isAnioOpen.includes(valor) ? "Mostrar más" : "Mostrar menos"}</Button>
-                                            </div>
-
-                                            {/* Contenedor de Cuatrimestres */}
-                                            <div className={`flex flex-col gap-8 pl-2 sm:pl-4 ${isAnioOpen.includes(valor) ? " hidden" : ""}`}>
-                                                {[1, 2].map((cuatri) => {
-                                                    // Me quedo con las materias de este cuatrimestre
-                                                    const materiasCuatri = materiasParaMostrar.filter(
-                                                        (m) => (Number(m.cuatrimestre) % 2 === 0 ? 2 : 1) === cuatri
-                                                    )
-
-                                                    if (materiasCuatri.length === 0) return null
-
-                                                    return (
-                                                        <div key={cuatri} className="flex flex-col gap-4">
-                                                            {/* Cabecera del Cuatrimestre */}
-                                                            <div className="flex items-center justify-between bg-default-50 border border-default-200 rounded-lg px-4 py-3 shadow-sm">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-1 h-5 bg-default-400 rounded-full"></div>
-                                                                    <h3 className="text-lg font-semibold text-default-700">
-                                                                        {cuatri}° Cuatrimestre
-                                                                    </h3>
-                                                                </div>
-                                                                <Chip size="sm" variant="flat" className="bg-background border border-default-200 text-default-600 font-medium shadow-sm">
-                                                                    {materiasCuatri.length} {materiasCuatri.length === 1 ? 'Materia' : 'Materias'}
-                                                                </Chip>
-                                                            </div>
-
-                                                            <div className={vista === 'grid'
-                                                                ? "grid grid-cols-1 min-[768px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
-                                                                : "flex flex-col gap-3"
-                                                            }>
-                                                                {materiasCuatri.map((materia, index) => {
-                                                                    const esElPrimero = materia.codigo === materias[0]?.codigo;
-                                                                    return (
-                                                                        <div key={materia.codigo !== "N/A" ? materia.codigo : `${materia.codigo}-${index}`} id={esElPrimero ? 'materia-card-ejemplo' : undefined}>
-                                                                            <MateriaCard
-                                                                                materia={materia}
-                                                                                estado={progreso[materia.codigo]}
-                                                                                detalles={progresoDetalles?.[materia.codigo]}
-                                                                                actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
-                                                                                abrirInfo={() => abrirInfo(materia)}
-                                                                                vista={vista}
-                                                                            />
-                                                                        </div>
-                                                                    )
-                                                                })}
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </section>
-                                    )
-                                })}
+                    {materiasFiltradas.length > 0 ? (
+                        <div className={vista === 'grid'
+                            ? "grid grid-cols-1 min-[768px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+                            : "flex flex-col gap-3"
+                        }>
+                            {materiasFiltradas.map((materia) => (
+                                <div key={materia.codigo}>
+                                    <MateriaCard
+                                        materia={materia}
+                                        estado={progreso[materia.codigo]}
+                                        detalles={progresoDetalles?.[materia.codigo]}
+                                        actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
+                                        abrirInfo={() => abrirInfo(materia)}
+                                        vista={vista}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-20 flex flex-col items-center justify-center text-center gap-4 bg-default-50 rounded-[2.5rem] border-2 border-dashed border-default-200">
+                            <div className="w-16 h-16 bg-default-100 rounded-2xl flex items-center justify-center text-default-400">
+                                <Search size={32} />
                             </div>
-                        </Tab>
+                            <div>
+                                <p className="text-xl font-bold text-foreground">No encontramos materias</p>
+                                <p className="text-default-500">Probá con otros términos o filtros</p>
+                            </div>
+                        </div>
                     )}
-                </Tabs>
-            </div>
+                </div>
+            ) : (
+                <div id="tabs-filtro-anio" className="relative animate-in fade-in duration-500">
+                    <Tabs aria-label="Filtos por año" items={tabs} className=' w-full mask-[linear-gradient(to_right,black_85%,transparent_100%)] pl-[3%] md:mask-none'>
+                        {(item) => (
+                            <Tab key={item.id} title={item.label} className=''>
+                                <div className="space-y-12 ">
+                                    {item.content.map((valor) => {
+                                        let materiasParaMostrar
+                                        //Si el valor es taller
+                                        if (valor === "taller") {
+                                            materiasParaMostrar = talleres
+                                        } else {
+                                            // Me quedo con las materias de este año
+                                            materiasParaMostrar = materias.filter((m) => Number(m.anio) === valor)
+                                        }
+
+                                        // Si no hay materias en este año, podríamos evitar renderizarlo (opcional)
+                                        if (materiasParaMostrar.length === 0) return null
+
+                                        return (
+                                            <section key={valor} className={`flex flex-col gap-6`}>
+                                                {/* Cabecera del Año */}
+                                                <div className="flex justify-between ">
+                                                    <div className='flex items-center gap-3 border-b border-default-200 pb-2'>
+                                                        <div className="w-1.5 h-8 bg-primary rounded-full shadow-sm"></div>
+                                                        <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                                                            {valor === "taller" ? "Talleres" : `${valor}° Año`}
+                                                        </h2>
+                                                    </div>
+                                                    <Button onPress={() => handleMostrar(valor)}>{isAnioOpen.includes(valor) ? "Mostrar más" : "Mostrar menos"}</Button>
+                                                </div>
+
+                                                {/* Contenedor de Cuatrimestres */}
+                                                <div className={`flex flex-col gap-8 pl-2 sm:pl-4 ${isAnioOpen.includes(valor) ? " hidden" : ""}`}>
+                                                    {[1, 2].map((cuatri) => {
+                                                        // Me quedo con las materias de este cuatrimestre
+                                                        const materiasCuatri = materiasParaMostrar.filter(
+                                                            (m) => (Number(m.cuatrimestre) % 2 === 0 ? 2 : 1) === cuatri
+                                                        )
+
+                                                        if (materiasCuatri.length === 0) return null
+
+                                                        return (
+                                                            <div key={cuatri} className="flex flex-col gap-4">
+                                                                {/* Cabecera del Cuatrimestre */}
+                                                                <div className="flex items-center justify-between bg-default-50 border border-default-200 rounded-lg px-4 py-3 shadow-sm">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-1 h-5 bg-default-400 rounded-full"></div>
+                                                                        <h3 className="text-lg font-semibold text-default-700">
+                                                                            {cuatri}° Cuatrimestre
+                                                                        </h3>
+                                                                    </div>
+                                                                    <Chip size="sm" variant="flat" className="bg-background border border-default-200 text-default-600 font-medium shadow-sm">
+                                                                        {materiasCuatri.length} {materiasCuatri.length === 1 ? 'Materia' : 'Materias'}
+                                                                    </Chip>
+                                                                </div>
+
+                                                                <div className={vista === 'grid'
+                                                                    ? "grid grid-cols-1 min-[768px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+                                                                    : "flex flex-col gap-3"
+                                                                }>
+                                                                    {materiasCuatri.map((materia, index) => {
+                                                                        const esElPrimero = materia.codigo === materias[0]?.codigo;
+                                                                        return (
+                                                                            <div key={materia.codigo !== "N/A" ? materia.codigo : `${materia.codigo}-${index}`} id={esElPrimero ? 'materia-card-ejemplo' : undefined}>
+                                                                                <MateriaCard
+                                                                                    materia={materia}
+                                                                                    estado={progreso[materia.codigo]}
+                                                                                    detalles={progresoDetalles?.[materia.codigo]}
+                                                                                    actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
+                                                                                    abrirInfo={() => abrirInfo(materia)}
+                                                                                    vista={vista}
+                                                                                />
+                                                                            </div>
+                                                                        )
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </section>
+                                        )
+                                    })}
+                                </div>
+                            </Tab>
+                        )}
+                    </Tabs>
+                </div>
+            )}
 
 
             {/* Drawer de info de las materiasd */}

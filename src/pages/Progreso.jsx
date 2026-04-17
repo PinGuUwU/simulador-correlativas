@@ -6,6 +6,7 @@ import LeyendaEstados from '../components/Progreso/LeyendaEstados';
 import PlanSelectionModal from '../components/Progreso/modals/PlanSelectionModal';
 import usePlanData from '../hooks/usePlanData';
 import materiasUtils from '../utils/Progreso/materiasUtils';
+import ProgresoSearchFilters from '../components/Progreso/ProgresoSearchFilters';
 
 function Progreso({ plan, setPlan }) {
     // Usamos el hook centralizado para la carga de datos y progreso
@@ -42,6 +43,9 @@ function Progreso({ plan, setPlan }) {
         ? Math.round((totalProgreso() * 100) / materias.length) 
         : 0;
 
+    const [busqueda, setBusqueda] = useState("");
+    const [filtros, setFiltros] = useState([]);
+
     return (
         <div className="overflow-visible bg-default-100 min-h-screen">
             <PlanSelectionModal 
@@ -68,6 +72,12 @@ function Progreso({ plan, setPlan }) {
                         setIsSticky={setIsSticky}
                     />
                     <div className='mx-5 md:mx-10 lg:mx-15 mt-6'>
+                        <ProgresoSearchFilters 
+                            busqueda={busqueda}
+                            setBusqueda={setBusqueda}
+                            filtros={filtros}
+                            setFiltros={setFiltros}
+                        />
                         <MateriasList
                             plan={plan}
                             progreso={progreso}
@@ -77,6 +87,8 @@ function Progreso({ plan, setPlan }) {
                             materias={materias}
                             cargando={cargando}
                             isProgressSticky={isSticky}
+                            busqueda={busqueda}
+                            filtros={filtros}
                         />
                     </div>
 

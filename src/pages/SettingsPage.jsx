@@ -163,6 +163,9 @@ export default function SettingsPage({ plan, setPlan }) {
                                     className="w-12 h-12 text-large"
                                     isBordered
                                     color="primary"
+                                    imgProps={{
+                                        referrerPolicy: "no-referrer"
+                                    }}
                                 />
                                 <div className="flex flex-col overflow-hidden">
                                     <p className="text-sm font-bold truncate">{user.displayName}</p>

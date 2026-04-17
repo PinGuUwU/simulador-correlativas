@@ -29,11 +29,10 @@ html, body {
 
 /* Forzar aceleración por hardware en elementos que animan seguido */
 .animate-in, .drawer-content, .sticky-element {
-    will-change: transform, opacity;
-    transform: translateZ(0);
+    /* Eliminado will-change para ahorrar memoria del navegador */
 }
 
 /* Optimizar transiciones para que no afecten el layout flow */
 .transition-transform {
-    will-change: transform;
+    /* Eliminado will-change para ahorrar memoria del navegador */
 }

@@ -100,6 +100,9 @@ const UserPanel = ({ onSignInPress, isCollapsed }) => {
                         isBordered
                         color="primary"
                         className="shrink-0"
+                        imgProps={{
+                            referrerPolicy: "no-referrer"
+                        }}
                     />
                 </Tooltip>
                 {!isCollapsed && (

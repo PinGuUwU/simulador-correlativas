@@ -1,22 +1,30 @@
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from './firebase';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db, auth } from './firebase';
 
 const SCHEMA_VERSION = 1;
 
 /**
- * Guarda el progreso del usuario usando notación de punto para no sobrescribir otros planes
- * Utiliza serverTimestamp() para garantizar precisión desde el servidor y no del cliente
+ * Guarda el progreso del usuario usando setDoc con merge para crear el doc si no existe.
+ * Incluimos UID y Email para que las reglas de validación (isValidUserDoc) pasen en caso de creación.
  */
 export const saveUserProgreso = async (uid, plan, progreso) => {
     if (!uid || !plan || !progreso) return;
 
     const userRef = doc(db, 'users', uid);
+    const currentUser = auth.currentUser;
     
-    await updateDoc(userRef, {
-        [`progreso.${plan}`]: progreso,
+    // Si el documento se está creando por primera vez, necesitamos estos campos para las reglas
+    const baseData = {
+        uid: uid,
+        email: currentUser?.email || "",
+        schemaVersion: SCHEMA_VERSION,
         progresoUpdatedAt: serverTimestamp(),
-        schemaVersion: SCHEMA_VERSION
-    });
+    };
+
+    await setDoc(userRef, {
+        ...baseData,
+        [`progreso.${plan}`]: progreso,
+    }, { merge: true });
 };
 
 /**
@@ -42,17 +50,22 @@ export const updateUserConfig = async (uid, config) => {
     if (!uid || !config) return;
 
     const userRef = doc(db, 'users', uid);
+    const currentUser = auth.currentUser;
     const { alias, planActivo, tema } = config;
     
-    const updates = {
+    const baseData = {
+        uid: uid,
+        email: currentUser?.email || "",
+        schemaVersion: SCHEMA_VERSION,
         configUpdatedAt: serverTimestamp(),
-        schemaVersion: SCHEMA_VERSION
     };
+
+    const updates = { ...baseData };
     
-    // Solo agregamos las variables si están presentes en la config
+    // Solo agregamos las variables si están presentes en la config usando notación de puntos
     if (alias !== undefined) updates['config.alias'] = alias;
     if (planActivo !== undefined) updates['config.planActivo'] = planActivo;
     if (tema !== undefined) updates['config.tema'] = tema;
     
-    await updateDoc(userRef, updates);
+    await setDoc(userRef, updates, { merge: true });
 };

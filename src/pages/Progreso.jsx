@@ -32,7 +32,8 @@ function Progreso({ plan, setPlan }) {
         if (!materias.length) return 0;
         let total = 0;
         materias.forEach((m) => {
-            if (progreso[m.codigo] === materiasUtils.estadosPosibles[2]) {
+            const estado = progreso[m.codigo];
+            if (estado === 'Aprobado' || estado === 'Promocionado') {
                 total += 1;
             }
         });

@@ -29,7 +29,7 @@ const buscarMateriasCorrelativas = (codigosCorrelativas, materias) => {
     return materiasEncontradas
 }
 
-const estadosPosibles = ['Disponible', 'Regular', 'Aprobado', 'Libre']
+const estadosPosibles = ['Disponible', 'Regular', 'Aprobado', 'Libre', 'Promocionado']
 const estadosActivos = ['Regular', 'Aprobado', 'Cursando'] // Los que cuentan como "en curso o terminado"
 const bloquear = 'Bloqueado'
 const numsRomanos = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"]

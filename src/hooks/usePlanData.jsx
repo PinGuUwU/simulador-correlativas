@@ -22,49 +22,58 @@ export default function usePlanData(plan) {
         }
 
         let isMounted = true;
-        setCargandoPlan(true);
-
-        // 1. Carga asíncrona del plan (JSON dinámico)
-        planService.getMateriasByPlan(plan).then(materiasDelPlan => {
+        
+        const loadData = () => {
             if (!isMounted) return;
-            setMaterias(materiasDelPlan);
+            setCargandoPlan(true);
 
-            // 2. Recuperación del progreso guardado
-            let localProgreso = getProgresoLocal(plan);
-            let localDetalles = getProgresoDetallesLocal(plan);
+            planService.getMateriasByPlan(plan).then(materiasDelPlan => {
+                if (!isMounted) return;
+                setMaterias(materiasDelPlan);
 
-            // 3. Inicialización si es la primera vez que se usa este plan
-            if (!localProgreso) {
-                localProgreso = {};
-                localDetalles = {};
-                materiasDelPlan.forEach(m => {
-                    if (m.tesis) {
-                        localProgreso[m.codigo] = materiasUtils.bloquear;
-                    } else {
-                        localProgreso[m.codigo] = (m.correlativas.length > 0 
-                            ? materiasUtils.bloquear 
-                            : materiasUtils.estadosPosibles[0]);
-                    }
-                });
-                updateAuthProgreso(plan, localProgreso, localDetalles);
-            }
+                let localProgreso = getProgresoLocal(plan);
+                let localDetalles = getProgresoDetallesLocal(plan);
 
-            setProgreso(localProgreso);
-            setProgresoDetalles(localDetalles || {});
-            setCargandoPlan(false);
-        }).catch(err => {
-            console.error("Error al cargar el plan académico:", err);
-            if (isMounted) {
-                addToast({ 
-                    title: 'Error de carga', 
-                    description: `No se pudo cargar el plan "${plan}".`, 
-                    color: 'danger' 
-                });
+                if (!localProgreso) {
+                    localProgreso = {};
+                    localDetalles = {};
+                    materiasDelPlan.forEach(m => {
+                        if (m.tesis) {
+                            localProgreso[m.codigo] = materiasUtils.bloquear;
+                        } else {
+                            localProgreso[m.codigo] = (m.correlativas.length > 0 
+                                ? materiasUtils.bloquear 
+                                : materiasUtils.estadosPosibles[0]);
+                        }
+                    });
+                    updateAuthProgreso(plan, localProgreso, localDetalles);
+                }
+
+                setProgreso(localProgreso);
+                setProgresoDetalles(localDetalles || {});
                 setCargandoPlan(false);
-            }
-        });
+            }).catch(err => {
+                console.error("Error al cargar el plan académico:", err);
+                if (isMounted) {
+                    addToast({ 
+                        title: 'Error de carga', 
+                        description: `No se pudo cargar el plan "${plan}".`, 
+                        color: 'danger' 
+                    });
+                    setCargandoPlan(false);
+                }
+            });
+        };
 
-        return () => { isMounted = false; };
+        loadData();
+
+        // Escuchar evento de hidratación desde la nube (AuthContext)
+        window.addEventListener('progress-hydrated', loadData);
+
+        return () => { 
+            isMounted = false; 
+            window.removeEventListener('progress-hydrated', loadData);
+        };
     }, [plan, getProgresoLocal, getProgresoDetallesLocal, updateAuthProgreso]);
 
     return { 

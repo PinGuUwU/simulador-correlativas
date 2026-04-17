@@ -26,9 +26,9 @@ const ESTADO_CONFIG = {
         icono: "fa-regular fa-circle-check",
     },
     Promocionado: {
-        estilo: "bg-success/15 border-success/50 hover:bg-success/22 hover:border-success/60 text-success-900 dark:text-success-100 font-bold",
+        estilo: "bg-emerald-500/15 border-emerald-400/60 hover:bg-emerald-500/20 hover:border-emerald-500/70 text-emerald-900 dark:text-emerald-100 font-black shadow-[0_0_10px_-2px_rgba(16,185,129,0.3)]",
         color: "success",
-        icono: "fa-solid fa-ranking-star",
+        icono: "fa-solid fa-crown",
     },
     Libre: {
         estilo: "bg-danger/8 border-danger/30 hover:bg-danger/15 hover:border-danger/45 text-danger-900 dark:text-danger-100 font-bold",

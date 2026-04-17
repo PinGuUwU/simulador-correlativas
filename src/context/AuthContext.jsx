@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../services/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { auth, db } from '../services/firebase';
 import { loginConGoogle, logout } from '../services/authService';
 import { isIntentionalAuthCancel } from '../utils/errorCodes';
 import { logError } from '../services/logService';
@@ -139,13 +140,21 @@ export function AuthProvider({ children }) {
 
     // ─── Observer de Firebase ─────────────────────────────────────────────────
     useEffect(() => {
+        let unsubscribeSnapshot = null;
+
         if (isSessionExpired()) {
             logout().catch(() => { });
             clearSession();
         }
 
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
             try {
+                // Limpiar snapshot previo si existía
+                if (unsubscribeSnapshot) {
+                    unsubscribeSnapshot();
+                    unsubscribeSnapshot = null;
+                }
+
                 if (firebaseUser) {
                     if (isSessionExpired()) {
                         logout().catch(() => { });
@@ -155,39 +164,31 @@ export function AuthProvider({ children }) {
                     } else {
                         setUser(firebaseUser);
                         
-                        try {
-                            const cloudData = await getUserData(firebaseUser.uid);
-                            if (cloudData) setUserData(cloudData);
+                        // ─── SUSCRIPCIÓN EN TIEMPO REAL ───
+                        const userRef = doc(db, 'users', firebaseUser.uid);
+                        unsubscribeSnapshot = onSnapshot(userRef, (docSnap) => {
+                            if (docSnap.exists()) {
+                                const cloudData = docSnap.data();
+                                setUserData(cloudData);
 
-                            // Intentar sincronizar cola pendiente al iniciar sesión
-                            flushSyncQueue(firebaseUser.uid);
+                                const localProgress = getLocalProgress();
+                                const hasCloudProgress = cloudData?.progreso && Object.keys(cloudData.progreso).length > 0;
 
-                            const localProgress = getLocalProgress();
-                            const hasCloudProgress = cloudData?.progreso && Object.keys(cloudData.progreso).length > 0;
-
-                            if (hasCloudProgress) {
-                                // Prioridad Nube: Si hay datos en la nube, estos mandan y sobrescriben lo local
-                                hydrateLocalData(cloudData);
-                                
-                                // Si además había algo local NO sincronizado, podríamos intentar subirlo? 
-                                // El usuario pidió reemplazo total, así que cumplimos eso.
-                            } else if (localProgress && !hasCloudProgress) {
-                                // Si solo hay local (ej: primer login tras usar la app como invitado)
-                                for (const [plan, prog] of Object.entries(localProgress)) {
-                                    syncProgreso(firebaseUser.uid, plan, prog);
+                                if (hasCloudProgress) {
+                                    hydrateLocalData(cloudData);
+                                } else if (localProgress && !hasCloudProgress) {
+                                    for (const [plan, prog] of Object.entries(localProgress)) {
+                                        syncProgreso(firebaseUser.uid, plan, prog);
+                                    }
                                 }
-                                if (cloudData?.config) hydrateLocalData({ config: cloudData.config });
-                            } else {
-                                // Caso base: sincronizar config si existe
-                                if (cloudData?.config) hydrateLocalData({ config: cloudData.config });
                             }
-                        } catch (err) {
-                            // Errores de lectura de Firestore no son bloqueantes per se
-                            logError(err, { route: 'auth/hydration' });
-                            setFirestoreWarning('Error de red al sincronizar datos. Podés seguir usando la app.');
-                        }
-                        
-                        setLoading(false);
+                            setLoading(false);
+                        }, (err) => {
+                            console.error("Snapshot error:", err);
+                            setLoading(false);
+                        });
+
+                        flushSyncQueue(firebaseUser.uid);
                     }
                 } else {
                     setUser(null);
@@ -200,13 +201,15 @@ export function AuthProvider({ children }) {
                 setLoading(false);
             }
         }, (error) => {
-            // Manejador de errores del observer de auth (ej: bloqueado por firewall)
             console.error("Firebase Auth State Changed Error:", error);
             setIsCriticalError(true);
             setLoading(false);
         });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribeAuth();
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
+        };
     }, []);
 
     // ─── Acciones expuestas ───────────────────────────────────────────────────

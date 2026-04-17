@@ -208,7 +208,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
     const [targetStateModal, setTargetStateModal] = useState(null)
 
     const handleCambioDeEstado = (codigo, targetState) => {
-        const mappedState = targetState === "Promocionado" ? "Aprobado" : targetState;
+        const mappedState = targetState;
         const materia = materias.find(m => m.codigo === codigo);
         const estadoActual = progreso[codigo];
 
@@ -265,9 +265,9 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             const detallesActuales = progresoDetalles?.[codigoMateria] || {};
             const estadoActual = progreso[codigoMateria];
 
-            // ¿Es una recursada? (viniendo de Libre o Aprobado y queriendo regularizar/cursar de nuevo)
-            const viniendoDeEstadoFinal = ['Libre', 'Aprobado'].includes(estadoActual);
-            const yendoAEstadoActivo = ['Cursando', 'Regular', 'Aprobado'].includes(capturaConfig.pendingState);
+            // ¿Es una recursada? (viniendo de Libre, Aprobado o Promocionado y queriendo regularizar/cursar de nuevo)
+            const viniendoDeEstadoFinal = ['Libre', 'Aprobado', 'Promocionado'].includes(estadoActual);
+            const yendoAEstadoActivo = ['Cursando', 'Regular', 'Aprobado', 'Promocionado'].includes(capturaConfig.pendingState);
             const esRecursada = viniendoDeEstadoFinal && yendoAEstadoActivo;
 
             let nuevosDetallesBase = { ...detallesActuales };
@@ -283,7 +283,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                             ...(historial || []),
                             {
                                 ...datosAArchivar,
-                                estadoFinal: estadoActual, // Guardamos que terminó como Libre o Aprobado
+                                estadoFinal: estadoActual, // Guardamos que terminó como Libre, Aprobado o Promocionado
                                 fechaFin: new Date().toISOString()
                             }
                         ],
@@ -310,7 +310,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                 nuevosDetalles.fechaRegularidad = nuevosDetallesBase.fechaInicioCursada;
             }
 
-            if (payload.notaFinal != null && capturaConfig.pendingState === 'Aprobado') {
+            if (payload.notaFinal != null && (capturaConfig.pendingState === 'Aprobado' || capturaConfig.pendingState === 'Promocionado')) {
                 const nuevoIntento = {
                     nota: payload.notaFinal,
                     estado: payload.notaFinal >= 4 ? 'aprobado' : 'reprobado',

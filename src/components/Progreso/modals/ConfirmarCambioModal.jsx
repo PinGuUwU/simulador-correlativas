@@ -34,7 +34,14 @@ function ConfirmarCambioModal({ onClose, isOpen, onOpenChange, setConfirmacion, 
     }
 
     return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <Modal 
+            isOpen={isOpen} 
+            onOpenChange={onOpenChange} 
+            backdrop="opaque"
+            classNames={{
+                backdrop: "bg-black/50"
+            }}
+        >
             <ModalContent>
                 {(onClose) => {
                     return (

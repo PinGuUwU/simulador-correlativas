@@ -394,8 +394,11 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             <Modal
                 isOpen={isResetOpen}
                 onOpenChange={onResetOpenChange}
-                backdrop="blur"
+                backdrop="opaque"
                 placement="center"
+                classNames={{
+                    backdrop: "bg-black/50"
+                }}
             >
                 <ModalContent>
                     {(onClose) => (
@@ -458,6 +461,17 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                 
                 {/* Herramientas de Sincronización y Vista */}
                 <div className="flex items-center gap-3">
+                    <Button
+                        size="sm"
+                        variant="flat"
+                        color="default"
+                        className="font-bold rounded-xl max-sm:hidden"
+                        startContent={<i className={`fa-solid ${isAnioOpen.length > 0 ? 'fa-eye' : 'fa-eye-slash'}`}></i>}
+                        onPress={handleMostrarTodo}
+                    >
+                        {isAnioOpen.length > 0 ? "Mostrar todo" : "Ocultar todo"}
+                    </Button>
+
                     <SyncCloud plan={plan} />
 
                     <div id="wrapper-view-selector" className="max-md:hidden">

@@ -64,6 +64,7 @@ function Progreso({ plan, setPlan }) {
                 <div>
                     <ProgresoTotal
                         carrera={carrera}
+                        plan={plan}
                         progress={progress}
                         progreso={progreso}
                         progresoDetalles={progresoDetalles}

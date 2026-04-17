@@ -35,18 +35,27 @@ export const downloadAllProgress = async (uid) => {
         let progreso = cloudData.progreso || {};
         let detalles = cloudData.progresoDetalles || {};
 
-        // Normalización: Si existen llaves con puntos literales (ej: "progreso.sistemas")
-        // les damos prioridad sobre el mapa, ya que suelen ser guardados más recientes.
+        // Normalización: Extraemos datos de llaves con puntos literales (ej: "progreso.17.14")
+        // y también intentamos aplanar mapas anidados que pudieron crearse por el bug de updateDoc
         Object.keys(cloudData).forEach(key => {
             if (key.startsWith('progreso.')) {
-                const plan = key.split('.')[1];
-                progreso[plan] = cloudData[key];
+                const plan = key.substring('progreso.'.length);
+                if (!progreso[plan]) progreso[plan] = cloudData[key];
             }
             if (key.startsWith('progresoDetalles.')) {
-                const plan = key.split('.')[1];
-                detalles[plan] = cloudData[key];
+                const plan = key.substring('progresoDetalles.'.length);
+                if (!detalles[plan]) detalles[plan] = cloudData[key];
             }
         });
+
+        // Caso especial: si el bug de updateDoc creó { progreso: { "17": { "14": ... } } }
+        // Necesitamos reconstruir "17.14" en el mapa plano
+        if (progreso['17'] && typeof progreso['17'] === 'object' && progreso['17']['14']) {
+            if (!progreso['17.14']) progreso['17.14'] = progreso['17']['14'];
+        }
+        if (detalles['17'] && typeof detalles['17'] === 'object' && detalles['17']['14']) {
+            if (!detalles['17.14']) detalles['17.14'] = detalles['17']['14'];
+        }
 
         console.log("🛠️ Progreso procesado para sincronización:", { progreso, detalles });
 

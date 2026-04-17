@@ -147,7 +147,15 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
     const necesitaNotaFinal = ['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo);
 
     return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center" backdrop="blur">
+        <Modal 
+            isOpen={isOpen} 
+            onOpenChange={onOpenChange} 
+            placement="center" 
+            backdrop="opaque"
+            classNames={{
+                backdrop: "bg-black/50"
+            }}
+        >
             <ModalContent>
                 {() => (
                     <>

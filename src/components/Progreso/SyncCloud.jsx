@@ -29,10 +29,8 @@ export default function SyncCloud({ plan }) {
             const success = await downloadAllProgress(user.uid);
             if (success) {
                 addToast({ title: '¡Éxito!', description: 'Se cargó tu progreso desde la nube.', color: 'success' });
-                // Forzamos una recarga completa para asegurar que todo el estado (plan, materias, etc) sea consistente
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
+                // Ya no recargamos manualmente aquí, dejamos que los eventos de downloadAllProgress 
+                // y los listeners en App.jsx/usePlanData hagan su trabajo de forma reactiva.
             } else {
                 addToast({ title: 'Aviso', description: 'No se encontraron datos en la nube.', color: 'warning' });
             }

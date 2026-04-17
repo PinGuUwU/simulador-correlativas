@@ -1,9 +1,9 @@
-import { Progress, Button, Tooltip, Chip } from '@heroui/react'
+import { Progress, Button, Tooltip, Chip, Divider } from '@heroui/react'
 import { useEffect, useRef, useState } from 'react'
 import MateriasProgreso from './MateriasProgreso'
 import regularidadUtils from '../../utils/Progreso/regularidadUtils'
 
-function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias, isSticky, headerRef, setIsSticky }) {
+function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, materias, isSticky, headerRef, setIsSticky }) {
     const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
     const promedios = regularidadUtils.calcularPromedioGeneral(progresoDetalles, progreso);
@@ -50,9 +50,19 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
 
                     <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
                         {/* Migas de pan / Ubicación */}
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="hidden sm:inline-block px-2 py-0.5 rounded-md bg-primary/10 text-primary font-black text-[10px] uppercase tracking-tighter">UNLu</span>
-                            <span className="text-secondary font-bold text-xs lg:text-sm tracking-wide uppercase">{carrera}</span>
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
+                            <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary font-black text-[10px] uppercase tracking-tighter shrink-0">UNLu</span>
+                            <span className="text-secondary font-bold text-xs lg:text-sm tracking-wide uppercase shrink-0">{carrera}</span>
+                            <Divider orientation="vertical" className="h-4 bg-default-300 hidden sm:block" />
+                            <Chip 
+                                size="sm" 
+                                variant="flat" 
+                                color="warning" 
+                                className="font-bold text-[10px] h-5 border border-warning/20"
+                                startContent={<i className="fa-solid fa-scroll text-[9px] mr-1" />}
+                            >
+                                Plan {plan || '---'}
+                            </Chip>
                         </div>
 
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-none mb-3">

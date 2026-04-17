@@ -16,10 +16,13 @@ export default function PlanSelectionModal({ isOpen, onSelect }) {
             isOpen={isOpen} 
             hideCloseButton 
             isDismissable={false}
-            backdrop="blur"
+            backdrop="opaque"
             placement="center"
             size="2xl"
             className="m-4"
+            classNames={{
+                backdrop: "bg-black/50"
+            }}
         >
             <ModalContent>
                 <ModalHeader className="flex flex-col gap-1 items-center pt-8">

@@ -15,29 +15,26 @@ export const saveUserProgreso = async (uid, plan, progreso, detalles = null) => 
     const userRef = doc(db, 'users', uid);
     const currentUser = auth.currentUser;
     
+    // Usamos un objeto anidado con setDoc merge:true. 
+    // Esto es más seguro para IDs de plan que contienen puntos (ej: "17.14")
+    // ya que la notación de punto en las llaves de updateDoc los interpretaría como sub-objetos.
     const updates = {
         uid: uid,
         email: currentUser?.email || "",
         schemaVersion: SCHEMA_VERSION,
         progresoUpdatedAt: serverTimestamp(),
-        [`progreso.${plan}`]: progreso
+        progreso: {
+            [plan]: progreso
+        }
     };
 
     if (detalles) {
-        updates[`progresoDetalles.${plan}`] = detalles;
+        updates.progresoDetalles = {
+            [plan]: detalles
+        };
     }
 
-    try {
-        // updateDoc es ideal para actualizar mapas anidados sin destruir el resto del mapa
-        await updateDoc(userRef, updates);
-    } catch (err) {
-        // Si el documento no existe (raro tras el login), lo creamos con setDoc
-        if (err.code === 'not-found') {
-            await setDoc(userRef, updates, { merge: true });
-        } else {
-            throw err;
-        }
-    }
+    await setDoc(userRef, updates, { merge: true });
 };
 
 /**
@@ -69,24 +66,18 @@ export const updateUserConfig = async (uid, config) => {
     const currentUser = auth.currentUser;
     const { alias, planActivo, tema } = config;
     
+    const configData = {};
+    if (alias !== undefined) configData.alias = alias;
+    if (planActivo !== undefined) configData.planActivo = planActivo;
+    if (tema !== undefined) configData.tema = tema;
+
     const updates = {
         uid: uid,
         email: currentUser?.email || "",
         schemaVersion: SCHEMA_VERSION,
         configUpdatedAt: serverTimestamp(),
+        config: configData
     };
     
-    if (alias !== undefined) updates['config.alias'] = alias;
-    if (planActivo !== undefined) updates['config.planActivo'] = planActivo;
-    if (tema !== undefined) updates['config.tema'] = tema;
-    
-    try {
-        await updateDoc(userRef, updates);
-    } catch (err) {
-        if (err.code === 'not-found') {
-            await setDoc(userRef, updates, { merge: true });
-        } else {
-            throw err;
-        }
-    }
+    await setDoc(userRef, updates, { merge: true });
 };

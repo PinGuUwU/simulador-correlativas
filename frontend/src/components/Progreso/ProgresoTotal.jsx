@@ -37,52 +37,57 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
         <header ref={headerRef} className="bg-transparent border border-default-200/60 shadow-sm hover:shadow-md rounded-2xl flex flex-col transition-all duration-300">
             {/* Contenedor con blur para la parte superior (No afecta al fixed de abajo) */}
             <div className="bg-background/80 backdrop-blur-md p-6 md:p-8 pb-3 flex flex-col gap-6 rounded-t-2xl w-full">
-                {/* Sección Superior: Logo y Títulos */}
-                <div className="flex flex-col md:flex-row items-center gap-5 text-center md:text-start">
-                    {/* Icono/Logo Estilizado */}
-                    <div className="bg-primary w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 shrink-0 2xl:hidden ring-2 ring-primary/15">
-                        <i className="fa-solid fa-graduation-cap text-white text-3xl"></i>
+                {/* Sección Superior: Pantalla completa centrada en móvil, horizontal en desktop */}
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-6 lg:gap-10">
+                    
+                    {/* Contenedor de Icono: Más grande en móvil, estándar en desktop */}
+                    <div className="relative group shrink-0">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                        <div className="relative bg-primary w-20 h-20 md:w-16 md:h-16 lg:w-24 lg:h-24 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 ring-1 ring-white/20">
+                            <i className="fa-solid fa-graduation-cap text-white text-4xl md:text-3xl lg:text-5xl"></i>
+                        </div>
                     </div>
 
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 justify-center md:justify-normal">
-                            <span className="text-primary font-bold text-sm tracking-wider 2xl:hidden">UNLu</span>
-                            <span className="text-default-400 2xl:hidden">|</span>
-                            <span className="text-foreground font-semibold text-sm">{carrera}</span>
+                    <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
+                        {/* Migas de pan / Ubicación */}
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="hidden sm:inline-block px-2 py-0.5 rounded-md bg-primary/10 text-primary font-black text-[10px] uppercase tracking-tighter">UNLu</span>
+                            <span className="text-secondary font-bold text-xs lg:text-sm tracking-wide uppercase">{carrera}</span>
                         </div>
 
-                        <h1 className="text-3xl font-black text-foreground tracking-tight">
-                            Mi Progreso Académico
+                        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-none mb-3">
+                            Mi Progreso <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Académico</span>
                         </h1>
 
-                        <p className="text-foreground/70 font-medium text-base max-w-2xl leading-relaxed mb-4">
-                            Gestioná tu progreso académico de la <span className="text-foreground font-bold underline decoration-primary/40 decoration-2">Licenciatura en Sistemas de Información</span> llevando el control de tus materias aprobadas y regulares.
+                        <p className="text-foreground/70 font-medium text-sm sm:text-base lg:text-lg max-w-3xl leading-relaxed mb-6">
+                            Gestioná tu avance en la <span className="text-foreground font-bold">Licenciatura en Sistemas de Información</span>. 
+                            Mantené el control total de tus materias <span className="italic">aprobadas, regulares y pendientes</span> de forma centralizada.
                         </p>
 
-                        {/* Sección Promedios */}
-                        <div className="flex flex-wrap gap-3 items-center justify-center md:justify-start pt-2">
-                            <Tooltip content="Promedio de notas de exámenes finales aprobados unicamente." placement="top">
-                                <Chip
-                                    color="success"
-                                    variant="flat"
-                                    size="md"
-                                    className="font-bold border border-success/30"
-                                    startContent={<i className="fa-solid fa-chart-line ml-1" />}
-                                >
-                                    Promedio (Sin Aplazos): {promedios.promedioSinAplazos || '-'}
-                                </Chip>
+                        {/* Sección Promedios: Grilla en móvil, flex en desktop */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex gap-3 w-full sm:w-auto">
+                            <Tooltip content="Promedio de exámenes finales aprobados." placement="bottom">
+                                <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-success/10 border border-success/20 rounded-xl transition-all hover:bg-success/20">
+                                    <div className="w-8 h-8 rounded-lg bg-success/20 flex items-center justify-center text-success shrink-0">
+                                        <i className="fa-solid fa-chart-line text-sm" />
+                                    </div>
+                                    <div className="flex flex-col items-start">
+                                        <span className="text-[10px] text-success-700 font-bold uppercase tracking-wider leading-none mb-1">Sin Aplazos</span>
+                                        <span className="text-lg font-black text-success-800 leading-none">{promedios.promedioSinAplazos || '--'}</span>
+                                    </div>
+                                </div>
                             </Tooltip>
 
-                            <Tooltip content="Promedio de notas de todos los intentos de exámenes finales (aprobados y reprobados)." placement="top">
-                                <Chip
-                                    color="danger"
-                                    variant="flat"
-                                    size="md"
-                                    className="font-bold border border-danger/30"
-                                    startContent={<i className="fa-solid fa-chart-area ml-1" />}
-                                >
-                                    Promedio (Con Aplazos): {promedios.promedioConAplazos || '-'}
-                                </Chip>
+                            <Tooltip content="Promedio de todos los intentos registrados." placement="bottom">
+                                <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-danger/10 border border-danger/20 rounded-xl transition-all hover:bg-danger/20">
+                                    <div className="w-8 h-8 rounded-lg bg-danger/20 flex items-center justify-center text-danger shrink-0">
+                                        <i className="fa-solid fa-chart-area text-sm" />
+                                    </div>
+                                    <div className="flex flex-col items-start">
+                                        <span className="text-[10px] text-danger-700 font-bold uppercase tracking-wider leading-none mb-1">Con Aplazos</span>
+                                        <span className="text-lg font-black text-danger-800 leading-none">{promedios.promedioConAplazos || '--'}</span>
+                                    </div>
+                                </div>
                             </Tooltip>
                         </div>
                     </div>

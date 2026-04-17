@@ -12,8 +12,8 @@ const LoginModal = ({ isOpen, onClose, onConfirm }) => {
         setLoading(true);
         clearAuthError();
         try {
-            await onConfirm(rememberMe);
-            onClose();
+            const success = await onConfirm(rememberMe);
+            if (success) onClose();
         } catch {
         } finally {
             setLoading(false);

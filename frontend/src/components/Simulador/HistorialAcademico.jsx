@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Accordion, AccordionItem, Card } from '@heroui/react'
+import { Button, Accordion, AccordionItem, Card, CardBody } from '@heroui/react'
 
 /**
  * Muestra el historial de semestres completados como una línea de tiempo con acordeones.
@@ -117,21 +117,39 @@ function HistorialAcademico({ historialSemestres, openedAccordions, setOpenedAcc
                                         </div>
                                     }
                                 >
-                                    <div className={`grid ${descargandoPDF ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'} gap-3 px-2 pb-4`}>
-                                        {item.materiasDelSemestre.map(materia => (
-                                            <Card
-                                                key={materia.codigo}
-                                                className={`p-3 border ${item.progresoSnapshot[materia.codigo] === 'Cursado' ? 'border-success/30 bg-success/5' : 'border-warning/30 bg-warning/5'} shadow-none`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <i
-                                                        data-html2canvas-ignore
-                                                        className={`fa-regular ${item.progresoSnapshot[materia.codigo] === 'Cursado' ? 'fa-circle-check text-success' : 'fa-clock text-warning'} text-lg`}
-                                                    />
-                                                    <span className="text-sm font-medium text-foreground/80">{materia.nombre}</span>
-                                                </div>
-                                            </Card>
-                                        ))}
+                                    <div className={`grid ${descargandoPDF ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'} gap-3 px-2 pb-6`}>
+                                        {item.materiasDelSemestre.map(materia => {
+                                            const isCursado = item.progresoSnapshot[materia.codigo] === 'Cursado';
+                                            return (
+                                                <Card
+                                                    key={materia.codigo}
+                                                    className={`relative overflow-hidden border-none shadow-sm transition-all duration-300 hover:shadow-md ${isCursado ? 'bg-success/10' : 'bg-warning/10'}`}
+                                                >
+                                                    {/* Barra de acento lateral */}
+                                                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${isCursado ? 'bg-success' : 'bg-warning'}`} />
+
+                                                    <CardBody className="p-2.5 pl-4 sm:pl-5 flex flex-row items-center gap-3 sm:gap-4 overflow-hidden">
+                                                        <div className={`hidden sm:flex w-8 h-8 rounded-lg items-center justify-center shrink-0 ${isCursado ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`}>
+                                                            <i className={`fa-regular  ${isCursado ? 'fa-circle-check' : 'fa-clock'} text-lg`} />
+                                                        </div>
+
+                                                        <div className="flex flex-col gap-1 flex-1 min-w-0">
+                                                            <div className="flex justify-between items-center w-full">
+                                                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-foreground/40 leading-none">
+                                                                    {materia.codigo}
+                                                                </span>
+                                                                <div className='sm:hidden'>
+                                                                    <i className={`fa-regular ${isCursado ? 'fa-circle-check text-success' : 'fa-clock text-warning'} text-[10px]`} />
+                                                                </div>
+                                                            </div>
+                                                            <h4 className="text-xs sm:text-sm font-bold text-foreground/80 leading-tight">
+                                                                {materia.nombre}
+                                                            </h4>
+                                                        </div>
+                                                    </CardBody>
+                                                </Card>
+                                            );
+                                        })}
                                         {item.materiasDelSemestre.length === 0 && (
                                             <div className="col-span-full text-sm text-foreground/60 p-2">No hubo materias disponibles.</div>
                                         )}

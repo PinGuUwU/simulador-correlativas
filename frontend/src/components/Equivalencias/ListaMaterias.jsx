@@ -90,9 +90,9 @@ function ListaMaterias({ materiasFiltradas, progresoSimulado, onToggleEstado }) 
                           {cuatri}° Cuatrimestre
                         </h3>
                       </div>
-                      <Chip 
-                        size="sm" 
-                        variant="flat" 
+                      <Chip
+                        size="sm"
+                        variant="flat"
                         className="bg-background/80 border border-default-300 text-default-700 dark:text-foreground font-black text-[10px] uppercase px-3"
                       >
                         {gruposCuatri.length} {gruposCuatri.length === 1 ? 'grupo' : 'grupos'}
@@ -102,17 +102,17 @@ function ListaMaterias({ materiasFiltradas, progresoSimulado, onToggleEstado }) 
                     <div className="grid grid-cols-1 gap-12 sm:gap-16">
                       {gruposCuatri.map((grupo, index) => {
                         // Un grupo está aprobado si TODAS sus materias viejas lo están
-                        const todasAprobadas = grupo.materiasViejas.length > 0 && 
+                        const todasAprobadas = grupo.materiasViejas.length > 0 &&
                           grupo.materiasViejas.every(m => progresoSimulado[m.codigo] === "Aprobado");
-                        
-                        const estadoNuevo = grupo.esEquivalente 
+
+                        const estadoNuevo = grupo.esEquivalente
                           ? (todasAprobadas ? "Aprobado" : "Disponible")
                           : "Sin equivalencia";
 
                         return (
                           <React.Fragment key={grupo.id}>
                             <div className="flex flex-col sm:grid sm:grid-cols-11 gap-4 sm:gap-6 items-center">
-                              
+
                               {/* Lado Izquierdo: Materias Viejas (Origen) */}
                               <div className="w-full sm:col-span-5 flex flex-col gap-3">
                                 {grupo.materiasViejas.map((mVieja) => (

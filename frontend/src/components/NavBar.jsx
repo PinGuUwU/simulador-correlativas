@@ -296,13 +296,18 @@ export default function NavBar({ setPlan, plan, isCollapsed, setIsCollapsed }) {
 
     const handleSignIn = async (rememberMe) => {
         try {
-            await signIn(rememberMe);
-            addToast({ title: '¡Bienvenido!', description: 'Sesión iniciada correctamente', color: 'success' });
-            if (firestoreWarning) {
-                addToast({ title: 'Aviso de sincronización', description: firestoreWarning, color: 'warning' });
-                clearFirestoreWarning();
+            const loggedUser = await signIn(rememberMe);
+            if (loggedUser) {
+                addToast({ title: '¡Bienvenido!', description: 'Sesión iniciada correctamente', color: 'success' });
+                if (firestoreWarning) {
+                    addToast({ title: 'Aviso de sincronización', description: firestoreWarning, color: 'warning' });
+                    clearFirestoreWarning();
+                }
+                return loggedUser;
             }
+            return null;
         } catch {
+            return null;
         }
     };
 

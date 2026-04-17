@@ -9,4 +9,31 @@ html, body {
     margin: 0;
     padding: 0;
     font-family: 'Inter', sans-serif;
+    /* Suavizado de fuentes para mejor rendimiento visual */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimización de rendimiento para dispositivos de gama baja */
+@media (max-width: 768px) {
+    * {
+        /* Reducir la complejidad de los efectos de desenfoque en móvil */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    
+    .backdrop-blur-md, .backdrop-blur-xl, .backdrop-blur-lg {
+        background-color: rgba(var(--background), 0.95) !important;
+    }
+}
+
+/* Forzar aceleración por hardware en elementos que animan seguido */
+.animate-in, .transition-all, .drawer-content, .sticky-element {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+}
+
+/* Optimizar transiciones para que no afecten el layout flow */
+.transition-transform {
+    will-change: transform;
 }

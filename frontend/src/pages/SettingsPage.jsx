@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Button, 
-    Input, 
-    Card, 
-    CardHeader, 
-    CardBody, 
-    Divider, 
-    Switch, 
-    Tabs, 
-    Tab, 
+import {
+    Button,
+    Input,
+    Card,
+    CardHeader,
+    CardBody,
+    Divider,
+    Switch,
+    Tabs,
+    Tab,
     addToast,
     Chip,
     Avatar
@@ -18,14 +18,14 @@ import { updateUserConfig } from '../services/dbService';
 import { useTheme } from 'next-themes';
 
 export default function SettingsPage({ plan, setPlan }) {
-    const { 
-        user, 
-        userData, 
-        loading, 
-        getProgresoLocal, 
-        getSimulacionLocal, 
+    const {
+        user,
+        userData,
+        loading,
+        getProgresoLocal,
+        getSimulacionLocal,
         refetchUserData,
-        signIn 
+        signIn
     } = useAuth();
     const { theme, setTheme } = useTheme();
 
@@ -43,8 +43,8 @@ export default function SettingsPage({ plan, setPlan }) {
     const handleSave = async () => {
         if (!user) {
             try {
-                const logged = await signIn();
-                if (logged) {
+                const loggedUser = await signIn();
+                if (loggedUser) {
                     addToast({ title: '¡Bienvenido!', description: 'Sesión iniciada correctamente.', color: 'success' });
                 }
             } catch (err) {
@@ -74,7 +74,7 @@ export default function SettingsPage({ plan, setPlan }) {
         const rawSimu = getSimulacionLocal(plan);
 
         const minifyProgreso = (prog) => Object.fromEntries(
-            Object.entries(prog || {}).filter(([_, state]) => 
+            Object.entries(prog || {}).filter(([_, state]) =>
                 ['Aprobado', 'Regular', 'Cursado'].includes(state)
             )
         );
@@ -124,9 +124,9 @@ export default function SettingsPage({ plan, setPlan }) {
                             <h3 className="text-xl font-bold mb-1">Potenciá tu Simulador</h3>
                             <p className="text-foreground/70 text-sm">Registrate para guardar tu progreso en la nube, sincronizar entre dispositivos y acceder a funciones exclusivas.</p>
                         </div>
-                        <Button 
-                            color="primary" 
-                            variant="shadow" 
+                        <Button
+                            color="primary"
+                            variant="shadow"
                             className="font-bold px-8"
                             onPress={async () => {
                                 const logged = await signIn();
@@ -157,9 +157,9 @@ export default function SettingsPage({ plan, setPlan }) {
                     <CardBody className="px-6 pb-6 pt-2 flex flex-col gap-4">
                         {user && (
                             <div className="flex items-center gap-4 mb-2 p-3 bg-default-50 rounded-xl border border-default-100">
-                                <Avatar 
-                                    src={user.photoURL} 
-                                    name={user.displayName} 
+                                <Avatar
+                                    src={user.photoURL}
+                                    name={user.displayName}
                                     className="w-12 h-12 text-large"
                                     isBordered
                                     color="primary"
@@ -170,9 +170,9 @@ export default function SettingsPage({ plan, setPlan }) {
                                 </div>
                             </div>
                         )}
-                        
-                        <Input 
-                            label="Alias / Nombre" 
+
+                        <Input
+                            label="Alias / Nombre"
                             placeholder="Tu nombre público"
                             labelPlacement="outside"
                             description="Se muestra en la barra de navegación."
@@ -182,23 +182,23 @@ export default function SettingsPage({ plan, setPlan }) {
                             isDisabled={!user}
                             startContent={<i className="fa-solid fa-user text-default-400 text-sm mr-2" />}
                             endContent={
-                                user && alias !== (userData?.config?.alias || user.displayName?.split(' ')[0]) && (
-                                    <Button 
-                                        size="sm" 
-                                        color="primary" 
-                                        variant="flat" 
-                                        className="h-7 min-w-0 px-2"
+                                user && (
+                                    <Button
+                                        size="sm"
+                                        color={alias !== (userData?.config?.alias || user.displayName?.split(' ')[0]) ? "primary" : "default"}
+                                        variant={alias !== (userData?.config?.alias || user.displayName?.split(' ')[0]) ? "shadow" : "flat"}
+                                        className="h-8 font-bold px-4"
                                         onPress={handleSave}
                                         isLoading={saving}
                                     >
-                                        Guardar
+                                        Actualizar
                                     </Button>
                                 )
                             }
                         />
 
-                        <Input 
-                            label="Correo Electrónico" 
+                        <Input
+                            label="Correo Electrónico"
                             labelPlacement="outside"
                             value={user?.email || 'Visitante'}
                             variant="bordered"
@@ -228,25 +228,26 @@ export default function SettingsPage({ plan, setPlan }) {
                                 aria-label="Selección de Plan" 
                                 color="primary" 
                                 variant="bordered"
+                                fullWidth
                                 selectedKey={plan || '17.14'}
                                 onSelectionChange={(key) => setPlan(key)}
                                 classNames={{
                                     base: "w-full",
-                                    tabList: "w-full bg-default-100 p-1 border-none",
+                                    tabList: "w-full bg-default-100 p-1 border-none shrink-0",
                                     cursor: "shadow-sm",
-                                    tab: "h-10"
+                                    tab: "h-10 px-2"
                                 }}
                             >
-                                <Tab 
-                                    key="17.14" 
+                                <Tab
+                                    key="17.14"
                                     title={
-                                        <div className="flex items-center space-x-2">
-                                            <span>Plan 17.14</span>
-                                            <Chip size="sm" variant="flat" color="primary">Actual</Chip>
+                                        <div className="flex items-center gap-1.5 overflow-hidden">
+                                            <span className="text-xs sm:text-sm font-bold whitespace-nowrap">Plan 17.14</span>
+                                            <Chip size="sm" variant="flat" color="primary" className="hidden xs:flex h-5 h-min min-w-0 px-1 text-[10px]">Actual</Chip>
                                         </div>
                                     } 
                                 />
-                                <Tab key="17.13" title="Plan 17.13" />
+                                <Tab key="17.13" title={<span className="text-xs sm:text-sm font-bold">Plan 17.13</span>} />
                             </Tabs>
                             <p className="text-xs text-default-500 px-1 italic">
                                 * Cambiar el plan afecta los datos mostrados en el Simulador y Progreso.
@@ -280,11 +281,10 @@ export default function SettingsPage({ plan, setPlan }) {
                                     <button
                                         key={t.id}
                                         onClick={() => setTheme(t.id)}
-                                        className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
-                                            theme === t.id 
-                                            ? 'border-primary bg-primary/5 shadow-sm' 
-                                            : 'border-default-100 bg-default-50 hover:border-default-200'
-                                        }`}
+                                        className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${theme === t.id
+                                                ? 'border-primary bg-primary/5 shadow-sm'
+                                                : 'border-default-100 bg-default-50 hover:border-default-200'
+                                            }`}
                                     >
                                         <div className={`w-4 h-4 rounded-full ${t.color} border border-default-200 shadow-inner`} />
                                         <span className={`text-xs font-bold ${theme === t.id ? 'text-primary' : 'text-foreground/70'}`}>
@@ -328,8 +328,8 @@ export default function SettingsPage({ plan, setPlan }) {
 
                         <Divider className="my-1" />
 
-                        <Button 
-                            variant="light" 
+                        <Button
+                            variant="light"
                             color="default"
                             size="sm"
                             className="font-bold justify-start px-2 h-9 text-default-500 hover:text-primary transition-colors"
@@ -342,33 +342,22 @@ export default function SettingsPage({ plan, setPlan }) {
                 </Card>
             </div>
 
-            {/* Acciones Finales / Guardar */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-default-50/50 backdrop-blur-md p-6 rounded-3xl border border-default-200 shadow-sm">
-                <div className="flex flex-col gap-1 w-full md:w-auto">
-                    <p className="text-sm font-bold text-foreground/80">Configuración General</p>
+            {/* Ayuda y Estado */}
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-default-50/50 backdrop-blur-md p-6 rounded-3xl border border-default-200 shadow-sm mt-4">
+                <div className="flex flex-col gap-1 w-full md:w-auto text-center md:text-left">
+                    <p className="text-sm font-bold text-foreground/80">Estado de Sincronización</p>
                     {!user ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center md:justify-start gap-2">
                             <i className="fa-solid fa-triangle-exclamation text-warning text-xs" />
-                            <p className="text-xs text-foreground/50">Iniciá sesión para sincronizar estos ajustes</p>
+                            <p className="text-xs text-foreground/50">Iniciá sesión para guardar tus ajustes en la nube</p>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center md:justify-start gap-2">
                             <i className="fa-solid fa-cloud-check text-success text-xs" />
-                            <p className="text-xs text-foreground/50">Tus cambios se guardarán en la nube</p>
+                            <p className="text-xs text-foreground/50">Tus cambios se sincronizan automáticamente</p>
                         </div>
                     )}
                 </div>
-
-                <Button 
-                    color="primary" 
-                    variant="shadow"
-                    className="font-bold w-full md:w-auto h-12 px-12 text-md"
-                    onPress={handleSave} 
-                    isLoading={saving}
-                    startContent={!saving && <i className="fa-solid fa-floppy-disk" />}
-                >
-                    {user ? 'Guardar Cambios' : 'Iniciá Sesión para Guardar'}
-                </Button>
             </div>
         </div>
     );

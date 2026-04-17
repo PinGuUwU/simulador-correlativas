@@ -95,6 +95,13 @@ function MateriasProgreso({ progreso, materias }) {
     ]
 
     const horasTotalesCarrera = materias.reduce((acc, m) => acc + (Number(m.horas_totales) || 0), 0)
+    const horasConsumidas = materias.reduce((acc, m) => {
+        const estado = progreso[m.codigo];
+        if (["Aprobado", "Regular", "Cursando"].includes(estado)) {
+            return acc + (Number(m.horas_totales) || 0);
+        }
+        return acc;
+    }, 0);
 
     const resumenStats = [
         {
@@ -106,8 +113,8 @@ function MateriasProgreso({ progreso, materias }) {
         },
         {
             label: "Carga Horaria",
-            value: horasTotalesCarrera,
-            sublabel: "horas totales",
+            value: horasConsumidas,
+            sublabel: `/ ${horasTotalesCarrera} hs`,
             icon: "fa-solid fa-clock-rotate-left",
             color: "danger"
         }
@@ -145,7 +152,7 @@ function MateriasProgreso({ progreso, materias }) {
     }, [isOpen, onOpenChange, isDetailOpen])
 
     return (
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mt-2 mb-6 uppercase tracking-wider">
+        <div className="grid grid-cols-1 min-[450px]:grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mt-2 mb-6 uppercase tracking-wider">
             {stats.map((stat, index) => {
                 const porcentaje = Math.round(calcularPorcentaje(stat.count))
                 const textColors = {
@@ -170,25 +177,25 @@ function MateriasProgreso({ progreso, materias }) {
                         className={`bg-background/70 backdrop-blur-sm border border-default-200/60 hover:border-default-300/80 transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${glowClass} w-full group`}
                         onPress={() => handleClick(stat.estado, stat.label)}
                     >
-                        <CardBody className="py-3 px-4 flex flex-row items-center gap-4 overflow-visible">
+                        <CardBody className="py-2.5 px-3 sm:py-3 sm:px-4 flex flex-row items-center gap-3 sm:gap-4 overflow-visible">
                             <CircularProgress
                                 value={porcentaje}
-                                size="lg"
+                                size="md"
                                 color={stat.color}
                                 showValueLabel={false}
                                 aria-label={`Progreso circular ${stat.label}`}
                                 classNames={{
-                                    svg: "w-10 h-10 drop-shadow-sm group-hover:scale-105 transition-transform duration-200",
+                                    svg: "w-8 h-8 sm:w-10 sm:h-10 drop-shadow-sm group-hover:scale-105 transition-transform duration-200",
                                     track: "stroke-default-200/50",
                                 }}
                             />
 
                             <div className="flex flex-col text-left">
-                                <span className="text-[10px] sm:text-xs font-bold text-foreground/60 leading-tight">{stat.label}</span>
-                                <span className={`text-sm sm:text-base font-black ${textColorClass} tabular-nums`}>
+                                <span className="text-[9px] sm:text-xs font-bold text-foreground/60 leading-tight">{stat.label}</span>
+                                <span className={`text-xs sm:text-base font-black ${textColorClass} tabular-nums`}>
                                     {porcentaje}%
                                 </span>
-                                <span className="text-[9px] font-bold text-foreground/40 tabular-nums">{stat.count} mat.</span>
+                                <span className="text-[8px] sm:text-[9px] font-bold text-foreground/40 tabular-nums">{stat.count} mat.</span>
                             </div>
                         </CardBody>
                     </Card>
@@ -220,17 +227,17 @@ function MateriasProgreso({ progreso, materias }) {
                         key={`resumen-${index}`}
                         className={`bg-background/70 backdrop-blur-sm border border-default-200/60 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${styles.glow} transition-all duration-200 w-full`}
                     >
-                        <CardBody className="py-3 px-4 flex flex-row items-center gap-4 overflow-visible">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${styles.bg} border ${styles.border} ${styles.text} shadow-sm`}>
-                                <i className={resumen.icon}></i>
+                        <CardBody className="py-2.5 px-3 sm:py-3 sm:px-4 flex flex-row items-center gap-3 sm:gap-4 overflow-visible">
+                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 ${styles.bg} border ${styles.border} ${styles.text} shadow-sm`}>
+                                <i className={`${resumen.icon} text-xs sm:text-base`}></i>
                             </div>
                             <div className="flex flex-col text-left">
-                                <span className="text-[10px] sm:text-xs font-bold text-foreground/60 leading-tight">{resumen.label}</span>
+                                <span className="text-[9px] sm:text-xs font-bold text-foreground/60 leading-tight">{resumen.label}</span>
                                 <div className="flex items-baseline gap-1">
-                                    <span className={`text-sm sm:text-base font-black ${styles.value} tabular-nums`}>
+                                    <span className={`text-xs sm:text-base font-black ${styles.value} tabular-nums whitespace-nowrap`}>
                                         {resumen.value}
                                     </span>
-                                    <span className="text-[9px] font-bold text-foreground/40">{resumen.sublabel}</span>
+                                    <span className="text-[8px] sm:text-[9px] font-bold text-foreground/40">{resumen.sublabel}</span>
                                 </div>
                             </div>
                         </CardBody>

@@ -60,7 +60,7 @@ const UserPanel = ({ onSignInPress, isCollapsed }) => {
                         Iniciar Sesión
                     </Button>
                 )}
-                
+
                 {isCollapsed ? (
                     <Tooltip content="Configuración" placement="right">
                         <Button
@@ -78,7 +78,7 @@ const UserPanel = ({ onSignInPress, isCollapsed }) => {
                         id="btn-configuracion-guest"
                         variant="flat"
                         color="default"
-                        className="w-full justify-start font-semibold text-sm"
+                        className="w-full font-semibold text-sm"
                         startContent={<i className="fa-solid fa-gear" />}
                         onPress={() => navigate('/config')}
                     >
@@ -232,10 +232,10 @@ const NavLinks = ({ onItemClick, isCollapsed }) => {
                         id={item.id}
                         onClick={() => isDisabled ? addToast({ title: 'En progreso', description: 'Esta página aún no está disponible', color: 'warning' }) : handleClick(item.path)}
                         className={`flex items-center gap-3 rounded-xl transition-all duration-200 group relative ${isCollapsed ? 'p-3 justify-center' : 'p-3'} ${isActive
-                                ? 'bg-primary/10 text-primary font-bold shadow-sm border border-primary/20 backdrop-blur-sm'
-                                : isDisabled 
-                                    ? 'bg-default-200/50 text-foreground/60 cursor-not-allowed'
-                                    : 'text-foreground/70 hover:bg-default-100/80 hover:text-primary hover:translate-x-0.5'
+                            ? 'bg-primary/10 text-primary font-bold shadow-sm border border-primary/20 backdrop-blur-sm'
+                            : isDisabled
+                                ? 'bg-default-200/50 text-foreground/60 cursor-not-allowed'
+                                : 'text-foreground/70 hover:bg-default-100/80 hover:text-primary hover:translate-x-0.5'
                             }`}
                     >
                         <i className={`fa-solid ${item.icon} w-5 text-lg shrink-0 ${isActive ? 'text-primary drop-shadow-sm' : 'group-hover:scale-110 transition-transform'}`} />
@@ -244,7 +244,7 @@ const NavLinks = ({ onItemClick, isCollapsed }) => {
                             <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_6px_2px] shadow-primary/60 animate-pulse" />
                         )}
                         {isActive && isCollapsed && (
-                             <div className="absolute right-1 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-primary" />
+                            <div className="absolute right-1 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-primary" />
                         )}
                     </button>
                 );
@@ -288,19 +288,11 @@ SidebarFooter.propTypes = {
 };
 
 // ─── NavBar principal ─────────────────────────────────────────────────────────
-export default function NavBar({ setPlan, plan }) {
+export default function NavBar({ setPlan, plan, isCollapsed, setIsCollapsed }) {
     const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onOpenChange: onDrawerOpenChange } = useDisclosure();
     const { isOpen: isLoginOpen, onOpen: onLoginOpen, onClose: onLoginClose } = useDisclosure();
     const { signIn, firestoreWarning, clearFirestoreWarning } = useAuth();
-    const [isCollapsed, setIsCollapsed] = useState(() => {
-        const saved = localStorage.getItem('sidebar_collapsed');
-        return saved ? JSON.parse(saved) : false;
-    });
     const navigate = useNavigate();
-
-    useEffect(() => {
-        localStorage.setItem('sidebar_collapsed', JSON.stringify(isCollapsed));
-    }, [isCollapsed]);
 
     const handleSignIn = async (rememberMe) => {
         try {
@@ -336,9 +328,8 @@ export default function NavBar({ setPlan, plan }) {
                 </div>
             )}
 
-            {/* Sidebar Desktop */}
-            <aside 
-                className={`hidden lg:flex flex-col h-screen sticky left-0 top-0 bg-background/85 backdrop-blur-xl border-r border-default-200/60 z-40 shadow-xl shadow-black/5 transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-64'}`}
+            <aside
+                className={`hidden lg:flex flex-col h-screen fixed left-0 top-0 bg-background/85 backdrop-blur-xl border-r border-default-200/60 z-40 shadow-xl shadow-black/5 transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-64'}`}
             >
                 {/* Botón Toggle */}
                 <Button
@@ -360,7 +351,7 @@ export default function NavBar({ setPlan, plan }) {
                     >
                         <i className="fa-solid fa-graduation-cap text-white text-xl" />
                     </div>
-                    
+
                     {!isCollapsed && (
                         <div className="flex flex-col transition-opacity duration-300">
                             <span className="font-black text-foreground text-xl tracking-tight leading-none">UNLu</span>
@@ -425,4 +416,6 @@ export default function NavBar({ setPlan, plan }) {
 NavBar.propTypes = {
     setPlan: PropTypes.func,
     plan: PropTypes.string,
+    isCollapsed: PropTypes.bool.isRequired,
+    setIsCollapsed: PropTypes.func.isRequired,
 };

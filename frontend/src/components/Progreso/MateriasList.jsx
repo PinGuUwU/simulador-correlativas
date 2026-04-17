@@ -14,14 +14,14 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
     const { updateAuthProgreso } = useAuth();
     const [infoMateria, setInfoMateria] = useState()
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)
-    
+
     // Efecto para verificar vencimientos pasivos al cargar
     useEffect(() => {
         if (!progreso || !progresoDetalles) return;
-        
+
         let huboCambios = false;
         const nuevoProgreso = { ...progreso };
-        
+
         Object.entries(progreso).forEach(([codigo, estado]) => {
             if (estado === 'Regular') {
                 const detalles = progresoDetalles[codigo];
@@ -38,7 +38,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                 }
             }
         });
-        
+
         if (huboCambios) {
             setProgreso(nuevoProgreso);
             updateAuthProgreso(plan, nuevoProgreso, progresoDetalles);
@@ -244,7 +244,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
         if (payload && codigoMateria) {
             const detallesActuales = progresoDetalles?.[codigoMateria] || {};
             const estadoActual = progreso[codigoMateria];
-            
+
             // ¿Es una recursada? (viniendo de Libre o Aprobado y queriendo regularizar/cursar de nuevo)
             const viniendoDeEstadoFinal = ['Libre', 'Aprobado'].includes(estadoActual);
             const yendoAEstadoActivo = ['Cursando', 'Regular', 'Aprobado'].includes(capturaConfig.pendingState);
@@ -255,14 +255,14 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             if (esRecursada) {
                 // Archivar la cursada actual en el historial
                 const { historial, ...datosAArchivar } = detallesActuales;
-                
+
                 // Solo archivar si realmente hay algo significativo (intentos o fecha de regularidad)
                 if ((datosAArchivar.intentosFinal && datosAArchivar.intentosFinal.length > 0) || datosAArchivar.fechaRegularidad) {
                     nuevosDetallesBase = {
                         historial: [
                             ...(historial || []),
-                            { 
-                                ...datosAArchivar, 
+                            {
+                                ...datosAArchivar,
                                 estadoFinal: estadoActual, // Guardamos que terminó como Libre o Aprobado
                                 fechaFin: new Date().toISOString()
                             }
@@ -424,7 +424,8 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                 </div>
 
                 {/* Selector de Vista (Lista vs Cuadrícula) */}
-                <div id="wrapper-view-selector" className="col-span-2 sm:col-span-1 flex justify-center">
+                <div id="wrapper-view-selector" className="col-span-2 sm:col-span-1 flex justify-center max-md:hidden">
+
                     <Tabs
                         size="sm"
                         variant="bordered"

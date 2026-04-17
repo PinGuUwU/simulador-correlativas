@@ -181,6 +181,20 @@ export default function SettingsPage({ plan, setPlan }) {
                             variant="flat"
                             isDisabled={!user}
                             startContent={<i className="fa-solid fa-user text-default-400 text-sm mr-2" />}
+                            endContent={
+                                user && alias !== (userData?.config?.alias || user.displayName?.split(' ')[0]) && (
+                                    <Button 
+                                        size="sm" 
+                                        color="primary" 
+                                        variant="flat" 
+                                        className="h-7 min-w-0 px-2"
+                                        onPress={handleSave}
+                                        isLoading={saving}
+                                    >
+                                        Guardar
+                                    </Button>
+                                )
+                            }
                         />
 
                         <Input 
@@ -311,26 +325,36 @@ export default function SettingsPage({ plan, setPlan }) {
                             </div>
                             <p className="text-xs font-semibold">Alertas de Inscripción y Finales</p>
                         </div>
+
+                        <Divider className="my-1" />
+
+                        <Button 
+                            variant="light" 
+                            color="default"
+                            size="sm"
+                            className="font-bold justify-start px-2 h-9 text-default-500 hover:text-primary transition-colors"
+                            startContent={<i className="fa-solid fa-file-export text-xs" />}
+                            onPress={handleExport}
+                        >
+                            Exportar Avance (JSON)
+                        </Button>
                     </CardBody>
                 </Card>
             </div>
 
             {/* Acciones Finales / Guardar */}
-            <div className="flex flex-col-reverse md:flex-row gap-4 items-center justify-between bg-default-50 p-6 rounded-3xl border border-default-200">
-                <div className="flex flex-col gap-2 w-full md:w-auto">
-                    <Button 
-                        variant="light" 
-                        color="primary"
-                        className="font-bold"
-                        startContent={<i className="fa-solid fa-file-export" />}
-                        onPress={handleExport}
-                    >
-                        Exportar Respaldo Local (JSON)
-                    </Button>
-                    {!user && (
-                        <div className="flex items-center gap-2 px-4 py-1">
-                            <i className="fa-solid fa-triangle-exclamation text-warning text-[10px]" />
-                            <p className="text-[10px] text-foreground/50 font-bold uppercase tracking-tighter">Guardado limitado al dispositivo local</p>
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-default-50/50 backdrop-blur-md p-6 rounded-3xl border border-default-200 shadow-sm">
+                <div className="flex flex-col gap-1 w-full md:w-auto">
+                    <p className="text-sm font-bold text-foreground/80">Configuración General</p>
+                    {!user ? (
+                        <div className="flex items-center gap-2">
+                            <i className="fa-solid fa-triangle-exclamation text-warning text-xs" />
+                            <p className="text-xs text-foreground/50">Iniciá sesión para sincronizar estos ajustes</p>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <i className="fa-solid fa-cloud-check text-success text-xs" />
+                            <p className="text-xs text-foreground/50">Tus cambios se guardarán en la nube</p>
                         </div>
                     )}
                 </div>
@@ -343,7 +367,7 @@ export default function SettingsPage({ plan, setPlan }) {
                     isLoading={saving}
                     startContent={!saving && <i className="fa-solid fa-floppy-disk" />}
                 >
-                    {user ? 'Guardar Configuración' : 'Iniciá Sesión para Guardar'}
+                    {user ? 'Guardar Cambios' : 'Iniciá Sesión para Guardar'}
                 </Button>
             </div>
         </div>

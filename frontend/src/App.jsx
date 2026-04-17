@@ -12,18 +12,35 @@ import { initOfflineListener } from './services/syncService'
 const Footer = lazy(() => import('./components/Footer'))
 const SyncModal = lazy(() => import('./components/SyncModal'))
 
+import { useAuth } from './context/AuthContext'
+import ServerError from './components/Shared/ServerError'
+
 // Componente interno para poder usar usePageTracking dentro del contexto del router
 function AppContent({ plan, setPlan }) {
+    const { isCriticalError } = useAuth();
+    const [isCollapsed, setIsCollapsed] = useState(() => {
+        const saved = localStorage.getItem('sidebar_collapsed');
+        return saved ? JSON.parse(saved) : false;
+    });
+
     usePageTracking();
-    
-    // Inicializar el listener para sincronización automática cuando vuelve el internet
+
+    useEffect(() => {
+        localStorage.setItem('sidebar_collapsed', JSON.stringify(isCollapsed));
+    }, [isCollapsed]);
+
     useEffect(() => {
         initOfflineListener();
     }, []);
+
+    if (isCriticalError) {
+        return <ServerError />;
+    }
+
     return (
-        <div className='flex min-h-screen overflow-x-hidden'>
-            <NavBar setPlan={setPlan} plan={plan} />
-            <main className='flex-1 min-w-0 relative'>
+        <div className='flex items-start min-h-screen overflow-x-hidden'>
+            <NavBar setPlan={setPlan} plan={plan} isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+            <main className={`flex-1 min-w-0 relative transition-all duration-300 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
                 <Rutas plan={plan} setPlan={setPlan} />
                 <Suspense fallback={null}>
                     <Footer />

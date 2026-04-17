@@ -95,6 +95,18 @@ export function AuthProvider({ children }) {
     const [showSyncModal, setShowSyncModal] = useState(false);
     const [pendingSyncData, setPendingSyncData] = useState(null);
 
+    /**
+     * isCriticalError: identifica si hubo un fallo fatal en la conexión con los servidores de Google.
+     * Si es true, la App muestra una pantalla de error bloqueante.
+     */
+    const [isCriticalError, setIsCriticalError] = useState(false);
+
+    // Función para "saltarse" el error de servidor y usar la app localmente
+    const enterOfflineMode = useCallback(() => {
+        setIsCriticalError(false);
+        setLoading(false);
+    }, []);
+
     // Helper para limpiar errores (útil para que la UI los descarte)
     const clearAuthError = useCallback(() => setAuthError(null), []);
     const clearFirestoreWarning = useCallback(() => setFirestoreWarning(null), []);
@@ -133,45 +145,59 @@ export function AuthProvider({ children }) {
         }
 
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                if (isSessionExpired()) {
-                    logout().catch(() => { });
-                    clearSession();
+            try {
+                if (firebaseUser) {
+                    if (isSessionExpired()) {
+                        logout().catch(() => { });
+                        clearSession();
+                        setUser(null);
+                        setLoading(false);
+                    } else {
+                        setUser(firebaseUser);
+                        
+                        try {
+                            const cloudData = await getUserData(firebaseUser.uid);
+                            if (cloudData) setUserData(cloudData);
+
+                            const localProgress = getLocalProgress();
+                            const hasCloudProgress = cloudData?.progreso && Object.keys(cloudData.progreso).length > 0;
+
+                            if (localProgress && hasCloudProgress) {
+                                setPendingSyncData({ local: localProgress, cloud: cloudData });
+                                setShowSyncModal(true);
+                            } else if (localProgress && !hasCloudProgress) {
+                                for (const [plan, prog] of Object.entries(localProgress)) {
+                                    syncProgreso(firebaseUser.uid, plan, prog);
+                                }
+                                if (cloudData?.config) hydrateLocalData({ config: cloudData.config });
+                            } else if (!localProgress && hasCloudProgress) {
+                                hydrateLocalData(cloudData);
+                            } else {
+                                if (cloudData?.config) hydrateLocalData({ config: cloudData.config });
+                            }
+                        } catch (err) {
+                            // Errores de lectura de Firestore no son bloqueantes per se
+                            logError(err, { route: 'auth/hydration' });
+                            setFirestoreWarning('Error de red al sincronizar datos. Podés seguir usando la app.');
+                        }
+                        
+                        setLoading(false);
+                    }
+                } else {
                     setUser(null);
                     setLoading(false);
-                } else {
-                    setUser(firebaseUser);
-                    
-                    try {
-                        const cloudData = await getUserData(firebaseUser.uid);
-                        if (cloudData) setUserData(cloudData);
-
-                        const localProgress = getLocalProgress();
-                        const hasCloudProgress = cloudData?.progreso && Object.keys(cloudData.progreso).length > 0;
-
-                        if (localProgress && hasCloudProgress) {
-                            setPendingSyncData({ local: localProgress, cloud: cloudData });
-                            setShowSyncModal(true);
-                        } else if (localProgress && !hasCloudProgress) {
-                            for (const [plan, prog] of Object.entries(localProgress)) {
-                                syncProgreso(firebaseUser.uid, plan, prog);
-                            }
-                            if (cloudData?.config) hydrateLocalData({ config: cloudData.config });
-                        } else if (!localProgress && hasCloudProgress) {
-                            hydrateLocalData(cloudData);
-                        } else {
-                            if (cloudData?.config) hydrateLocalData({ config: cloudData.config });
-                        }
-                    } catch (err) {
-                        logError(err, { route: 'auth/hydration' });
-                    }
-                    
-                    setLoading(false);
                 }
-            } else {
-                setUser(null);
+            } catch (globalErr) {
+                console.error("Critical Auth Initialization Error:", globalErr);
+                logError(globalErr, { route: 'auth/global_init' });
+                setIsCriticalError(true);
                 setLoading(false);
             }
+        }, (error) => {
+            // Manejador de errores del observer de auth (ej: bloqueado por firewall)
+            console.error("Firebase Auth State Changed Error:", error);
+            setIsCriticalError(true);
+            setLoading(false);
         });
 
         return () => unsubscribe();
@@ -297,6 +323,8 @@ export function AuthProvider({ children }) {
         refetchUserData,
         authError,
         firestoreWarning,
+        isCriticalError,
+        enterOfflineMode,
         clearAuthError,
         clearFirestoreWarning,
         signIn,

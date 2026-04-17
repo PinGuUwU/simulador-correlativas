@@ -11,17 +11,50 @@ const ContactForm = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Configuración de EmailJS
-        emailjs.sendForm(
+        // Recolectar información de diagnóstico
+        const diagnostics = {
+            browser: navigator.userAgent,
+            platform: navigator.platform,
+            resolution: `${window.screen.width}x${window.screen.height}`,
+            language: navigator.language,
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+        };
+
+        // Clonar los datos del formulario para modificar el mensaje sin afectar la UI
+        const formData = new FormData(form.current);
+        const originalMessage = formData.get('message');
+        
+        const diagnosticString = `
+\n\n--- Información de Diagnóstico ---
+• Browser: ${diagnostics.browser}
+• Plataforma: ${diagnostics.platform}
+• Resolución: ${diagnostics.resolution}
+• Idioma: ${diagnostics.language}
+• URL: ${diagnostics.url}
+• Fecha: ${diagnostics.timestamp}
+----------------------------------`;
+
+        // EmailJS sendForm usa el elemento real, por lo que para adjuntar info extra
+        // sin que el usuario la vea en el campo de texto, podemos usar send()
+        // enviando un objeto con los nombres de las variables del template.
+        
+        const templateParams = {
+            user_name: formData.get('user_name'),
+            user_email: formData.get('user_email'),
+            message: originalMessage + diagnosticString
+        };
+
+        emailjs.send(
             import.meta.env.VITE_EMAILJS_SERVICE_ID || import.meta.env.EMAILJS_SERVICE_ID,
             import.meta.env.VITE_EMAILJS_TEMPLATE_ID || import.meta.env.EMAILJS_TEMPLATE_ID,
-            form.current,
+            templateParams,
             { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || import.meta.env.EMAILJS_PUBLIC_KEY }
         )
             .then(
                 () => {
                     setAction("¡Mensaje enviado con éxito!");
-                    e.target.reset();
+                    form.current.reset();
                     setTimeout(() => setAction(null), 3000);
                 },
                 (error) => {

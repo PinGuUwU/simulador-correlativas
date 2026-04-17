@@ -38,6 +38,7 @@ export const flushSyncQueue = async (currentUid = null) => {
     // Si no se pasa UID, intentamos obtenerlo de la instancia de Auth (útil para listeners globales)
     const activeUid = currentUid || auth.currentUser?.uid;
     if (!activeUid) return; // No intentamos sincronizar si no hay nadie logueado
+    let queue = [];
     try {
         const stored = localStorage.getItem(QUEUE_KEY);
         if (stored) queue = JSON.parse(stored);
@@ -45,7 +46,10 @@ export const flushSyncQueue = async (currentUid = null) => {
         return;
     }
 
-    if (queue.length === 0) return;
+    if (queue.length === 0) {
+        isFlushing = false;
+        return;
+    }
 
     isFlushing = true;
     const remainingQueue = [];
@@ -96,8 +100,8 @@ export const syncProgreso = (uid, plan, progreso) => {
         clearTimeout(debounceTimeout);
     }
 
-    // 3. Setear encolamiento, tras 3 segundos de inactividad, se iniciará la sincronización en nube
+    // 3. Setear encolamiento, tras 1.5 segundos de inactividad, se iniciará la sincronización en nube
     debounceTimeout = setTimeout(() => {
         flushSyncQueue(uid);
-    }, 3000);
+    }, 1500);
 };

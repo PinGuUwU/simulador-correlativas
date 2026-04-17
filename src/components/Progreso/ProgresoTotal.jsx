@@ -129,11 +129,11 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
                             : "w-full"
                     }
                 >
-                    <div className={isSticky ? "max-w-7xl mx-auto lg:pl-64 xl:pl-0 transition-all duration-300" : ""}>
-                        <div className="flex sm:px-10 pr-10 sm:p-0 justify-between items-end mb-3">
+                    <div className={isSticky ? "max-w-7xl mx-auto lg:pl-64 transition-all duration-300" : ""}>
+                        <div className="flex sm:px-10 pr-10 sm:p-0 justify-between items-end mb-3 ">
                             <div className="space-y-0.5">
                                 <span className="text-default-500 text-xs uppercase tracking-widest font-black">Estado Actual</span>
-                                <p className="text-foreground font-bold">Progreso de la carrera</p>
+                                <p className="text-foreground font-bold ">Progreso de la carrera</p>
                             </div>
                             <div className="text-right">
                                 <span className="text-2xl font-black text-secondary tabular-nums">{progress}%</span>
@@ -148,7 +148,7 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
                             className="h-2.5"
                             showValueLabel={false}
                             classNames={{
-                                track: "bg-default-200/60",
+                                track: "bg-default-200/60 ",
                                 indicator: "bg-gradient-to-r from-secondary to-primary"
                             }}
                         />

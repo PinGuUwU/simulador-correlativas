@@ -7,7 +7,7 @@ import { isIntentionalAuthCancel } from '../utils/errorCodes';
 import { logError } from '../services/logService';
 import { trackLogin, trackLogout } from '../services/analyticsService';
 import { getUserData } from '../services/dbService';
-import { syncProgreso } from '../services/syncService';
+import { syncProgreso, flushSyncQueue } from '../services/syncService';
 
 // ─── Constantes de persistencia ────────────────────────────────────────────────
 const SESSION_KEY = 'auth_session';
@@ -159,20 +159,26 @@ export function AuthProvider({ children }) {
                             const cloudData = await getUserData(firebaseUser.uid);
                             if (cloudData) setUserData(cloudData);
 
+                            // Intentar sincronizar cola pendiente al iniciar sesión
+                            flushSyncQueue(firebaseUser.uid);
+
                             const localProgress = getLocalProgress();
                             const hasCloudProgress = cloudData?.progreso && Object.keys(cloudData.progreso).length > 0;
 
-                            if (localProgress && hasCloudProgress) {
-                                setPendingSyncData({ local: localProgress, cloud: cloudData });
-                                setShowSyncModal(true);
+                            if (hasCloudProgress) {
+                                // Prioridad Nube: Si hay datos en la nube, estos mandan y sobrescriben lo local
+                                hydrateLocalData(cloudData);
+                                
+                                // Si además había algo local NO sincronizado, podríamos intentar subirlo? 
+                                // El usuario pidió reemplazo total, así que cumplimos eso.
                             } else if (localProgress && !hasCloudProgress) {
+                                // Si solo hay local (ej: primer login tras usar la app como invitado)
                                 for (const [plan, prog] of Object.entries(localProgress)) {
                                     syncProgreso(firebaseUser.uid, plan, prog);
                                 }
                                 if (cloudData?.config) hydrateLocalData({ config: cloudData.config });
-                            } else if (!localProgress && hasCloudProgress) {
-                                hydrateLocalData(cloudData);
                             } else {
+                                // Caso base: sincronizar config si existe
                                 if (cloudData?.config) hydrateLocalData({ config: cloudData.config });
                             }
                         } catch (err) {
@@ -262,6 +268,8 @@ export function AuthProvider({ children }) {
         setAuthError(null);
         setFirestoreWarning(null);
         try {
+            // Asegurar que todo lo pendiente se suba antes de irse
+            if (user) await flushSyncQueue(user.uid);
             await logout();
             trackLogout();
         } catch {

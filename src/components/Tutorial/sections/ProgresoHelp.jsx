@@ -1,5 +1,6 @@
 import React from 'react'
-import { Card, CardBody } from '@heroui/react'
+import { Card, CardBody, Divider } from '@heroui/react'
+import InteractiveMateriaDemo from './InteractiveMateriaDemo'
 
 export default function ProgresoHelp() {
     return (
@@ -37,9 +38,22 @@ export default function ProgresoHelp() {
                                 </p>
                             </CardBody>
                         </Card>
-                    </div>
+                        </div>
 
-                    {/* Tip para avanzados */}
+                        {/* Nueva utilidad: Filtro por estado */}
+                        <div className="bg-primary/5 rounded-3xl p-6 border border-primary/10">
+                        <h4 className="font-bold text-foreground flex items-center gap-2 mb-3">
+                            <i className="fa-solid fa-filter text-primary" />
+                            Resumen e Interacción
+                        </h4>
+                        <p className="text-sm text-foreground/70 leading-relaxed">
+                            Las tarjetas superiores (Disponibles, Regulares, etc.) no son solo informativas: 
+                            <b> si haces clic en ellas</b>, se abrirá un panel con el listado detallado de todas las materias que tienen ese estado. 
+                            Esto te permite revisar rápidamente qué te falta o qué tenés pendiente sin navegar por toda la lista.
+                        </p>
+                        </div>
+
+                        {/* Tip para avanzados */}
                     <Card className="bg-gradient-to-br from-secondary/10 to-primary/10 border-none shadow-none">
                         <CardBody className="p-6 flex flex-col sm:flex-row gap-5 items-center">
                             <div className="p-4 bg-background/50 rounded-2xl text-secondary shadow-sm shrink-0">
@@ -83,6 +97,11 @@ export default function ProgresoHelp() {
                     </ul>
                 </div>
             </div>
+
+            <Divider className="my-12 opacity-50" />
+
+            {/* Demo Interactiva */}
+            <InteractiveMateriaDemo />
         </div>
     )
 }

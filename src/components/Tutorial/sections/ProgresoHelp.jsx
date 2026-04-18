@@ -38,6 +38,22 @@ export default function ProgresoHelp() {
                             </CardBody>
                         </Card>
                     </div>
+
+                    {/* Tip para avanzados */}
+                    <Card className="bg-gradient-to-br from-secondary/10 to-primary/10 border-none shadow-none">
+                        <CardBody className="p-6 flex flex-col sm:flex-row gap-5 items-center">
+                            <div className="p-4 bg-background/50 rounded-2xl text-secondary shadow-sm shrink-0">
+                                <i className="fa-solid fa-wand-magic-sparkles text-2xl"></i>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-foreground text-lg mb-1">¡Tip para avanzados!</h4>
+                                <p className="text-sm text-foreground/70 leading-relaxed">
+                                    ¿Ya tenés muchas materias hechas? No hace falta marcar una por una. 
+                                    Si marcás tus <b>últimas materias</b> aprobadas, regulares o promocionadas, el sistema <b>actualizará automáticamente</b> todas sus correlativas previas en cascada.
+                                </p>
+                            </div>
+                        </CardBody>
+                    </Card>
                 </div>
 
                 {/* Columna Derecha - Sincronización */}

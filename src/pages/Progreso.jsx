@@ -4,6 +4,7 @@ import ProgresoTotal from '../components/Progreso/ProgresoTotal';
 import { Spinner } from '@heroui/react';
 import LeyendaEstados from '../components/Progreso/LeyendaEstados';
 import PlanSelectionModal from '../components/Progreso/modals/PlanSelectionModal';
+import ConsejoAvanzadosModal from '../components/Progreso/modals/ConsejoAvanzadosModal';
 import usePlanData from '../hooks/usePlanData';
 import materiasUtils from '../utils/Progreso/materiasUtils';
 import ProgresoSearchFilters from '../components/Progreso/ProgresoSearchFilters';
@@ -22,10 +23,23 @@ function Progreso({ plan, setPlan }) {
     const carrera = "Licenciatura en Sistemas de Información";
     const headerRef = useRef(null);
     const [isSticky, setIsSticky] = useState(false);
+    const [isAvanzadosModalOpen, setIsAvanzadosModalOpen] = useState(false);
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' });
     }, []);
+
+    // Mostrar modal de consejos para avanzados si hay plan y no se ocultó antes
+    useEffect(() => {
+        if (plan && !cargando) {
+            const ocultar = localStorage.getItem('ocultar_consejo_avanzados');
+            if (ocultar !== 'true') {
+                // Pequeño delay para que no aparezca justo encima del cargando
+                const timer = setTimeout(() => setIsAvanzadosModalOpen(true), 800);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [plan, cargando]);
 
     // Calcular el progreso total (materias aprobadas)
     const totalProgreso = () => {
@@ -52,6 +66,11 @@ function Progreso({ plan, setPlan }) {
             <PlanSelectionModal 
                 isOpen={!plan} 
                 onSelect={(selectedPlan) => setPlan(selectedPlan)} 
+            />
+
+            <ConsejoAvanzadosModal 
+                isOpen={isAvanzadosModalOpen} 
+                onClose={() => setIsAvanzadosModalOpen(false)} 
             />
 
             {cargando && (

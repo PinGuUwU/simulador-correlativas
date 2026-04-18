@@ -123,10 +123,8 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
         if (materiaActual.tesis && (estadoNuevo === materiasUtils.estadosPosibles[1] || estadoNuevo === materiasUtils.estadosPosibles[2])) {
             aprobarTodas(nuevoProgreso, materiasModificadas);
         } else {
-            // Cursando: estado neutro, no dispara cascada de correlativas
-            if (estadoNuevo === 'Cursando') {
-                // Solo actualizar el estado, sin tocar dependencias
-            } else if (estadoNuevo === materiasUtils.estadosPosibles[1]) { // Regular
+            // Cursando y Regular: disparan regularización de correlativas
+            if (estadoNuevo === 'Cursando' || estadoNuevo === materiasUtils.estadosPosibles[1]) {
                 if (materiaActual.correlativas.length > 0) {
                     regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas);
                 }

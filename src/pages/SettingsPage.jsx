@@ -332,11 +332,11 @@ export default function SettingsPage({ plan, setPlan }) {
                             variant="light"
                             color="default"
                             size="sm"
-                            className="font-bold justify-start px-2 h-9 text-default-500 hover:text-primary transition-colors"
+                            className="font-bold justify-start px-2 h-9 text-default-400 cursor-not-allowed"
                             startContent={<i className="fa-solid fa-file-export text-xs" />}
-                            onPress={handleExport}
+                            isDisabled
                         >
-                            Exportar Avance (JSON)
+                            Exportar Avance (Próximamente)
                         </Button>
                     </CardBody>
                 </Card>

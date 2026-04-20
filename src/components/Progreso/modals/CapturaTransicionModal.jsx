@@ -16,6 +16,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
     const [anio, setAnio] = useState(String(new Date().getFullYear()));
     const [notaCursada, setNotaCursada] = useState("");
     const [notaFinal, setNotaFinal] = useState("");
+    const [fechaFinal, setFechaFinal] = useState("");
     const [errors, setErrors] = useState({});
     // Estado de sugerencia cuando nota cursada < 4
     const [sugerenciaLibre, setSugerenciaLibre] = useState(false);
@@ -24,6 +25,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
         setAnio(String(new Date().getFullYear()));
         setNotaCursada("");
         setNotaFinal("");
+        setFechaFinal(new Date().toISOString().split("T")[0]);
         setErrors({});
         setSugerenciaLibre(false);
     }, [isOpen]);
@@ -70,7 +72,10 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
         // Validar nota final (cuando se pide)
         if (['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
             if (notaFinal !== "") {
-                const err = validarNota(notaFinal, "Nota final");
+                let err = validarNota(notaFinal, "Nota final");
+                if (!err && Number(notaFinal) < 4) {
+                    err = "Para probar(aprobar) la nota debe ser de 4 para arriba.";
+                }
                 if (err) newErrors.notaFinal = err;
             }
         }
@@ -103,6 +108,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
 
         if (['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
             payload.notaFinal = notaFinal !== "" ? Number(notaFinal) : null;
+            payload.fechaFinal = fechaFinal;
         }
 
         if (tipo === 'hacia_aprobado_directo') {
@@ -234,20 +240,31 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
 
                             {/* Nota final */}
                             {necesitaNotaFinal && (
-                                <Input
-                                    label="Nota del examen final"
-                                    placeholder="0 - 10"
-                                    type="number"
-                                    variant="faded"
-                                    color="success"
-                                    value={notaFinal}
-                                    onValueChange={setNotaFinal}
-                                    isInvalid={!!errors.notaFinal}
-                                    errorMessage={errors.notaFinal}
-                                    min="0"
-                                    max="10"
-                                    fullWidth
-                                />
+                                <div className="flex flex-col gap-2">
+                                    <Input
+                                        label="Fecha del examen final"
+                                        type="date"
+                                        variant="faded"
+                                        color="success"
+                                        value={fechaFinal}
+                                        onChange={(e) => setFechaFinal(e.target.value)}
+                                        fullWidth
+                                    />
+                                    <Input
+                                        label="Nota del examen final"
+                                        placeholder="0 - 10"
+                                        type="number"
+                                        variant="faded"
+                                        color="success"
+                                        value={notaFinal}
+                                        onValueChange={setNotaFinal}
+                                        isInvalid={!!errors.notaFinal}
+                                        errorMessage={errors.notaFinal}
+                                        min="0"
+                                        max="10"
+                                        fullWidth
+                                    />
+                                </div>
                             )}
 
                             {/* Resumen de cuatrimestre para tipo cursando */}

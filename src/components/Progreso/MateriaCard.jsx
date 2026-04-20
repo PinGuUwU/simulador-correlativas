@@ -43,6 +43,11 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
                         Vence: {regularidadUtils.obtenerFechaVencimientoLabel(detalles.fechaRegularidad)}
                     </Chip>
                 )}
+                {estado === 'Aprobado' && detalles?.intentosFinal?.some(i => i.estado === 'aprobado') && (
+                    <Chip color="success" variant="dot" size="sm" className="font-bold">
+                        Aprobada en: {detalles.intentosFinal.find(i => i.estado === 'aprobado').fecha?.split("-")[0] || 'S/F'}
+                    </Chip>
+                )}
             </CardHeader>
 
             <CardBody className={`${vista === 'list' ? 'flex-row items-center flex-1 justify-between p-2 overflow-hidden gap-4' : ''}`}>

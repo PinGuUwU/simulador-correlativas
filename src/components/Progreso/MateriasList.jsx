@@ -294,7 +294,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                 const nuevoIntento = {
                     nota: payload.notaFinal,
                     estado: payload.notaFinal >= 4 ? 'aprobado' : 'reprobado',
-                    fecha: new Date().toISOString()
+                    fecha: payload.fechaFinal || new Date().toISOString().split("T")[0]
                 };
                 nuevosDetalles.intentosFinal = [
                     ...(nuevosDetallesBase.intentosFinal || []),

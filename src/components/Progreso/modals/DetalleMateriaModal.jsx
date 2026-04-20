@@ -24,10 +24,12 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
         fechaIntento, setFechaIntento,
         notaError,
         editingHistorialIndex, setEditingHistorialIndex,
+        editingIntentoIndex, setEditingIntentoIndex,
         handleCambioAnio,
         handleCambioNotaCursada,
         handleGuardarIntento,
         handleEliminarIntento,
+        handleUpdateIntento,
         handleUpdateCursadaHistorial,
         handleEliminarCursadaHistorial
     } = useDetalleMateria(
@@ -208,18 +210,53 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                                 <div className="flex flex-col gap-1.5 mt-2">
                                                     {intentosFinal.map((intento, i) => (
                                                         <div key={i} className="flex items-center justify-between text-xs text-default-600 bg-default-100/50 rounded-lg pl-3 pr-1 py-1 group">
-                                                            <div className="flex-1 flex justify-between mr-2">
-                                                                <div className="flex flex-col">
-                                                                    <span className="font-bold">{i + 1}° intento</span>
-                                                                    <span className="text-[10px] text-default-400">{intento.fecha || 'Sin fecha'}</span>
+                                                            {editingIntentoIndex === i ? (
+                                                                <div className="flex-1 flex flex-col gap-2 w-full py-1">
+                                                                    <div className="flex gap-2 items-center w-full">
+                                                                        <Input type="date" size="sm" defaultValue={intento.fecha} id={`edit-fecha-${i}`} className="flex-[3]" aria-label="Fecha del intento" />
+                                                                        <Select size="sm" defaultSelectedKeys={[intento.estado === 'ausente' ? 'ausente' : 'rendido']} id={`edit-estado-${i}`} className="flex-[3] min-w-[110px]" aria-label="Estado del examen">
+                                                                            <SelectItem key="rendido">Rindió</SelectItem>
+                                                                            <SelectItem key="ausente">Ausente</SelectItem>
+                                                                        </Select>
+                                                                        <Input type="number" size="sm" defaultValue={intento.nota != null ? String(intento.nota) : ""} placeholder="Nota" id={`edit-nota-${i}`} className="flex-[1] w-14" aria-label="Nota del examen" />
+                                                                    </div>
+                                                                    <div className="flex justify-end gap-2 w-full">
+                                                                        <Button size="sm" color="success" variant="flat" onPress={() => {
+                                                                            const eFecha = document.getElementById(`edit-fecha-${i}`).value;
+                                                                            const eEstadoVisual = document.getElementById(`edit-estado-${i}`).value;
+                                                                            const eNota = document.getElementById(`edit-nota-${i}`).value;
+                                                                            const finalNota = eEstadoVisual === 'ausente' ? null : Number(eNota);
+                                                                            const finalEstado = eEstadoVisual === 'ausente' ? 'ausente' : (finalNota >= 4 ? 'aprobado' : 'reprobado');
+                                                                            handleUpdateIntento(i, { fecha: eFecha, estado: finalEstado, nota: finalNota });
+                                                                        }}>
+                                                                            <i className="fa-solid fa-check mr-1" /> Guardar
+                                                                        </Button>
+                                                                        <Button size="sm" color="default" variant="flat" onPress={() => setEditingIntentoIndex(null)}>
+                                                                            Cancelar
+                                                                        </Button>
+                                                                    </div>
                                                                 </div>
-                                                                <span className={intento.estado === 'aprobado' ? "text-success font-black" : (intento.estado === 'reprobado' ? "text-danger font-black" : "text-warning font-black")}>
-                                                                    {intento.estado === 'ausente' ? 'Ausente' : `Nota: ${intento.nota}`}
-                                                                </span>
-                                                            </div>
-                                                            <Button isIconOnly size="sm" variant="light" color="danger" className="h-7 w-7 opacity-20 group-hover:opacity-100" onPress={() => handleEliminarIntento(i)}>
-                                                                <i className="fa-solid fa-trash-can text-[10px]" />
-                                                            </Button>
+                                                            ) : (
+                                                                <>
+                                                                    <div className="flex-1 flex justify-between mr-2">
+                                                                        <div className="flex flex-col">
+                                                                            <span className="font-bold">{i + 1}° intento</span>
+                                                                            <span className="text-[10px] text-default-400">{intento.fecha || 'Sin fecha'}</span>
+                                                                        </div>
+                                                                        <span className={intento.estado === 'aprobado' ? "text-success font-black" : (intento.estado === 'reprobado' ? "text-danger font-black" : "text-warning font-black")}>
+                                                                            {intento.estado === 'ausente' ? 'Ausente (Nota: -)' : `Nota: ${intento.nota}`}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="flex gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
+                                                                        <Button isIconOnly size="sm" variant="light" color="secondary" className="h-7 w-7" onPress={() => setEditingIntentoIndex(i)}>
+                                                                            <i className="fa-solid fa-pen text-[10px]" />
+                                                                        </Button>
+                                                                        <Button isIconOnly size="sm" variant="light" color="danger" className="h-7 w-7" onPress={() => handleEliminarIntento(i)}>
+                                                                            <i className="fa-solid fa-trash-can text-[10px]" />
+                                                                        </Button>
+                                                                    </div>
+                                                                </>
+                                                            )}
                                                         </div>
                                                     ))}
                                                 </div>

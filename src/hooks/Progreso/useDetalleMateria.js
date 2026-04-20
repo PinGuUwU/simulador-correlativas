@@ -14,6 +14,7 @@ export default function useDetalleMateria(infoMateria, progresoDetalles, setProg
     const [fechaIntento, setFechaIntento] = useState(new Date().toISOString().split('T')[0]);
     const [notaError, setNotaError] = useState("");
     const [editingHistorialIndex, setEditingHistorialIndex] = useState(null);
+    const [editingIntentoIndex, setEditingIntentoIndex] = useState(null);
 
     const guardarDetalles = (nuevosDetalles) => {
         const payload = { ...progresoDetalles, [infoMateria.codigo]: nuevosDetalles };
@@ -159,6 +160,39 @@ export default function useDetalleMateria(infoMateria, progresoDetalles, setProg
         });
     };
 
+    const handleUpdateIntento = (index, dataActualizada) => {
+        const currentData = progresoDetalles[infoMateria?.codigo];
+        if (!currentData || !currentData.intentosFinal) return;
+
+        const newIntentos = [...currentData.intentosFinal];
+        newIntentos[index] = dataActualizada;
+
+        // Si se editó a "aprobado", actualizar notaFinal. Si ya no es, remover notaFinal
+        const fueAprobado = dataActualizada.estado === 'aprobado';
+        
+        const updatedData = {
+            ...currentData,
+            intentosFinal: newIntentos,
+            ...(fueAprobado ? { notaFinal: dataActualizada.nota } : { notaFinal: null })
+        };
+        guardarDetalles(updatedData);
+
+        // Actualizar estado general consolidado
+        if (fueAprobado) {
+            cambioDeEstado(infoMateria.codigo, 'Aprobado');
+        } else {
+            const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
+                estadoActual === "Aprobado" ? "Regular" : estadoActual, 
+                currentData.fechaRegularidad,
+                newIntentos
+            );
+            if (estadoActualizado !== estadoActual) {
+                cambioDeEstado(infoMateria.codigo, estadoActualizado);
+            }
+        }
+        setEditingIntentoIndex(null);
+    };
+
     return {
         showNotaForm, setShowNotaForm,
         notaVal, setNotaVal,
@@ -166,10 +200,12 @@ export default function useDetalleMateria(infoMateria, progresoDetalles, setProg
         fechaIntento, setFechaIntento,
         notaError,
         editingHistorialIndex, setEditingHistorialIndex,
+        editingIntentoIndex, setEditingIntentoIndex,
         handleCambioAnio,
         handleCambioNotaCursada,
         handleGuardarIntento,
         handleEliminarIntento,
+        handleUpdateIntento,
         handleUpdateCursadaHistorial,
         handleEliminarCursadaHistorial
     };

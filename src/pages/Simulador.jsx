@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Button, Spinner, useDisclosure, Card, CardBody } from '@heroui/react'
+import { Button, Spinner, useDisclosure, Card, CardBody, Modal, ModalContent, ModalBody } from '@heroui/react'
 
 import HeaderSimulador from '../components/Simulador/HeaderSimulador'
 import MateriasSimulador from '../components/Simulador/MateriasSimulador'
@@ -104,6 +104,21 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                 cuatri={cuatri}
                 simulacionTerminada={simulacionTerminada}
             />
+
+            {/* Modal que muestra el estado de descarga de PDF sin afectar el render base */}
+            <Modal isOpen={descargandoPDF} hideCloseButton isDismissable={false} backdrop="blur" placement="center">
+                <ModalContent>
+                    <ModalBody className="py-8 flex flex-col items-center justify-center text-center gap-4">
+                        <Spinner size="lg" color="primary" />
+                        <div>
+                            <h3 className="text-xl font-black text-foreground">Generando Reporte</h3>
+                            <p className="text-sm text-foreground/60 mt-1">
+                                Preparando tu historial académico y procesando el documento...
+                            </p>
+                        </div>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
 
             {/* ── Estado: sin plan configurado ── */}
             {!plan && !cargando && (

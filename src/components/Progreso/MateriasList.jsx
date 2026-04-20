@@ -9,11 +9,32 @@ import materiasUtils from '../../utils/Progreso/materiasUtils.js'
 import useProgresoMaterias from '../../hooks/Progreso/useProgresoMaterias.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import regularidadUtils from '../../utils/Progreso/regularidadUtils.js'
+import { Search } from 'lucide-react'
+import SyncCloud from './SyncCloud';
 
-function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan }) {
+function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan, busqueda = "", filtros = [] }) {
     const { updateAuthProgreso } = useAuth();
     const [infoMateria, setInfoMateria] = useState()
     const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)
+
+    // Lógica de filtrado
+    const isSearching = busqueda.trim().length > 0 || filtros.length > 0;
+
+    const materiasFiltradas = materias.filter(m => {
+        // Función para quitar acentos
+        const normalize = (text) => 
+            text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+        const searchNormalized = normalize(busqueda);
+        
+        const matchBusqueda = busqueda === "" ||
+            normalize(m.nombre).includes(searchNormalized) ||
+            normalize(m.codigo).includes(searchNormalized);
+
+        const matchFiltros = filtros.length === 0 || filtros.includes(progreso[m.codigo]);
+
+        return matchBusqueda && matchFiltros;
+    });
 
     // Efecto para verificar vencimientos pasivos al cargar
     useEffect(() => {
@@ -188,7 +209,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
     const [targetStateModal, setTargetStateModal] = useState(null)
 
     const handleCambioDeEstado = (codigo, targetState) => {
-        const mappedState = targetState === "Promocionado" ? "Aprobado" : targetState;
+        const mappedState = targetState;
         const materia = materias.find(m => m.codigo === codigo);
         const estadoActual = progreso[codigo];
 
@@ -198,14 +219,29 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             return;
         }
 
+        // Si es "Cursando", no preguntamos nada y tomamos el año actual automáticamente
+        if (mappedState === "Cursando") {
+            const cuatrimestreAuto = materia?.cuatrimestre
+                ? (Number(materia.cuatrimestre) % 2 === 0 ? 2 : 1)
+                : 1;
+
+            const payload = {
+                fechaInicioCursada: {
+                    anio: new Date().getFullYear(),
+                    cuatrimestre: cuatrimestreAuto
+                }
+            };
+
+            ejecutarCambioConDatos(codigo, { tipo: 'hacia_cursando', materia, pendingState: mappedState }, payload);
+            return;
+        }
+
         // Determinar tipo de captura según la transición
         let tipoCaptura = null;
 
-        if (mappedState === "Cursando") {
-            tipoCaptura = 'hacia_cursando';
-        } else if (mappedState === "Regular") {
+        if (mappedState === "Regular") {
             tipoCaptura = estadoActual === 'Cursando' ? 'desde_cursando_hacia_reg' : 'hacia_regular';
-        } else if (mappedState === "Aprobado") {
+        } else if (mappedState === "Aprobado" || mappedState === "Promocionado") {
             if (estadoActual === 'Regular' || estadoActual === 'Cursando') {
                 tipoCaptura = 'hacia_aprobado_desde_reg';
             } else {
@@ -224,30 +260,14 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
         cambioDeEstado(codigo, mappedState);
     }
 
-    const handleCapturaConfirm = (payload) => {
-        // _sugerirLibre: el usuario eligio "Marcar como Libre" desde la alerta de nota reprobatoria
-        if (payload?._sugerirLibre) {
-            if (codigoMateria) {
-                const detallesActuales = progresoDetalles?.[codigoMateria] || {};
-                const updatedDetalles = {
-                    ...progresoDetalles,
-                    [codigoMateria]: { ...detallesActuales, notaRegularizacion: payload.notaRegularizacion }
-                };
-                if (setProgresoDetalles) setProgresoDetalles(updatedDetalles);
-                updateAuthProgreso(plan, progreso, updatedDetalles);
-            }
-            onCapturaClose();
-            cambioDeEstado(codigoMateria, 'Libre');
-            return;
-        }
+    const ejecutarCambioConDatos = (codigo, config, payload) => {
+        if (payload && codigo) {
+            const detallesActuales = progresoDetalles?.[codigo] || {};
+            const estadoActual = progreso[codigo];
 
-        if (payload && codigoMateria) {
-            const detallesActuales = progresoDetalles?.[codigoMateria] || {};
-            const estadoActual = progreso[codigoMateria];
-
-            // ¿Es una recursada? (viniendo de Libre o Aprobado y queriendo regularizar/cursar de nuevo)
-            const viniendoDeEstadoFinal = ['Libre', 'Aprobado'].includes(estadoActual);
-            const yendoAEstadoActivo = ['Cursando', 'Regular', 'Aprobado'].includes(capturaConfig.pendingState);
+            // ¿Es una recursada? (viniendo de Libre, Aprobado o Promocionado y queriendo regularizar/cursar de nuevo)
+            const viniendoDeEstadoFinal = ['Libre', 'Aprobado', 'Promocionado'].includes(estadoActual);
+            const yendoAEstadoActivo = ['Cursando', 'Regular', 'Aprobado', 'Promocionado'].includes(config.pendingState);
             const esRecursada = viniendoDeEstadoFinal && yendoAEstadoActivo;
 
             let nuevosDetallesBase = { ...detallesActuales };
@@ -263,7 +283,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                             ...(historial || []),
                             {
                                 ...datosAArchivar,
-                                estadoFinal: estadoActual, // Guardamos que terminó como Libre o Aprobado
+                                estadoFinal: estadoActual, // Guardamos que terminó como Libre, Aprobado o Promocionado
                                 fechaFin: new Date().toISOString()
                             }
                         ],
@@ -286,15 +306,19 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             };
 
             // Si transición 'desde_cursando_hacia_reg', copiar fechaInicioCursada como fechaRegularidad si no la tiene
-            if (capturaConfig.tipo === 'desde_cursando_hacia_reg' && !nuevosDetalles.fechaRegularidad && nuevosDetallesBase.fechaInicioCursada) {
+            if (config.tipo === 'desde_cursando_hacia_reg' && !nuevosDetalles.fechaRegularidad && nuevosDetallesBase.fechaInicioCursada) {
                 nuevosDetalles.fechaRegularidad = nuevosDetallesBase.fechaInicioCursada;
             }
 
-            if (payload.notaFinal != null && capturaConfig.pendingState === 'Aprobado') {
+            if (payload.notaFinal != null && (config.pendingState === 'Aprobado' || config.pendingState === 'Promocionado')) {
+                const fechaExamen = payload.anioExamen 
+                    ? new Date(payload.anioExamen, 11, 31).toISOString() 
+                    : new Date().toISOString();
+
                 const nuevoIntento = {
                     nota: payload.notaFinal,
                     estado: payload.notaFinal >= 4 ? 'aprobado' : 'reprobado',
-                    fecha: payload.fechaFinal || new Date().toISOString().split("T")[0]
+                    fecha: payload.fechaFinal || fechaExamen.split("T")[0]
                 };
                 nuevosDetalles.intentosFinal = [
                     ...(nuevosDetallesBase.intentosFinal || []),
@@ -302,16 +326,36 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                 ];
             }
 
-            const updatedDetalles = { ...progresoDetalles, [codigoMateria]: nuevosDetalles };
+            const updatedDetalles = { ...progresoDetalles, [codigo]: nuevosDetalles };
             if (setProgresoDetalles) setProgresoDetalles(updatedDetalles);
             updateAuthProgreso(plan, progreso, updatedDetalles);
         }
 
-        onCapturaClose();
-        // Aplicar el cambio de estado siempre
-        if (capturaConfig.pendingState) {
-            cambioDeEstado(codigoMateria, capturaConfig.pendingState);
+        // Aplicar el cambio de estado siempre si hay un estado pendiente
+        if (config.pendingState) {
+            cambioDeEstado(codigo, config.pendingState);
         }
+    }
+
+    const handleCapturaConfirm = (payload) => {
+        // _sugerirLibre: el usuario eligio "Marcar como Libre" desde la alerta de nota reprobatoria
+        if (payload?._sugerirLibre) {
+            if (codigoMateria) {
+                const detallesActuales = progresoDetalles?.[codigoMateria] || {};
+                const updatedDetalles = {
+                    ...progresoDetalles,
+                    [codigoMateria]: { ...detallesActuales, notaRegularizacion: payload.notaRegularizacion }
+                };
+                if (setProgresoDetalles) setProgresoDetalles(updatedDetalles);
+                updateAuthProgreso(plan, progreso, updatedDetalles);
+            }
+            onCapturaClose();
+            cambioDeEstado(codigoMateria, 'Libre');
+            return;
+        }
+
+        ejecutarCambioConDatos(codigoMateria, capturaConfig, payload);
+        onCapturaClose();
     }
 
     useEffect(() => {
@@ -350,8 +394,11 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             <Modal
                 isOpen={isResetOpen}
                 onOpenChange={onResetOpenChange}
-                backdrop="blur"
+                backdrop="opaque"
                 placement="center"
+                classNames={{
+                    backdrop: "bg-black/50"
+                }}
             >
                 <ModalContent>
                     {(onClose) => (
@@ -388,148 +435,198 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             </Modal>
 
             {/* Sección de botones */}
-            <div className="grid grid-cols-2 sm:flex sm:justify-between mb-8 gap-2">
-                {/* Botón de Reestablecer */}
-                <div id="wrapper-btn-reset-progreso" className="flex flex-col">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+                {/* Grupo de Acciones Principales */}
+                <div className="flex items-center gap-2">
                     <Button
                         size="sm"
                         variant="flat"
                         color="danger"
-                        className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 w-full"
+                        className="font-bold rounded-xl"
                         startContent={<i className="fa-solid fa-trash-can"></i>}
                         onPress={() => handleBorrado()}
                     >
                         Reestablecer
                     </Button>
-                </div>
-
-                <Button
-                    size='sm'
-                    variant="flat"
-                    color="success"
-                    className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 text-success-800"
-                    onPress={() => navigate("/simulador")}
-                >Simular Avance</Button>
-
-                <div id="wrapper-btn-mostrar-todos" className="flex flex-col">
                     <Button
                         size='sm'
                         variant="flat"
-                        color="warning"
-                        className="font-bold rounded-xl animate-in fade-in zoom-in duration-300 text-warning-800 w-full"
-                        onPress={() => handleMostrarTodo()}
+                        color="success"
+                        className="font-bold rounded-xl text-success-800"
+                        onPress={() => navigate("/simulador")}
                     >
-                        {isAnioOpen.length > 0 ? "Mostrar todos" : "Ocultar todos"}
+                        Simular Avance
                     </Button>
                 </div>
-
-                {/* Selector de Vista (Lista vs Cuadrícula) */}
-                <div id="wrapper-view-selector" className="col-span-2 sm:col-span-1 flex justify-center max-md:hidden">
-
-                    <Tabs
+                
+                {/* Herramientas de Sincronización y Vista */}
+                <div className="flex items-center gap-3">
+                    <Button
                         size="sm"
-                        variant="bordered"
-                        selectedKey={vista}
-                        onSelectionChange={setVista}
-                        classNames={{
-                            tabList: "rounded-xl border-default-200 bg-background/50",
-                            cursor: "rounded-lg"
-                        }}
+                        variant="flat"
+                        color="default"
+                        className="font-bold rounded-xl max-sm:hidden"
+                        startContent={<i className={`fa-solid ${isAnioOpen.length > 0 ? 'fa-eye' : 'fa-eye-slash'}`}></i>}
+                        onPress={handleMostrarTodo}
                     >
-                        <Tab key="grid" title={<div className="flex items-center gap-2"><i className="fa-solid fa-table-cells-large"></i><span>Cuadrícula</span></div>} />
-                        <Tab key="list" title={<div className="flex items-center gap-2"><i className="fa-solid fa-list-ul"></i><span>Lista</span></div>} />
-                    </Tabs>
+                        {isAnioOpen.length > 0 ? "Mostrar todo" : "Ocultar todo"}
+                    </Button>
+
+                    <SyncCloud plan={plan} />
+
+                    <div id="wrapper-view-selector" className="max-md:hidden">
+                        <Tabs
+                            size="sm"
+                            variant="bordered"
+                            selectedKey={vista}
+                            onSelectionChange={setVista}
+                            classNames={{
+                                tabList: "rounded-xl border-default-200 bg-default-100 p-1",
+                                cursor: "rounded-lg bg-background shadow-sm",
+                                tab: "px-3"
+                            }}
+                        >
+                            <Tab key="grid" title={<div className="flex items-center gap-2"><i className="fa-solid fa-table-cells-large"></i></div>} />
+                            <Tab key="list" title={<div className="flex items-center gap-2"><i className="fa-solid fa-list-ul"></i></div>} />
+                        </Tabs>
+                    </div>
                 </div>
             </div>
-            {/* Sección materias */}
-            <div id="tabs-filtro-anio" className="relative">
-                <Tabs aria-label="Filtos por año" items={tabs} className=' w-full mask-[linear-gradient(to_right,black_85%,transparent_100%)] pl-[3%] md:mask-none'>
-                    {(item) => (
-                        <Tab key={item.id} title={item.label} className=''>
-                            <div className="space-y-12 ">
-                                {item.content.map((valor) => {
-                                    let materiasParaMostrar
-                                    //Si el valor es taller
-                                    if (valor === "taller") {
-                                        materiasParaMostrar = talleres
-                                    } else {
-                                        // Me quedo con las materias de este año
-                                        materiasParaMostrar = materias.filter((m) => Number(m.anio) === valor)
-                                    }
+            {/* Sección materias o Resultados de búsqueda */}
+            {isSearching ? (
+                <div className="space-y-8 animate-in fade-in duration-500">
+                    <div className="flex items-center justify-between border-b border-default-200 pb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-8 bg-secondary rounded-full"></div>
+                            <h2 className="text-2xl font-black text-foreground tracking-tight">
+                                Resultados de búsqueda
+                            </h2>
+                        </div>
+                        <Chip variant="flat" color="secondary" className="font-bold">
+                            {materiasFiltradas.length} encontrados
+                        </Chip>
+                    </div>
 
-                                    // Si no hay materias en este año, podríamos evitar renderizarlo (opcional)
-                                    if (materiasParaMostrar.length === 0) return null
-
-                                    return (
-                                        <section key={valor} className={`flex flex-col gap-6`}>
-                                            {/* Cabecera del Año */}
-                                            <div className="flex justify-between ">
-                                                <div className='flex items-center gap-3 border-b border-default-200 pb-2'>
-                                                    <div className="w-1.5 h-8 bg-primary rounded-full shadow-sm"></div>
-                                                    <h2 className="text-2xl font-bold text-foreground tracking-tight">
-                                                        {valor === "taller" ? "Talleres" : `${valor}° Año`}
-                                                    </h2>
-                                                </div>
-                                                <Button onPress={() => handleMostrar(valor)}>{isAnioOpen.includes(valor) ? "Mostrar más" : "Mostrar menos"}</Button>
-                                            </div>
-
-                                            {/* Contenedor de Cuatrimestres */}
-                                            <div className={`flex flex-col gap-8 pl-2 sm:pl-4 ${isAnioOpen.includes(valor) ? " hidden" : ""}`}>
-                                                {[1, 2].map((cuatri) => {
-                                                    // Me quedo con las materias de este cuatrimestre
-                                                    const materiasCuatri = materiasParaMostrar.filter(
-                                                        (m) => (Number(m.cuatrimestre) % 2 === 0 ? 2 : 1) === cuatri
-                                                    )
-
-                                                    if (materiasCuatri.length === 0) return null
-
-                                                    return (
-                                                        <div key={cuatri} className="flex flex-col gap-4">
-                                                            {/* Cabecera del Cuatrimestre */}
-                                                            <div className="flex items-center justify-between bg-default-50 border border-default-200 rounded-lg px-4 py-3 shadow-sm">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-1 h-5 bg-default-400 rounded-full"></div>
-                                                                    <h3 className="text-lg font-semibold text-default-700">
-                                                                        {cuatri}° Cuatrimestre
-                                                                    </h3>
-                                                                </div>
-                                                                <Chip size="sm" variant="flat" className="bg-background border border-default-200 text-default-600 font-medium shadow-sm">
-                                                                    {materiasCuatri.length} {materiasCuatri.length === 1 ? 'Materia' : 'Materias'}
-                                                                </Chip>
-                                                            </div>
-
-                                                            <div className={vista === 'grid'
-                                                                ? "grid grid-cols-1 min-[768px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
-                                                                : "flex flex-col gap-3"
-                                                            }>
-                                                                {materiasCuatri.map((materia, index) => {
-                                                                    const esElPrimero = materia.codigo === materias[0]?.codigo;
-                                                                    return (
-                                                                        <div key={materia.codigo !== "N/A" ? materia.codigo : `${materia.codigo}-${index}`} id={esElPrimero ? 'materia-card-ejemplo' : undefined}>
-                                                                            <MateriaCard
-                                                                                materia={materia}
-                                                                                estado={progreso[materia.codigo]}
-                                                                                detalles={progresoDetalles?.[materia.codigo]}
-                                                                                actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
-                                                                                abrirInfo={() => abrirInfo(materia)}
-                                                                                vista={vista}
-                                                                            />
-                                                                        </div>
-                                                                    )
-                                                                })}
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </section>
-                                    )
-                                })}
+                    {materiasFiltradas.length > 0 ? (
+                        <div className={vista === 'grid'
+                            ? "grid grid-cols-1 min-[768px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+                            : "flex flex-col gap-3"
+                        }>
+                            {materiasFiltradas.map((materia) => (
+                                <div key={materia.codigo}>
+                                    <MateriaCard
+                                        materia={materia}
+                                        estado={progreso[materia.codigo]}
+                                        detalles={progresoDetalles?.[materia.codigo]}
+                                        actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
+                                        abrirInfo={() => abrirInfo(materia)}
+                                        vista={vista}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-20 flex flex-col items-center justify-center text-center gap-4 bg-default-50 rounded-[2.5rem] border-2 border-dashed border-default-200">
+                            <div className="w-16 h-16 bg-default-100 rounded-2xl flex items-center justify-center text-default-400">
+                                <Search size={32} />
                             </div>
-                        </Tab>
+                            <div>
+                                <p className="text-xl font-bold text-foreground">No encontramos materias</p>
+                                <p className="text-default-500">Probá con otros términos o filtros</p>
+                            </div>
+                        </div>
                     )}
-                </Tabs>
-            </div>
+                </div>
+            ) : (
+                <div id="tabs-filtro-anio" className="relative animate-in fade-in duration-500">
+                    <Tabs aria-label="Filtos por año" items={tabs} className=' w-full mask-[linear-gradient(to_right,black_85%,transparent_100%)] pl-[3%] md:mask-none'>
+                        {(item) => (
+                            <Tab key={item.id} title={item.label} className=''>
+                                <div className="space-y-12 ">
+                                    {item.content.map((valor) => {
+                                        let materiasParaMostrar
+                                        //Si el valor es taller
+                                        if (valor === "taller") {
+                                            materiasParaMostrar = talleres
+                                        } else {
+                                            // Me quedo con las materias de este año
+                                            materiasParaMostrar = materias.filter((m) => Number(m.anio) === valor)
+                                        }
+
+                                        // Si no hay materias en este año, podríamos evitar renderizarlo (opcional)
+                                        if (materiasParaMostrar.length === 0) return null
+
+                                        return (
+                                            <section key={valor} className={`flex flex-col gap-6`}>
+                                                {/* Cabecera del Año */}
+                                                <div className="flex justify-between ">
+                                                    <div className='flex items-center gap-3 border-b border-default-200 pb-2'>
+                                                        <div className="w-1.5 h-8 bg-primary rounded-full shadow-sm"></div>
+                                                        <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                                                            {valor === "taller" ? "Talleres" : `${valor}° Año`}
+                                                        </h2>
+                                                    </div>
+                                                    <Button onPress={() => handleMostrar(valor)}>{isAnioOpen.includes(valor) ? "Mostrar más" : "Mostrar menos"}</Button>
+                                                </div>
+
+                                                {/* Contenedor de Cuatrimestres */}
+                                                <div className={`flex flex-col gap-8 pl-2 sm:pl-4 ${isAnioOpen.includes(valor) ? " hidden" : ""}`}>
+                                                    {[1, 2].map((cuatri) => {
+                                                        // Me quedo con las materias de este cuatrimestre
+                                                        const materiasCuatri = materiasParaMostrar.filter(
+                                                            (m) => (Number(m.cuatrimestre) % 2 === 0 ? 2 : 1) === cuatri
+                                                        )
+
+                                                        if (materiasCuatri.length === 0) return null
+
+                                                        return (
+                                                            <div key={cuatri} className="flex flex-col gap-4">
+                                                                {/* Cabecera del Cuatrimestre */}
+                                                                <div className="flex items-center justify-between bg-default-50 border border-default-200 rounded-lg px-4 py-3 shadow-sm">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-1 h-5 bg-default-400 rounded-full"></div>
+                                                                        <h3 className="text-lg font-semibold text-default-700">
+                                                                            {cuatri}° Cuatrimestre
+                                                                        </h3>
+                                                                    </div>
+                                                                    <Chip size="sm" variant="flat" className="bg-background border border-default-200 text-default-600 font-medium shadow-sm">
+                                                                        {materiasCuatri.length} {materiasCuatri.length === 1 ? 'Materia' : 'Materias'}
+                                                                    </Chip>
+                                                                </div>
+
+                                                                <div className={vista === 'grid'
+                                                                    ? "grid grid-cols-1 min-[768px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+                                                                    : "flex flex-col gap-3"
+                                                                }>
+                                                                    {materiasCuatri.map((materia, index) => {
+                                                                        const esElPrimero = materia.codigo === materias[0]?.codigo;
+                                                                        return (
+                                                                            <div key={materia.codigo !== "N/A" ? materia.codigo : `${materia.codigo}-${index}`} id={esElPrimero ? 'materia-card-ejemplo' : undefined}>
+                                                                                <MateriaCard
+                                                                                    materia={materia}
+                                                                                    estado={progreso[materia.codigo]}
+                                                                                    detalles={progresoDetalles?.[materia.codigo]}
+                                                                                    actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
+                                                                                    abrirInfo={() => abrirInfo(materia)}
+                                                                                    vista={vista}
+                                                                                />
+                                                                            </div>
+                                                                        )
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </section>
+                                        )
+                                    })}
+                                </div>
+                            </Tab>
+                        )}
+                    </Tabs>
+                </div>
+            )}
 
 
             {/* Drawer de info de las materiasd */}

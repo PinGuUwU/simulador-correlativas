@@ -32,12 +32,34 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
                 <Chip color={config.color} variant="flat">
                     <span className="font-bold">{estado}</span>
                 </Chip>
-                {estado === 'Regular' && !detalles?.fechaRegularidad && (
+                
+                {/* Indicadores de falta de información */}
+                {estado === 'Regular' && !detalles?.fechaRegularidad && !detalles?.notaRegularizacion && (
+                    <Chip color="danger" variant="flat" size="sm" className="animate-pulse">
+                        <i className="fa-solid fa-circle-exclamation mr-1" />
+                        Falta Info
+                    </Chip>
+                )}
+                {estado === 'Regular' && !detalles?.fechaRegularidad && detalles?.notaRegularizacion && (
                     <Chip color="danger" variant="flat" size="sm" className="animate-pulse">
                         <i className="fa-solid fa-calendar-circle-exclamation mr-1" />
                         Falta Año
                     </Chip>
                 )}
+                {estado === 'Regular' && detalles?.fechaRegularidad && !detalles?.notaRegularizacion && (
+                    <Chip color="danger" variant="flat" size="sm" className="animate-pulse">
+                        <i className="fa-solid fa-pen-to-square mr-1" />
+                        Falta Nota
+                    </Chip>
+                )}
+
+                {(estado === 'Aprobado' || estado === 'Promocionado') && !detalles?.notaFinal && (
+                    <Chip color="danger" variant="flat" size="sm" className="animate-pulse">
+                        <i className="fa-solid fa-pen-to-square mr-1" />
+                        Falta Nota
+                    </Chip>
+                )}
+
                 {estado === 'Regular' && detalles?.fechaRegularidad && (
                     <Chip color="warning" variant="dot" size="sm" className="font-bold">
                         Vence: {regularidadUtils.obtenerFechaVencimientoLabel(detalles.fechaRegularidad)}

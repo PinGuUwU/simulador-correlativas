@@ -54,24 +54,28 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
         const newErrors = {};
 
         // Validar año (cuando se pide)
-        if (['hacia_cursando', 'hacia_regular'].includes(tipo)) {
+        if (['hacia_regular', 'hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
             const anioN = Number(anio);
             if (!anio || isNaN(anioN) || anioN < 2000 || anioN > 2100) {
                 newErrors.anio = "Ingresá un año válido (ej: 2024)";
             }
         }
 
-        // Validar nota cursada (cuando se pide)
+        // Validar nota cursada (cuando se pide) - Ahora obligatoria en Confirmar
         if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo)) {
-            if (notaCursada !== "") {
+            if (notaCursada === "") {
+                newErrors.notaCursada = "La nota de cursada es obligatoria";
+            } else {
                 const err = validarNota(notaCursada, "Nota de cursada");
                 if (err) newErrors.notaCursada = err;
             }
         }
 
-        // Validar nota final (cuando se pide)
+        // Validar nota final (cuando se pide) - Ahora obligatoria en Confirmar
         if (['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
-            if (notaFinal !== "") {
+            if (notaFinal === "") {
+                newErrors.notaFinal = "La nota final es obligatoria";
+            } else {
                 let err = validarNota(notaFinal, "Nota final");
                 if (!err && Number(notaFinal) < 4) {
                     err = "Para probar(aprobar) la nota debe ser de 4 para arriba.";
@@ -87,15 +91,11 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
 
         const payload = {};
 
-        if (['hacia_cursando', 'hacia_regular'].includes(tipo)) {
+        if (tipo === 'hacia_regular') {
             payload.fechaInicioCursada = {
                 anio: Number(anio),
                 cuatrimestre: cuatrimestreAuto
             };
-        }
-
-        // hacia_regular también registra como fecha de regularidad
-        if (tipo === 'hacia_regular') {
             payload.fechaRegularidad = {
                 anio: Number(anio),
                 cuatrimestre: cuatrimestreAuto
@@ -103,17 +103,18 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
         }
 
         if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo)) {
-            payload.notaRegularizacion = notaCursada !== "" ? Number(notaCursada) : null;
+            payload.notaRegularizacion = Number(notaCursada);
         }
 
         if (['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
-            payload.notaFinal = notaFinal !== "" ? Number(notaFinal) : null;
+            payload.notaFinal = Number(notaFinal);
             payload.fechaFinal = fechaFinal;
+            payload.anioExamen = Number(anio);
         }
 
         if (tipo === 'hacia_aprobado_directo') {
             payload.fechaRegularidad = {
-                anio: Number(new Date().getFullYear()),
+                anio: Number(anio),
                 cuatrimestre: cuatrimestreAuto
             };
         }
@@ -131,7 +132,6 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
     };
 
     const TITULOS = {
-        'hacia_cursando': 'Registrar inicio de cursada',
         'hacia_regular': 'Registrar Regularización',
         'desde_cursando_hacia_reg': 'Registrar Regularización',
         'hacia_aprobado_desde_reg': 'Registrar Aprobación',
@@ -139,7 +139,6 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
     };
 
     const ICONOS = {
-        'hacia_cursando': 'fa-pencil',
         'hacia_regular': 'fa-clock',
         'desde_cursando_hacia_reg': 'fa-clock',
         'hacia_aprobado_desde_reg': 'fa-circle-check',
@@ -149,12 +148,20 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
     const titulo = TITULOS[tipo] || 'Registrar Datos';
     const icono = ICONOS[tipo] || 'fa-graduation-cap';
 
-    const necesitaAnio = ['hacia_cursando', 'hacia_regular'].includes(tipo);
+    const necesitaAnio = ['hacia_regular', 'hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo);
     const necesitaNotaCursada = ['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo);
     const necesitaNotaFinal = ['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo);
 
     return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center" backdrop="blur">
+        <Modal 
+            isOpen={isOpen} 
+            onOpenChange={onOpenChange} 
+            placement="center" 
+            backdrop="opaque"
+            classNames={{
+                backdrop: "bg-black/50"
+            }}
+        >
             <ModalContent>
                 {() => (
                     <>
@@ -171,15 +178,15 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
                         </ModalHeader>
 
                         <ModalBody className="gap-4">
-                            {/* Año de inicio/regularización */}
+                            {/* Año de inicio/regularización/aprobación */}
                             {necesitaAnio && (
                                 <div className="flex flex-col gap-2">
                                     <Input
-                                        label={tipo === 'hacia_cursando' ? 'Año de inicio de cursada' : 'Año de regularización'}
+                                        label={['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo) ? 'Año de aprobación' : 'Año de regularización'}
                                         placeholder="ej: 2024"
                                         type="number"
                                         variant="faded"
-                                        color={tipo === 'hacia_cursando' ? 'secondary' : 'warning'}
+                                        color={['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo) ? 'success' : 'warning'}
                                         value={anio}
                                         onValueChange={setAnio}
                                         isInvalid={!!errors.anio}
@@ -266,16 +273,6 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
                                     />
                                 </div>
                             )}
-
-                            {/* Resumen de cuatrimestre para tipo cursando */}
-                            {tipo === 'hacia_cursando' && (
-                                <div className="flex items-center gap-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl px-4 py-3">
-                                    <i className="fa-solid fa-pencil text-indigo-500" />
-                                    <p className="text-sm text-default-600">
-                                        Se registrará el <strong>año y cuatrimestre de inicio</strong> para llevar el historial de cursadas.
-                                    </p>
-                                </div>
-                            )}
                         </ModalBody>
 
                         <ModalFooter className="flex-col gap-2">
@@ -308,7 +305,6 @@ CapturaTransicionModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onOpenChange: PropTypes.func.isRequired,
     tipo: PropTypes.oneOf([
-        'hacia_cursando',
         'hacia_regular',
         'desde_cursando_hacia_reg',
         'hacia_aprobado_desde_reg',

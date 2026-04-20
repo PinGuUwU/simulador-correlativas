@@ -6,7 +6,6 @@ import ScrollToTop from './components/Shared/ScrollToTop'
 import AutoScrollTop from './components/Shared/AutoScrollTop'
 import { AuthProvider } from './context/AuthContext'
 import { usePageTracking } from './hooks/usePageTracking'
-import { initOfflineListener } from './services/syncService'
 
 // Componentes secundarios lazy-loaded para reducir FCP
 const Footer = lazy(() => import('./components/Footer'))
@@ -28,10 +27,6 @@ function AppContent({ plan, setPlan }) {
     useEffect(() => {
         localStorage.setItem('sidebar_collapsed', JSON.stringify(isCollapsed));
     }, [isCollapsed]);
-
-    useEffect(() => {
-        initOfflineListener();
-    }, []);
 
     if (isCriticalError) {
         return <ServerError />;
@@ -55,7 +50,25 @@ function App() {
     // Inicializar el plan desde localStorage si existe
     const [plan, setPlan] = useState(() => {
         return localStorage.getItem('plan_activo');
-    })
+    });
+
+    // Escuchar cambios en el plan desde el almacenamiento (hidratación de nube o pestañas)
+    useEffect(() => {
+        const syncPlan = () => {
+            const currentPlan = localStorage.getItem('plan_activo');
+            if (currentPlan !== plan) {
+                setPlan(currentPlan);
+            }
+        };
+
+        window.addEventListener('progress-hydrated', syncPlan);
+        window.addEventListener('storage', syncPlan);
+        
+        return () => {
+            window.removeEventListener('progress-hydrated', syncPlan);
+            window.removeEventListener('storage', syncPlan);
+        };
+    }, [plan]);
 
     // Persistir el plan cada vez que cambie
     useEffect(() => {

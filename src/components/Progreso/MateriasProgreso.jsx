@@ -72,6 +72,27 @@ function MateriasProgreso({ progreso, materias }) {
             bg: "bg-success-50/50"
         },
         {
+            label: "Promocionadas",
+            estado: "Promocionado",
+            count: materias.filter(m => progreso[m.codigo] === "Promocionado").length,
+            horas_semanales: materias.filter(m => progreso[m.codigo] === "Promocionado")
+                .reduce((acumulador, materia) => {
+                    const horas = Number(materia.horas_semanales) || 0
+                    return acumulador + horas
+                }, 0),
+            horas_totales: materias.filter(m => progreso[m.codigo] === "Promocionado")
+                .reduce((acumulador, materia) => {
+                    const horas = Number(materia.horas_totales) || 0
+                    return acumulador + horas
+                }, 0),
+            color: "success",
+            icon: "fa-solid fa-star",
+            accent: "bg-success-300 border-success-400/50 shadow-success",
+            tittle: "Materias promocionadas",
+            text: "Eximido de final",
+            bg: "bg-success-50/50"
+        },
+        {
             label: "Bloqueadas",
             estado: "Bloqueado",
             count: materias.filter(m => progreso[m.codigo] === "Bloqueado").length,
@@ -103,22 +124,7 @@ function MateriasProgreso({ progreso, materias }) {
         return acc;
     }, 0);
 
-    const resumenStats = [
-        {
-            label: "Total Materias",
-            value: materiasTotales,
-            sublabel: "asignaturas",
-            icon: "fa-solid fa-book-bookmark",
-            color: "secondary"
-        },
-        {
-            label: "Carga Horaria",
-            value: horasConsumidas,
-            sublabel: `/ ${horasTotalesCarrera} hs`,
-            icon: "fa-solid fa-clock-rotate-left",
-            color: "danger"
-        }
-    ]
+    const resumenStats = []
 
     const calcularPorcentaje = (cant) => (materiasTotales > 0 ? (cant * 100) / materiasTotales : 0)
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -152,7 +158,7 @@ function MateriasProgreso({ progreso, materias }) {
     }, [isOpen, onOpenChange, isDetailOpen])
 
     return (
-        <div className="grid grid-cols-1 min-[450px]:grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mt-2 mb-6 uppercase tracking-wider">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mt-2 mb-6 uppercase tracking-wider">
             {stats.map((stat, index) => {
                 const porcentaje = Math.round(calcularPorcentaje(stat.count))
                 const textColors = {
@@ -196,49 +202,6 @@ function MateriasProgreso({ progreso, materias }) {
                                     {porcentaje}%
                                 </span>
                                 <span className="text-[8px] sm:text-[9px] font-bold text-foreground/40 tabular-nums">{stat.count} mat.</span>
-                            </div>
-                        </CardBody>
-                    </Card>
-                )
-            })}
-
-            {/* Tarjetas de Resumen (Horas y Materias) */}
-            {resumenStats.map((resumen, index) => {
-                const colorMap = {
-                    secondary: {
-                        bg: "bg-secondary/10",
-                        border: "border-secondary/25",
-                        text: "text-secondary",
-                        value: "text-secondary",
-                        glow: "shadow-secondary/15"
-                    },
-                    danger: {
-                        bg: "bg-danger/10",
-                        border: "border-danger/25",
-                        text: "text-danger",
-                        value: "text-danger",
-                        glow: "shadow-danger/15"
-                    }
-                }
-                const styles = colorMap[resumen.color] || colorMap.secondary
-
-                return (
-                    <Card
-                        key={`resumen-${index}`}
-                        className={`bg-background/70 backdrop-blur-sm border border-default-200/60 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${styles.glow} transition-all duration-200 w-full`}
-                    >
-                        <CardBody className="py-2.5 px-3 sm:py-3 sm:px-4 flex flex-row items-center gap-3 sm:gap-4 overflow-visible">
-                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 ${styles.bg} border ${styles.border} ${styles.text} shadow-sm`}>
-                                <i className={`${resumen.icon} text-xs sm:text-base`}></i>
-                            </div>
-                            <div className="flex flex-col text-left">
-                                <span className="text-[9px] sm:text-xs font-bold text-foreground/60 leading-tight">{resumen.label}</span>
-                                <div className="flex items-baseline gap-1">
-                                    <span className={`text-xs sm:text-base font-black ${styles.value} tabular-nums whitespace-nowrap`}>
-                                        {resumen.value}
-                                    </span>
-                                    <span className="text-[8px] sm:text-[9px] font-bold text-foreground/40">{resumen.sublabel}</span>
-                                </div>
                             </div>
                         </CardBody>
                     </Card>

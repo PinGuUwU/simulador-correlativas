@@ -6,7 +6,6 @@ import {
     CardHeader,
     CardBody,
     Divider,
-    Switch,
     Tabs,
     Tab,
     addToast,
@@ -23,7 +22,6 @@ export default function SettingsPage({ plan, setPlan }) {
         userData,
         loading,
         getProgresoLocal,
-        getSimulacionLocal,
         refetchUserData,
         signIn
     } = useAuth();
@@ -47,9 +45,7 @@ export default function SettingsPage({ plan, setPlan }) {
                 if (loggedUser) {
                     addToast({ title: '¡Bienvenido!', description: 'Sesión iniciada correctamente.', color: 'success' });
                 }
-            } catch (err) {
-                // El error ya se maneja en el contexto
-            }
+            } catch (err) {}
             return;
         }
 
@@ -61,7 +57,7 @@ export default function SettingsPage({ plan, setPlan }) {
                 tema: theme
             });
             await refetchUserData();
-            addToast({ title: 'Guardado', description: 'Tus configuraciones han sido actualizadas permanentemente.', color: 'success' });
+            addToast({ title: 'Guardado', description: 'Tus configuraciones han sido actualizadas.', color: 'success' });
         } catch (err) {
             addToast({ title: 'Error', description: 'No se pudo guardar la configuración.', color: 'danger' });
         } finally {
@@ -71,11 +67,10 @@ export default function SettingsPage({ plan, setPlan }) {
 
     const handleExport = () => {
         const rawProgreso = getProgresoLocal(plan);
-        const rawSimu = getSimulacionLocal(plan);
 
         const minifyProgreso = (prog) => Object.fromEntries(
             Object.entries(prog || {}).filter(([_, state]) =>
-                ['Aprobado', 'Regular', 'Cursado'].includes(state)
+                ['Aprobado', 'Regular', 'Cursado', 'Promocionado'].includes(state)
             )
         );
 
@@ -83,17 +78,6 @@ export default function SettingsPage({ plan, setPlan }) {
             plan,
             timestamp: new Date().toISOString(),
             progreso: minifyProgreso(rawProgreso),
-            simulacion: rawSimu ? {
-                ...rawSimu,
-                progresoSimulado: minifyProgreso(rawSimu.progresoSimulado),
-                progresoBase: minifyProgreso(rawSimu.progresoBase),
-                historialSemestres: (rawSimu.historialSemestres || []).map(s => ({
-                    ...s,
-                    materiasDelSemestre: (s.materiasDelSemestre || []).map(m => m.codigo),
-                    progresoSnapshot: minifyProgreso(s.progresoSnapshot),
-                    progresoBaseSnapshot: minifyProgreso(s.progresoBaseSnapshot)
-                }))
-            } : null
         };
 
         const blob = new Blob([JSON.stringify(fullData, null, 2)], { type: 'application/json' });
@@ -122,7 +106,7 @@ export default function SettingsPage({ plan, setPlan }) {
                         </div>
                         <div className="flex-1 text-center md:text-left">
                             <h3 className="text-xl font-bold mb-1">Potenciá tu Simulador</h3>
-                            <p className="text-foreground/70 text-sm">Registrate para guardar tu progreso en la nube, sincronizar entre dispositivos y acceder a funciones exclusivas.</p>
+                            <p className="text-foreground/70 text-sm">Inicia sesión para guardar tu progreso en la nube y sincronizar entre dispositivos.</p>
                         </div>
                         <Button
                             color="primary"
@@ -163,6 +147,7 @@ export default function SettingsPage({ plan, setPlan }) {
                                     className="w-12 h-12 text-large"
                                     isBordered
                                     color="primary"
+                                    imgProps={{ referrerPolicy: "no-referrer" }}
                                 />
                                 <div className="flex flex-col overflow-hidden">
                                     <p className="text-sm font-bold truncate">{user.displayName}</p>
@@ -298,7 +283,7 @@ export default function SettingsPage({ plan, setPlan }) {
                     </CardBody>
                 </Card>
 
-                {/* Próximamente Section */}
+                {/* Backup & Export Section */}
                 <Card className="shadow-sm border border-dashed border-default-300 bg-default-50/30 overflow-hidden relative">
                     <div className="absolute top-2 right-2 rotate-12">
                         <Chip variant="flat" color="warning" size="sm" className="font-bold uppercase tracking-wider">Lab</Chip>
@@ -308,26 +293,12 @@ export default function SettingsPage({ plan, setPlan }) {
                             <i className="fa-solid fa-rocket text-default-400 w-4" />
                         </div>
                         <div className="flex flex-col">
-                            <p className="text-md font-bold leading-none">Nuevas Funciones</p>
-                            <p className="text-xs text-default-400 italic">En desarrollo activo</p>
+                            <p className="text-md font-bold leading-none">Backup y Exportación</p>
+                            <p className="text-xs text-default-400 italic">Funciones avanzadas de guardado</p>
                         </div>
                     </CardHeader>
-                    <CardBody className="px-6 pb-6 pt-2 flex flex-col gap-3 opacity-60">
-                        <div className="flex items-center gap-3 p-2 border border-default-100 rounded-xl">
-                            <div className="p-2 rounded-lg bg-default-50">
-                                <i className="fa-solid fa-file-pdf text-default-400 w-4" />
-                            </div>
-                            <p className="text-xs font-semibold">Reporte Analítico en PDF</p>
-                        </div>
-                        <div className="flex items-center gap-3 p-2 border border-default-100 rounded-xl">
-                            <div className="p-2 rounded-lg bg-default-50">
-                                <i className="fa-solid fa-bell text-default-400 w-4" />
-                            </div>
-                            <p className="text-xs font-semibold">Alertas de Inscripción y Finales</p>
-                        </div>
-
-                        <Divider className="my-1" />
-
+                    <Divider className="my-2 mx-6 w-auto" />
+                    <CardBody className="px-6 pb-6 pt-2 opacity-60">
                         <Button
                             variant="light"
                             color="default"
@@ -340,24 +311,6 @@ export default function SettingsPage({ plan, setPlan }) {
                         </Button>
                     </CardBody>
                 </Card>
-            </div>
-
-            {/* Ayuda y Estado */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-default-50/50 backdrop-blur-md p-6 rounded-3xl border border-default-200 shadow-sm mt-4">
-                <div className="flex flex-col gap-1 w-full md:w-auto text-center md:text-left">
-                    <p className="text-sm font-bold text-foreground/80">Estado de Sincronización</p>
-                    {!user ? (
-                        <div className="flex items-center justify-center md:justify-start gap-2">
-                            <i className="fa-solid fa-triangle-exclamation text-warning text-xs" />
-                            <p className="text-xs text-foreground/50">Iniciá sesión para guardar tus ajustes en la nube</p>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-center md:justify-start gap-2">
-                            <i className="fa-solid fa-cloud-check text-success text-xs" />
-                            <p className="text-xs text-foreground/50">Tus cambios se sincronizan automáticamente</p>
-                        </div>
-                    )}
-                </div>
             </div>
         </div>
     );

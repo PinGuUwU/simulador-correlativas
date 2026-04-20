@@ -1,12 +1,28 @@
-import { Progress, Button, Tooltip, Chip } from '@heroui/react'
+import { Progress, Button, Tooltip, Chip, Divider } from '@heroui/react'
 import { useEffect, useRef, useState } from 'react'
 import MateriasProgreso from './MateriasProgreso'
 import regularidadUtils from '../../utils/Progreso/regularidadUtils'
 
-function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias, isSticky, headerRef, setIsSticky }) {
+function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, materias, isSticky, headerRef, setIsSticky }) {
     const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
     const promedios = regularidadUtils.calcularPromedioGeneral(progresoDetalles, progreso);
+
+    // Calcular carga horaria de progreso (Regular, Aprobado, Promocionado)
+    const totalHorasProgreso = materias.reduce((acc, m) => {
+        const estado = progreso[m.codigo];
+        if (estado === 'Aprobado' || estado === 'Promocionado' || estado === 'Regular') {
+            return acc + (Number(m.horas_totales) || 0);
+        }
+        return acc;
+    }, 0);
+
+    const totalMateriasFinalizadas = materias.filter(m => 
+        progreso[m.codigo] === 'Aprobado' || progreso[m.codigo] === 'Promocionado'
+    ).length;
+
+    const totalMateriasCarrera = materias.length;
+    const totalHorasCarrera = materias.reduce((acc, m) => acc + (Number(m.horas_totales) || 0), 0);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -50,9 +66,19 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
 
                     <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
                         {/* Migas de pan / Ubicación */}
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="hidden sm:inline-block px-2 py-0.5 rounded-md bg-primary/10 text-primary font-black text-[10px] uppercase tracking-tighter">UNLu</span>
-                            <span className="text-secondary font-bold text-xs lg:text-sm tracking-wide uppercase">{carrera}</span>
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
+                            <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary font-black text-[10px] uppercase tracking-tighter shrink-0">UNLu</span>
+                            <span className="text-secondary font-bold text-xs lg:text-sm tracking-wide uppercase shrink-0">{carrera}</span>
+                            <Divider orientation="vertical" className="h-4 bg-default-300 hidden sm:block" />
+                            <Chip 
+                                size="sm" 
+                                variant="flat" 
+                                color="warning" 
+                                className="font-bold text-[10px] h-5 border border-warning/20"
+                                startContent={<i className="fa-solid fa-scroll text-[9px] mr-1" />}
+                            >
+                                Plan {plan || '---'}
+                            </Chip>
                         </div>
 
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-none mb-3">
@@ -64,8 +90,8 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
                             Mantené el control total de tus materias <span className="italic">aprobadas, regulares y pendientes</span> de forma centralizada.
                         </p>
 
-                        {/* Sección Promedios: Grilla en móvil, flex en desktop */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex gap-3 w-full sm:w-auto">
+                        {/* Sección Estadísticas: Grilla en móvil, flex en desktop */}
+                        <div className="grid grid-cols-2 lg:flex gap-3 w-full sm:w-auto">
                             <Tooltip content="Promedio de exámenes finales aprobados." placement="bottom">
                                 <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-success/10 border border-success/20 rounded-xl transition-all hover:bg-success/20">
                                     <div className="w-8 h-8 rounded-lg bg-success/20 flex items-center justify-center text-success shrink-0">
@@ -79,13 +105,43 @@ function ProgresoTotal({ carrera, progress, progreso, progresoDetalles, materias
                             </Tooltip>
 
                             <Tooltip content="Promedio de todos los intentos registrados." placement="bottom">
-                                <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-danger/10 border border-danger/20 rounded-xl transition-all hover:bg-danger/20">
+                                <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-danger/10 border border-danger/30 rounded-xl transition-all hover:bg-danger/20">
                                     <div className="w-8 h-8 rounded-lg bg-danger/20 flex items-center justify-center text-danger shrink-0">
                                         <i className="fa-solid fa-chart-area text-sm" />
                                     </div>
                                     <div className="flex flex-col items-start">
                                         <span className="text-[10px] text-danger-700 font-bold uppercase tracking-wider leading-none mb-1">Con Aplazos</span>
                                         <span className="text-lg font-black text-danger-800 leading-none">{promedios.promedioConAplazos || '--'}</span>
+                                    </div>
+                                </div>
+                            </Tooltip>
+
+                            <Tooltip content="Materias finalizadas respecto al total de la carrera." placement="bottom">
+                                <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-primary/10 border border-primary/20 rounded-xl transition-all hover:bg-primary/20">
+                                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                                        <i className="fa-solid fa-book-bookmark text-sm" />
+                                    </div>
+                                    <div className="flex flex-col items-start">
+                                        <span className="text-[10px] text-primary-700 font-bold uppercase tracking-wider leading-none mb-1">Total Materias</span>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-lg font-black text-primary-800 leading-none">{totalMateriasFinalizadas}</span>
+                                            <span className="text-[10px] font-bold text-primary-600/70">/ {totalMateriasCarrera}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Tooltip>
+
+                            <Tooltip content="Horas de materias regulares, aprobadas y promocionadas respecto al total." placement="bottom">
+                                <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-secondary/10 border border-secondary/20 rounded-xl transition-all hover:bg-secondary/20">
+                                    <div className="w-8 h-8 rounded-lg bg-secondary/20 flex items-center justify-center text-secondary shrink-0">
+                                        <i className="fa-solid fa-clock text-sm" />
+                                    </div>
+                                    <div className="flex flex-col items-start">
+                                        <span className="text-[10px] text-secondary-700 font-bold uppercase tracking-wider leading-none mb-1">Carga Horaria</span>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-lg font-black text-secondary-800 leading-none">{totalHorasProgreso}</span>
+                                            <span className="text-[10px] font-bold text-secondary-600/70">/ {totalHorasCarrera} hs</span>
+                                        </div>
                                     </div>
                                 </div>
                             </Tooltip>

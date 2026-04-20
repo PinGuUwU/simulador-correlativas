@@ -90,11 +90,16 @@ export const useEquivalencias = () => {
     }, [planViejo, planNuevo]);
 
     const materiasFiltradas = useMemo(() => {
+        const normalize = (text) => 
+            text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        
+        const searchNormalized = normalize(busqueda);
+
         return gruposEquivalencia.filter(grupo => {
             // Busqueda en cualquier materia vieja del grupo o en la nueva
             const matchesBusqueda = 
-                grupo.materiaNueva.nombre.toLowerCase().includes(busqueda.toLowerCase()) || 
-                grupo.materiasViejas.some(m => m.nombre.toLowerCase().includes(busqueda.toLowerCase()) || m.codigo.includes(busqueda));
+                normalize(grupo.materiaNueva.nombre).includes(searchNormalized) || 
+                grupo.materiasViejas.some(m => normalize(m.nombre).includes(searchNormalized) || m.codigo.includes(busqueda));
             
             // Para el filtro de estado, consideramos el estado del grupo (Equivalencia aceptada si TODAS están aprobadas)
             const todasAprobadas = grupo.materiasViejas.length > 0 && 

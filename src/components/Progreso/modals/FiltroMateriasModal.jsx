@@ -8,6 +8,7 @@ function FiltroMateriasModal({ estado, materias, progreso, isOpen, onOpenChange,
     const estiloEstado = (estado) => {
         switch (estado) {
             case "Aprobado": return "success"
+            case "Promocionado": return "success"
             case "Disponible": return "primary"
             case "Regular": return "warning"
             case "Bloqueado": default: return "default"
@@ -98,6 +99,9 @@ function FiltroMateriasModal({ estado, materias, progreso, isOpen, onOpenChange,
                                                 break
                                             case "Regular":
                                                 emptyText = "No tenés materias regulares (pendientes de final)."
+                                                break
+                                            case "Promocionado":
+                                                emptyText = "No tenés materias promocionadas aún."
                                                 break
                                             case "Bloqueado":
                                                 emptyText = "¡Excelente! No tenés materias bloqueadas."

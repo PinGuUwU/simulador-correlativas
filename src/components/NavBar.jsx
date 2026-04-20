@@ -100,6 +100,9 @@ const UserPanel = ({ onSignInPress, isCollapsed }) => {
                         isBordered
                         color="primary"
                         className="shrink-0"
+                        imgProps={{
+                            referrerPolicy: "no-referrer"
+                        }}
                     />
                 </Tooltip>
                 {!isCollapsed && (
@@ -381,8 +384,11 @@ export default function NavBar({ setPlan, plan, isCollapsed, setIsCollapsed }) {
                 isOpen={isDrawerOpen}
                 onOpenChange={onDrawerOpenChange}
                 placement="left"
-                backdrop="blur"
-                classNames={{ base: 'bg-background' }}
+                backdrop="opaque"
+                classNames={{ 
+                    base: 'bg-background shadow-none border-r border-default-200',
+                    backdrop: 'bg-black/30'
+                }}
             >
                 <DrawerContent>
                     {(onClose) => (

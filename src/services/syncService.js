@@ -1,107 +1,99 @@
-import { saveUserProgreso } from './dbService';
-import { auth } from './firebase';
-
-const QUEUE_KEY = 'sync_pending_queue';
-let debounceTimeout = null;
-let isFlushing = false;
+import { saveUserProgreso, getUserData } from './dbService';
 
 /**
- * Encola una actualización pendiente en la cola de LocalStorage (Offline-First)
+ * Sube el progreso actual de un plan a la nube de forma manual.
+ * Se asegura de leer tanto el progreso (estados) como los detalles (notas, fechas)
+ * desde el localStorage antes de enviarlos.
  */
-const enqueueToLocalStorage = (uid, plan, progreso) => {
-    let queue = [];
+export const uploadPlanProgress = async (uid, plan) => {
     try {
-        const stored = localStorage.getItem(QUEUE_KEY);
-        if (stored) queue = JSON.parse(stored);
-    } catch (e) {
-        console.warn("Error leyendo la cola de sincronización:", e);
-    }
+        const progreso = JSON.parse(localStorage.getItem(`progreso+${plan}`));
+        const detalles = JSON.parse(localStorage.getItem(`detalles_progreso+${plan}`));
 
-    // Buscamos si ya hay una entrada para este UID y plan, para actualizarla (y no duplicar)
-    const existingIndex = queue.findIndex(item => item.uid === uid && item.plan === plan);
-    if (existingIndex !== -1) {
-        queue[existingIndex].progreso = progreso;
-    } else {
-        queue.push({ uid, plan, progreso });
-    }
-
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-};
-
-/**
- * Ejecuta un flush de la cola guardada localmente hacia Firestore.
- * Filtrado por UID actual para evitar errores de permisos.
- */
-export const flushSyncQueue = async (currentUid = null) => {
-    if (isFlushing || !navigator.onLine) return;
-
-    // Si no se pasa UID, intentamos obtenerlo de la instancia de Auth (útil para listeners globales)
-    const activeUid = currentUid || auth.currentUser?.uid;
-    if (!activeUid) return; // No intentamos sincronizar si no hay nadie logueado
-    let queue = [];
-    try {
-        const stored = localStorage.getItem(QUEUE_KEY);
-        if (stored) queue = JSON.parse(stored);
-    } catch (e) {
-        return;
-    }
-
-    if (queue.length === 0) {
-        isFlushing = false;
-        return;
-    }
-
-    isFlushing = true;
-    const remainingQueue = [];
-
-    // Verificamos e intentamos sincronizar cada elemento pendiente
-    for (const item of queue) {
-        try {
-            // SEGURIDAD: Solo subimos si el UID en cola coincide con el UID logueado
-            if (activeUid && item.uid !== activeUid) {
-                remainingQueue.push(item);
-                continue;
-            }
-            await saveUserProgreso(item.uid, item.plan, item.progreso);
-        } catch (error) {
-            console.error("Fallo al sincronizar un item a Firestore:", error);
-            // Si el guardado falla, conservamos la partida en la cola para intentar más adelante
-            remainingQueue.push(item);
+        if (!progreso) {
+            throw new Error("No hay datos locales para este plan.");
         }
-    }
 
-    // Actualizamos LocalStorage dejando solo los que fallaron (si todo salió bien, guardará array vacío)
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(remainingQueue));
-    isFlushing = false;
+        // Se pasa tanto el progreso como los detalles al servicio de base de datos.
+        await saveUserProgreso(uid, plan, progreso, detalles || {});
+        return true;
+    } catch (error) {
+        console.error("Error al subir datos:", error);
+        throw error;
+    }
 };
 
 /**
- * Suscribe un listener global a la ventana para reanudar la sincronización automáticamente
- * tan pronto el navegador detecte que se reanudó la conexión.
+ * Descarga TODO el progreso y detalles desde la nube y lo guarda en local.
+ * Esta función es la que se llama al iniciar sesión o al presionar "Cargar".
  */
-export const initOfflineListener = () => {
-    window.addEventListener('online', () => {
-        console.log("Conexión restablecida. Sincronizando pendientes...");
-        // Reintentamos flashear (el UID se validará al momento de gatillar por debounce o login)
-        flushSyncQueue();
-    });
-};
+export const downloadAllProgress = async (uid) => {
+    try {
+        const cloudData = await getUserData(uid);
+        if (!cloudData) return false;
 
-/**
- * Función principal para usar desde los hooks.
- * Implementa un "debounce" de 3 segundos para evitar saturar la cuota de escrituras y enviar updates contínuos
- */
-export const syncProgreso = (uid, plan, progreso) => {
-    // 1. Guardar de forma local SIEMPRE para soportar caso offline y resguardar la manipulación
-    enqueueToLocalStorage(uid, plan, progreso);
+        let progreso = cloudData.progreso || {};
+        let detalles = cloudData.progresoDetalles || {};
 
-    // 2. Limpiar el temporizador anterior para reiniciar el debounce si el usuario interactuó rápido nuevamente
-    if (debounceTimeout) {
-        clearTimeout(debounceTimeout);
+        // Normalización: Extraemos datos de llaves con puntos literales (ej: "progreso.17.14")
+        // y también intentamos aplanar mapas anidados que pudieron crearse por el bug de updateDoc
+        Object.keys(cloudData).forEach(key => {
+            if (key.startsWith('progreso.')) {
+                const plan = key.substring('progreso.'.length);
+                if (!progreso[plan]) progreso[plan] = cloudData[key];
+            }
+            if (key.startsWith('progresoDetalles.')) {
+                const plan = key.substring('progresoDetalles.'.length);
+                if (!detalles[plan]) detalles[plan] = cloudData[key];
+            }
+        });
+
+        // Caso especial: si el bug de updateDoc creó { progreso: { "17": { "14": ... } } }
+        // Necesitamos reconstruir "17.14" en el mapa plano
+        if (progreso['17'] && typeof progreso['17'] === 'object' && progreso['17']['14']) {
+            if (!progreso['17.14']) progreso['17.14'] = progreso['17']['14'];
+        }
+        if (detalles['17'] && typeof detalles['17'] === 'object' && detalles['17']['14']) {
+            if (!detalles['17.14']) detalles['17.14'] = detalles['17']['14'];
+        }
+
+        console.log("🛠️ Progreso procesado para sincronización:", { progreso, detalles });
+
+        if (Object.keys(progreso).length === 0) {
+            return false;
+        }
+
+        // Limpiamos cualquier progreso local viejo para evitar mezclas indeseadas.
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('progreso+') || key.startsWith('detalles_progreso+')) {
+                localStorage.removeItem(key);
+            }
+        });
+        
+        // Escribimos los datos de la nube en el localStorage.
+        for (const [plan, data] of Object.entries(progreso)) {
+            localStorage.setItem(`progreso+${plan}`, JSON.stringify(data));
+        }
+
+        for (const [plan, data] of Object.entries(detalles)) {
+            localStorage.setItem(`detalles_progreso+${plan}`, JSON.stringify(data));
+        }
+
+        if (cloudData.config?.tema) {
+            localStorage.setItem('theme', cloudData.config.tema);
+        }
+
+        if (cloudData.config?.planActivo) {
+            localStorage.setItem('plan_activo', cloudData.config.planActivo);
+        }
+
+        // Avisamos a la UI que los datos han cambiado y necesita recargarse.
+        window.dispatchEvent(new Event('progress-hydrated'));
+        window.dispatchEvent(new Event('storage'));
+        
+        return cloudData;
+    } catch (error) {
+        console.error("Error al descargar datos:", error);
+        throw error;
     }
-
-    // 3. Setear encolamiento, tras 1.5 segundos de inactividad, se iniciará la sincronización en nube
-    debounceTimeout = setTimeout(() => {
-        flushSyncQueue(uid);
-    }, 1500);
 };

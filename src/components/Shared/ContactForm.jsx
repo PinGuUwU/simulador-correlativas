@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { Button, Input, Textarea, Form, addToast, Card, CardBody } from '@heroui/react';
 import emailjs from '@emailjs/browser';
+import { useAuth } from '../../context/AuthContext';
 
 const ContactForm = () => {
+    const { user } = useAuth();
     const [action, setAction] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const form = useRef();
@@ -13,6 +15,7 @@ const ContactForm = () => {
 
         // Recolectar información de diagnóstico
         const diagnostics = {
+            uid: user?.uid || 'Invitado (Sin sesión)',
             browser: navigator.userAgent,
             platform: navigator.platform,
             resolution: `${window.screen.width}x${window.screen.height}`,
@@ -27,6 +30,7 @@ const ContactForm = () => {
         
         const diagnosticString = `
 \n\n--- Información de Diagnóstico ---
+• UID: ${diagnostics.uid}
 • Browser: ${diagnostics.browser}
 • Plataforma: ${diagnostics.platform}
 • Resolución: ${diagnostics.resolution}

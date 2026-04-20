@@ -13,51 +13,52 @@ service cloud.firestore {
 
     function isValidUserDoc() {
       let data = request.resource.data;
-      return
+      return (
         data.uid is string && data.uid.size() > 0 &&
         data.email is string && data.email.size() > 0 &&
-        (data.displayName is string || data.displayName == null) &&
-        (data.photoURL is string || data.photoURL == null) &&
-        (data.progreso == null || data.progreso is map) &&
-        (data.config == null || data.config is map) &&
-        (data.materiasAprobadas == null || data.materiasAprobadas is list) &&
+        (data.get('displayName', null) is string || data.get('displayName', null) == null) &&
+        (data.get('photoURL', null) is string || data.get('photoURL', null) == null) &&
+        (data.get('progreso', null) == null || data.get('progreso', null) is map) &&
+        (data.get('config', null) == null || data.get('config', null) is map) &&
+        (data.get('materiasAprobadas', null) == null || data.get('materiasAprobadas', null) is list) &&
         data.schemaVersion is int && data.schemaVersion >= 1 &&
         !('password' in data) &&
         !('token'    in data) &&
-        !('secret'   in data);
+        !('secret'   in data)
+      );
     }
 
     function isValidLogDoc() {
       let data = request.resource.data;
-      return
-        data.level        is string &&
-        data.errorCode    is string &&
+      return (
+        data.level         is string &&
+        data.errorCode     is string &&
         data.errorMessage is string &&
-        data.route        is string &&
+        data.route         is string &&
         data.schemaVersion is int &&
-        // Restricción de tamaño: el mensaje no puede ser un stack completo
         data.errorMessage.size() <= 500 &&
-        // Campos prohibidos en logs
         !('apiKey'    in data) &&
         !('password'  in data) &&
-        !('token'     in data);
+        !('token'     in data)
+      );
     }
 
     // ─── Colección: users ─────────────────────────────────────────────────────
     match /users/{userId} {
-      // Un usuario solo puede leer y escribir SU propio documento
-      allow read:   if isOwner(userId);
-      allow create: if isOwner(userId) && isValidUserDoc();
-      allow update: if isOwner(userId) && isValidUserDoc();
-      // Nadie puede borrar su propio documento desde el cliente
+      // PERMITIR LECTURA: 
+      // Simplificada para asegurar que el "Cargar" funcione siempre que seas el dueño.
+      allow read: if isOwner(userId);
+
+      // PERMITIR ESCRITURA (Crear y Actualizar): 
+      // Mantenemos la validación estricta para que los datos suban con el formato correcto.
+      allow create, update: if isOwner(userId) && isValidUserDoc();
+
+      // Bloqueamos el borrado desde el cliente por seguridad.
       allow delete: if false;
     }
 
     // ─── Colección: app_logs ──────────────────────────────────────────────────
     match /app_logs/{logId} {
-      // Cualquier usuario (incluso no autenticado) puede CREAR un log,
-      // pero nadie puede leer, actualizar ni borrar logs desde el cliente.
-      // El acceso de lectura es solo desde Firebase Console / Admin SDK.
       allow create: if isValidLogDoc();
       allow read, update, delete: if false;
     }

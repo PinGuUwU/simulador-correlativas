@@ -37,11 +37,7 @@ html, body {
 /* Reducir sombras en móvil para mejorar FPS */
 @media (max-width: 768px) {
     .shadow-xl, .shadow-lg {
-        shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
     }
 }
-
-/* Optimizar transiciones para que no afecten el layout flow */
-.transition-transform {
-    /* Eliminado will-change para ahorrar memoria del navegador */
-}
+

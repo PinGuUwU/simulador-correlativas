@@ -4,7 +4,7 @@ import { Clock, Calendar, CheckCircle2, AlertCircle, Circle, HelpCircle, Unlock 
 import materiasUtils from '../../utils/Progreso/materiasUtils';
 
 const MateriaCard = ({ materia, estado, isNewPlan = false, onClick }) => {
-    
+
     // Configuración de estilos por estado (Respetando estados originales)
     const getStatusConfig = () => {
         switch (estado) {
@@ -61,21 +61,20 @@ const MateriaCard = ({ materia, estado, isNewPlan = false, onClick }) => {
     return (
         <div
             onClick={onClick}
-            className={`group relative flex items-stretch overflow-hidden rounded-2xl border transition-all duration-300 ${config.border} ${config.bg} ${config.shadow} ${
-                onClick ? "cursor-pointer hover:translate-y-[-2px] active:scale-[0.98]" : ""
-            }`}
+            className={`group relative flex items-stretch overflow-hidden rounded-2xl border transition-all duration-300 ${config.border} ${config.bg} ${config.shadow} ${onClick ? "cursor-pointer hover:translate-y-[-2px] active:scale-[0.98]" : ""
+                }`}
         >
             {/* Bloque de color lateral para identificación rápida */}
-            <div className={`w-1.5 flex-shrink-0 ${config.sideBar}`} />
+            <div className={`w-1.5 shrink-0 ${config.sideBar}`} />
 
-            <div className="flex flex-col flex-grow p-4 gap-3">
+            <div className="flex flex-col grow p-4 gap-3">
                 <div className="flex items-start justify-between gap-3">
                     <div className="flex flex-col min-w-0">
                         {/* Nombre de la materia como elemento principal */}
                         <h4 className="text-[15px] font-black text-foreground leading-tight tracking-tight group-hover:text-primary transition-colors">
                             {materia.nombre}
                         </h4>
-                        
+
                         <div className="flex items-center gap-2 mt-1.5">
                             <span className={`text-[10px] font-black uppercase tracking-widest ${config.accent}`}>
                                 {materia.mostrarCodigo === false ? '---' : materia.codigo}
@@ -87,12 +86,12 @@ const MateriaCard = ({ materia, estado, isNewPlan = false, onClick }) => {
                         </div>
                     </div>
 
-                    <Chip 
-                        size="sm" 
-                        variant="flat" 
-                        color={config.chip} 
+                    <Chip
+                        size="sm"
+                        variant="flat"
+                        color={config.chip}
                         startContent={config.icon}
-                        className="h-6 text-[9px] font-black uppercase pl-1 shadow-sm border border-white/20 flex-shrink-0"
+                        className="h-6 text-[9px] font-black uppercase pl-1 shadow-sm border border-white/20 shrink-0"
                     >
                         {config.label}
                     </Chip>

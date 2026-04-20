@@ -99,7 +99,7 @@ export default function SettingsPage({ plan, setPlan }) {
             </header>
 
             {!user && (
-                <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 shadow-md">
+                <Card className="bg-linear-to-br from-primary/10 to-primary/5 border-primary/20 shadow-md">
                     <CardBody className="flex flex-col md:flex-row items-center gap-6 p-6">
                         <div className="bg-primary/20 p-4 rounded-2xl">
                             <i className="fa-solid fa-rocket text-primary text-3xl" />
@@ -228,7 +228,7 @@ export default function SettingsPage({ plan, setPlan }) {
                                     title={
                                         <div className="flex items-center gap-1.5 overflow-hidden">
                                             <span className="text-xs sm:text-sm font-bold whitespace-nowrap">Plan 17.14</span>
-                                            <Chip size="sm" variant="flat" color="primary" className="hidden xs:flex h-5 h-min min-w-0 px-1 text-[10px]">Actual</Chip>
+                                            <Chip size="sm" variant="flat" color="primary" className="hidden xs:flex h-min min-w-0 px-1 text-[10px]">Actual</Chip>
                                         </div>
                                     }
                                 />

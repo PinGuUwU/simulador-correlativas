@@ -84,7 +84,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                 {(onClose) => (
                     <div className="flex flex-col h-full relative overflow-hidden">
                         {/* Indicador móvil */}
-                        <div className="lg:hidden w-full flex justify-center py-3 flex-shrink-0">
+                        <div className="lg:hidden w-full flex justify-center py-3 shrink-0">
                             <div className="w-12 h-1.5 bg-default-300 rounded-full opacity-50" />
                         </div>
 
@@ -189,7 +189,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                             <Input type="date" label="Fecha" labelPlacement="outside" value={fechaIntento} onChange={(e) => setFechaIntento(e.target.value)} />
                                                             <div className="flex gap-2 items-end">
-                                                                <Select label="Estado" labelPlacement="outside" selectedKeys={[estadoVal]} onChange={(e) => setEstadoVal(e.target.value)} className="flex-[2]">
+                                                                <Select label="Estado" labelPlacement="outside" selectedKeys={[estadoVal]} onChange={(e) => setEstadoVal(e.target.value)} className="flex-2">
                                                                     <SelectItem key="rendido">Rindió</SelectItem>
                                                                     <SelectItem key="ausente">Ausente</SelectItem>
                                                                 </Select>
@@ -215,12 +215,12 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                                             {editingIntentoIndex === i ? (
                                                                 <div className="flex-1 flex flex-col gap-2 w-full py-1">
                                                                     <div className="flex gap-2 items-center w-full">
-                                                                        <Input type="date" size="sm" defaultValue={intento.fecha} id={`edit-fecha-${i}`} className="flex-[3]" aria-label="Fecha del intento" />
-                                                                        <Select size="sm" defaultSelectedKeys={[intento.estado === 'ausente' ? 'ausente' : 'rendido']} id={`edit-estado-${i}`} className="flex-[3] min-w-[110px]" aria-label="Estado del examen">
+                                                                        <Input type="date" size="sm" defaultValue={intento.fecha} id={`edit-fecha-${i}`} className="flex-3" aria-label="Fecha del intento" />
+                                                                        <Select size="sm" defaultSelectedKeys={[intento.estado === 'ausente' ? 'ausente' : 'rendido']} id={`edit-estado-${i}`} className="flex-3 min-w-[110px]" aria-label="Estado del examen">
                                                                             <SelectItem key="rendido">Rindió</SelectItem>
                                                                             <SelectItem key="ausente">Ausente</SelectItem>
                                                                         </Select>
-                                                                        <Input type="number" size="sm" defaultValue={intento.nota != null ? String(intento.nota) : ""} placeholder="Nota" id={`edit-nota-${i}`} className="flex-[1] w-14" aria-label="Nota del examen" />
+                                                                        <Input type="number" size="sm" defaultValue={intento.nota != null ? String(intento.nota) : ""} placeholder="Nota" id={`edit-nota-${i}`} className="flex-1 w-14" aria-label="Nota del examen" />
                                                                     </div>
                                                                     <div className="flex justify-end gap-2 w-full">
                                                                         <Button size="sm" color="success" variant="flat" onPress={() => {
@@ -347,7 +347,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                 <ConsejoMateria estadoActual={estadoActual} statusPlan={statusPlan} detallesLocales={detallesLocales} infoMateria={infoMateria} />
                             </div>
                         </DrawerBody>
-                        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent pointer-events-none z-20" />
+                        <div className="absolute bottom-0 left-0 right-0 h-10 bg-linear-to-t from-background to-transparent pointer-events-none z-20" />
                     </div>
                 )}
             </DrawerContent>

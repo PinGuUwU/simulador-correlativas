@@ -17,7 +17,7 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
         return acc;
     }, 0);
 
-    const totalMateriasFinalizadas = materias.filter(m => 
+    const totalMateriasFinalizadas = materias.filter(m =>
         progreso[m.codigo] === 'Aprobado' || progreso[m.codigo] === 'Promocionado'
     ).length;
 
@@ -58,7 +58,7 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
 
                     {/* Contenedor de Icono: Más grande en móvil, estándar en desktop */}
                     <div className="relative group shrink-0">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                        <div className="absolute -inset-1 bg-linear-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                         <div className="relative bg-primary w-20 h-20 md:w-16 md:h-16 lg:w-24 lg:h-24 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 ring-1 ring-white/20">
                             <i className="fa-solid fa-graduation-cap text-white text-4xl md:text-3xl lg:text-5xl"></i>
                         </div>
@@ -70,10 +70,10 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                             <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary font-black text-[10px] uppercase tracking-tighter shrink-0">UNLu</span>
                             <span className="text-secondary font-bold text-xs lg:text-sm tracking-wide uppercase shrink-0">{carrera}</span>
                             <Divider orientation="vertical" className="h-4 bg-default-300 hidden sm:block" />
-                            <Chip 
-                                size="sm" 
-                                variant="flat" 
-                                color="warning" 
+                            <Chip
+                                size="sm"
+                                variant="flat"
+                                color="warning"
                                 className="font-bold text-[10px] h-5 border border-warning/20"
                                 startContent={<i className="fa-solid fa-scroll text-[9px] mr-1" />}
                             >
@@ -82,7 +82,7 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                         </div>
 
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-none mb-3">
-                            Mi Progreso <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Académico</span>
+                            Mi Progreso <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">Académico</span>
                         </h1>
 
                         <p className="text-foreground/70 font-medium text-sm sm:text-base lg:text-lg max-w-3xl leading-relaxed mb-6">

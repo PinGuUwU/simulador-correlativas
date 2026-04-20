@@ -55,27 +55,25 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
 
         // Validar año (cuando se pide)
         if (['hacia_regular', 'hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
-            const anioN = Number(anio);
-            if (!anio || isNaN(anioN) || anioN < 2000 || anioN > 2100) {
-                newErrors.anio = "Ingresá un año válido (ej: 2024)";
+            if (anio !== "") {
+                const anioN = Number(anio);
+                if (isNaN(anioN) || anioN < 2000 || anioN > 2100) {
+                    newErrors.anio = "Ingresá un año válido (ej: 2024)";
+                }
             }
         }
 
-        // Validar nota cursada (cuando se pide) - Ahora obligatoria en Confirmar
+        // Validar nota cursada (cuando se pide)
         if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo)) {
-            if (notaCursada === "") {
-                newErrors.notaCursada = "La nota de cursada es obligatoria";
-            } else {
+            if (notaCursada !== "") {
                 const err = validarNota(notaCursada, "Nota de cursada");
                 if (err) newErrors.notaCursada = err;
             }
         }
 
-        // Validar nota final (cuando se pide) - Ahora obligatoria en Confirmar
+        // Validar nota final (cuando se pide)
         if (['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
-            if (notaFinal === "") {
-                newErrors.notaFinal = "La nota final es obligatoria";
-            } else {
+            if (notaFinal !== "") {
                 let err = validarNota(notaFinal, "Nota final");
                 if (!err && Number(notaFinal) < 4) {
                     err = "Para probar(aprobar) la nota debe ser de 4 para arriba.";
@@ -91,7 +89,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
 
         const payload = {};
 
-        if (tipo === 'hacia_regular') {
+        if (tipo === 'hacia_regular' && anio !== "") {
             payload.fechaInicioCursada = {
                 anio: Number(anio),
                 cuatrimestre: cuatrimestreAuto
@@ -102,17 +100,17 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
             };
         }
 
-        if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo)) {
+        if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo) && notaCursada !== "") {
             payload.notaRegularizacion = Number(notaCursada);
         }
 
         if (['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
-            payload.notaFinal = Number(notaFinal);
-            payload.fechaFinal = fechaFinal;
-            payload.anioExamen = Number(anio);
+            if (notaFinal !== "") payload.notaFinal = Number(notaFinal);
+            if (fechaFinal !== "") payload.fechaFinal = fechaFinal;
+            if (anio !== "") payload.anioExamen = Number(anio);
         }
 
-        if (tipo === 'hacia_aprobado_directo') {
+        if (tipo === 'hacia_aprobado_directo' && anio !== "") {
             payload.fechaRegularidad = {
                 anio: Number(anio),
                 cuatrimestre: cuatrimestreAuto
@@ -175,6 +173,9 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
                                     {materia.nombre}
                                 </p>
                             )}
+                            <p className="text-xs text-default-400 mt-1">
+                                Puedes rellenar estos campos más tarde en los detalles de la materia
+                            </p>
                         </ModalHeader>
 
                         <ModalBody className="gap-4">
@@ -283,15 +284,6 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
                                 isDisabled={sugerenciaLibre && necesitaNotaCursada && !necesitaNotaFinal}
                             >
                                 Confirmar y Guardar
-                            </Button>
-                            <Button
-                                variant="flat"
-                                color="default"
-                                className="w-full font-medium"
-                                onPress={handleRellenarDespues}
-                            >
-                                <i className="fa-regular fa-clock mr-1" />
-                                Rellenar más tarde
                             </Button>
                         </ModalFooter>
                     </>

@@ -36,7 +36,18 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio }) => {
             if (modo === 'guardado') {
                 const parsed = getSimulacionLocal(plan);
                 if (parsed) {
-                    setHistorialSemestres(parsed.historialSemestres ?? [])
+                    // Update saved history with fresh materia definitions from planData
+                    const historialActualizado = (parsed.historialSemestres ?? []).map(semestre => {
+                        return {
+                            ...semestre,
+                            materiasDelSemestre: semestre.materiasDelSemestre.map(mGuardada => {
+                                const mFresca = planData.materias.find(m => m.codigo === mGuardada.codigo);
+                                return mFresca || mGuardada;
+                            })
+                        };
+                    });
+
+                    setHistorialSemestres(historialActualizado)
                     setProgresoSimulado(parsed.progresoSimulado ?? {})
                     setProgresoBase(parsed.progresoBase ?? {})
                     setAnioActual(parsed.anioActual ?? new Date().getFullYear())

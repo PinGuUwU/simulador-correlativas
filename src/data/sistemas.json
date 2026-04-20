@@ -1090,6 +1090,7 @@
             },
             {
                 "codigo": "PSTC-1714",
+                "mostrarCodigo": false,
                 "nombre": "Prácticas Socio-Técnico-Culturales",
                 "anio": "6",
                 "cuatrimestre": "11",
@@ -1105,6 +1106,7 @@
             },
             {
                 "codigo": "AO-1714",
+                "mostrarCodigo": false,
                 "nombre": "Actividades Optativas",
                 "anio": "6",
                 "cuatrimestre": "11",
@@ -1125,6 +1127,7 @@
             },
             {
                 "codigo": "TES-1714",
+                "mostrarCodigo": false,
                 "nombre": "Tesina de Grado",
                 "anio": "6",
                 "cuatrimestre": "11",

@@ -90,6 +90,7 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                 setAnio={setAnioInicio}
                 setCuatri={setCuatriInicio}
                 setPlan={setPlan}
+                initialPlan={initialPlan}
             />
             <GuardarSimulacion
                 isOpen={isGuardarOpen}
@@ -125,7 +126,7 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                     {/* Header + botón de reconfigurar */}
                     <div className="flex justify-between items-center mb-0">
-                        <HeaderSimulador />
+                        <HeaderSimulador plan={plan} />
                         <Button isIconOnly variant="flat" color="primary" onPress={onConfigOpen} className="rounded-xl">
                             <i className="fa-solid fa-sliders" />
                         </Button>

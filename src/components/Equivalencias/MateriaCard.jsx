@@ -78,7 +78,7 @@ const MateriaCard = ({ materia, estado, isNewPlan = false, onClick }) => {
                         
                         <div className="flex items-center gap-2 mt-1.5">
                             <span className={`text-[10px] font-black uppercase tracking-widest ${config.accent}`}>
-                                {materia.codigo}
+                                {materia.mostrarCodigo === false ? '---' : materia.codigo}
                             </span>
                             <div className="w-1 h-1 rounded-full bg-default-200" />
                             <span className="text-[9px] font-black text-default-600 dark:text-default-400 uppercase tracking-wider">

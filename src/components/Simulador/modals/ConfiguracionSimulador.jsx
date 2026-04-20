@@ -2,12 +2,17 @@ import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio
 import selectUtils from '../../../utils/Simulador/selectUtils.js'
 import { useState, useEffect } from 'react'
 
-function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setModo, setCuatri, setPlan }) {
+function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setModo, setCuatri, setPlan, initialPlan }) {
 
-    const [confiPlan, setConfiPlan] = useState("17.14")
+    const [confiPlan, setConfiPlan] = useState(initialPlan || "17.14")
     const [confiAnio, setConfiAnio] = useState("2026")
     const [confiCuatri, setConfiCuatri] = useState("1")
     const [confiModo, setConfiModo] = useState("viejo")
+
+    // Update internal state if initialPlan changes
+    useEffect(() => {
+        if (initialPlan) setConfiPlan(initialPlan);
+    }, [initialPlan]);
 
     const handleConfigurar = () => {
         setAnio(confiAnio)
@@ -89,13 +94,13 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                     <h3 className="font-bold text-md">Plan</h3>
                                 </div>
 
-                                <Select
-                                    label="Plan de estudio"
-                                    aria-label="Seleccionar Plan de estudio"
-                                    variant="flat"
-                                    defaultSelectedKeys={["17.14"]}
-                                    onSelectionChange={(keys) => setConfiPlan(Array.from(keys)[0])}
-                                    classNames={{
+                                    <Select
+                                        label="Plan de estudio"
+                                        aria-label="Seleccionar Plan de estudio"
+                                        variant="flat"
+                                        selectedKeys={[confiPlan]}
+                                        onSelectionChange={(keys) => setConfiPlan(Array.from(keys)[0])}
+                                        classNames={{
                                         trigger: "bg-default-50 border border-default-100 rounded-2xl shadow-sm h-14",
                                         label: "text-foreground/80 font-medium"
                                     }}

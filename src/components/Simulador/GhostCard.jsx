@@ -5,7 +5,7 @@ function GhostCard({ materia }) {
         <Card className="p-2 opacity-60 border-2 border-dashed border-default-300 bg-default-100/30 shadow-none grayscale-[0.5]">
             <CardHeader className="flex justify-between items-start pb-1">
                 <div className="text-[10px] font-black text-foreground/40 tracking-wider">
-                    {materia.codigo}
+                    {materia.mostrarCodigo === false ? '---' : materia.codigo}
                 </div>
                 <div className="text-danger-400 opacity-80">
                     <Tooltip content="Materia bloqueada por correlativas" color="danger" closeDelay={0}>

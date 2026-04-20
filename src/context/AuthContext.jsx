@@ -232,6 +232,17 @@ export function AuthProvider({ children }) {
         } catch { return null; }
     }, []);
 
+    const getSimulacionLocal = useCallback((plan) => {
+        try {
+            const data = localStorage.getItem(`simulacion+${plan}`);
+            return data ? JSON.parse(data) : null;
+        } catch { return null; }
+    }, []);
+
+    const setSimulacionLocal = useCallback((plan, data) => {
+        localStorage.setItem(`simulacion+${plan}`, JSON.stringify(data));
+    }, []);
+
     // --- Valor del Contexto ---
     const value = {
         user,
@@ -256,6 +267,8 @@ export function AuthProvider({ children }) {
         // Helpers de LocalStorage
         getProgresoLocal,
         getProgresoDetallesLocal,
+        getSimulacionLocal,
+        setSimulacionLocal,
     };
 
     return (

@@ -109,7 +109,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                 <div className="flex flex-col px-1 pt-3">
                                     <div className="flex items-center gap-2 text-foreground/80 mb-1">
                                         <i className="fa-solid fa-book-open text-base" />
-                                        <span className="text-sm font-medium tracking-wide">{infoMateria.codigo}</span>
+                                        <span className="text-sm font-medium tracking-wide">{infoMateria.mostrarCodigo === false ? '---' : infoMateria.codigo}</span>
                                     </div>
 
                                     <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight leading-tight">

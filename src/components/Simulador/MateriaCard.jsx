@@ -16,7 +16,7 @@ function MateriaCard({ materia, actualizarEstados, estado }) {
         <Card className={`p-1.5 sm:p-2 transition-colors duration-300 ${selectedState.background}`}>
             <CardHeader className="flex justify-between items-start pb-1">
                 <div className="text-[10px] sm:text-xs font-bold text-foreground/80">
-                    {materia.codigo}
+                    {materia.mostrarCodigo === false ? '---' : materia.codigo}
                 </div>
                 <div>
                     <i className={`${selectedState.icon} text-sm sm:text-base transition-colors duration-300`} />

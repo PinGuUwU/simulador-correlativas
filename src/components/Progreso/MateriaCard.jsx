@@ -73,7 +73,7 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
             </CardHeader>
 
             <CardBody className={`${vista === 'list' ? 'flex-row items-center flex-1 justify-between p-2 overflow-hidden gap-4' : ''}`}>
-                <div className={`text-foreground font-extrabold ${vista === 'list' ? 'w-16 shrink-0' : ''}`}>{codigo}</div>
+                <div className={`text-foreground font-extrabold ${vista === 'list' ? 'w-16 shrink-0' : ''}`}>{materia.mostrarCodigo === false ? '---' : codigo}</div>
                 <div className={`truncate text-foreground font-black tracking-tight ${vista === 'list' ? 'flex-1 pr-4' : ''}`} title={nombre}>
                     {nombre}
                 </div>

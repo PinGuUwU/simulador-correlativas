@@ -129,22 +129,34 @@ function HistorialAcademico({ historialSemestres, openedAccordions, setOpenedAcc
                                                     <div className={`absolute left-0 top-0 bottom-0 w-1 ${isCursado ? 'bg-success' : 'bg-warning'}`} />
 
                                                     <CardBody className="p-2.5 pl-4 sm:pl-5 flex flex-row items-center gap-3 sm:gap-4 overflow-hidden">
-                                                        <div className={`hidden sm:flex w-8 h-8 rounded-lg items-center justify-center shrink-0 ${isCursado ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`}>
+                                                        <div className={`hidden sm:flex w-8 h-8 rounded-lg items-center justify-center shrink-0 ${isCursado ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`} data-html2canvas-ignore>
                                                             <i className={`fa-regular  ${isCursado ? 'fa-circle-check' : 'fa-clock'} text-lg`} />
                                                         </div>
 
                                                         <div className="flex flex-col gap-1 flex-1 min-w-0">
                                                             <div className="flex justify-between items-center w-full">
-                                                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-foreground/40 leading-none">
-                                                                    {materia.codigo}
+                                                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-foreground/40 leading-none whitespace-nowrap">
+                                                                    {materia.mostrarCodigo === false ? '---' : materia.codigo}
                                                                 </span>
-                                                                <div className='sm:hidden'>
+                                                                <div className='sm:hidden' data-html2canvas-ignore>
                                                                     <i className={`fa-regular ${isCursado ? 'fa-circle-check text-success' : 'fa-clock text-warning'} text-[10px]`} />
                                                                 </div>
                                                             </div>
                                                             <h4 className="text-xs sm:text-sm font-bold text-foreground/80 leading-tight">
                                                                 {materia.nombre}
                                                             </h4>
+                                                            <div className="flex gap-3 mt-0.5 text-[9px] sm:text-[10px] font-medium text-foreground/50">
+                                                                {materia.horas_totales > 0 && (
+                                                                    <span className="flex items-center gap-1">
+                                                                        <i data-html2canvas-ignore className="fa-regular fa-clock" /> {materia.horas_totales}h tot.
+                                                                    </span>
+                                                                )}
+                                                                {materia.horas_semanales > 0 && (
+                                                                    <span className="flex items-center gap-1">
+                                                                        <i data-html2canvas-ignore className="fa-solid fa-calendar-week" /> {materia.horas_semanales}h/sem
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </CardBody>
                                                 </Card>

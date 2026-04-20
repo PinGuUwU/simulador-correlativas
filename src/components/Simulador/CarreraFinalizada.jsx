@@ -54,7 +54,7 @@ function CarreraFinalizada({ anioActual, plan, historialSemestres, progresoSimul
                     isLoading={descargandoPDF}
                 >
                     {!descargandoPDF && <i className="fa-solid fa-file-pdf" />}
-                    Descargar en PDF
+                    {descargandoPDF ? "Generando PDF..." : "Descargar en PDF"}
                 </Button>
             </div>
         </div>

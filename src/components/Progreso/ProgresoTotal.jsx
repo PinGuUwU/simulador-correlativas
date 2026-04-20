@@ -68,7 +68,7 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                         {/* Migas de pan / Ubicación */}
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
                             <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary font-black text-[10px] uppercase tracking-tighter shrink-0">UNLu</span>
-                            <span className="text-secondary font-bold text-xs lg:text-sm tracking-wide uppercase shrink-0">{carrera}</span>
+                            <span className="text-secondary font-bold text-xs lg:text-sm tracking-wide uppercase">{carrera}</span>
                             <Divider orientation="vertical" className="h-4 bg-default-300 hidden sm:block" />
                             <Chip
                                 size="sm"
@@ -94,7 +94,7 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                         <div className="grid grid-cols-2 lg:flex gap-3 w-full sm:w-auto">
                             <Tooltip content="Promedio de exámenes finales aprobados." placement="bottom">
                                 <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-success/10 border border-success/20 rounded-xl transition-all hover:bg-success/20">
-                                    <div className="w-8 h-8 rounded-lg bg-success/20 flex items-center justify-center text-success shrink-0">
+                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-success/20 flex items-center justify-center text-success shrink-0">
                                         <i className="fa-solid fa-chart-line text-sm" />
                                     </div>
                                     <div className="flex flex-col items-start">
@@ -106,7 +106,7 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
 
                             <Tooltip content="Promedio de todos los intentos registrados." placement="bottom">
                                 <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-danger/10 border border-danger/30 rounded-xl transition-all hover:bg-danger/20">
-                                    <div className="w-8 h-8 rounded-lg bg-danger/20 flex items-center justify-center text-danger shrink-0">
+                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-danger/20 flex items-center justify-center text-danger shrink-0">
                                         <i className="fa-solid fa-chart-area text-sm" />
                                     </div>
                                     <div className="flex flex-col items-start">
@@ -118,7 +118,7 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
 
                             <Tooltip content="Materias finalizadas respecto al total de la carrera." placement="bottom">
                                 <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-primary/10 border border-primary/20 rounded-xl transition-all hover:bg-primary/20">
-                                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
                                         <i className="fa-solid fa-book-bookmark text-sm" />
                                     </div>
                                     <div className="flex flex-col items-start">
@@ -133,12 +133,12 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
 
                             <Tooltip content="Horas de materias regulares, aprobadas y promocionadas respecto al total." placement="bottom">
                                 <div className="flex items-center gap-3 p-3 lg:px-4 lg:py-2 bg-secondary/10 border border-secondary/20 rounded-xl transition-all hover:bg-secondary/20">
-                                    <div className="w-8 h-8 rounded-lg bg-secondary/20 flex items-center justify-center text-secondary shrink-0">
+                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-secondary/20 flex items-center justify-center text-secondary shrink-0">
                                         <i className="fa-solid fa-clock text-sm" />
                                     </div>
                                     <div className="flex flex-col items-start">
                                         <span className="text-[10px] text-secondary-700 font-bold uppercase tracking-wider leading-none mb-1">Carga Horaria</span>
-                                        <div className="flex items-baseline gap-1">
+                                        <div className="sm:flex items-baseline gap-1">
                                             <span className="text-lg font-black text-secondary-800 leading-none">{totalHorasProgreso}</span>
                                             <span className="text-[10px] font-bold text-secondary-600/70">/ {totalHorasCarrera} hs</span>
                                         </div>
@@ -161,11 +161,11 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                             onPress={() => setIsStatsExpanded(!isStatsExpanded)}
                             endContent={<i className={`fa-solid fa-chevron-down transition-transform duration-300 ${isStatsExpanded ? 'rotate-180' : ''}`}></i>}
                         >
-                            {isStatsExpanded ? 'Ocultar' : 'Ver más'}
+                            {isStatsExpanded ? 'Ocultar' : 'Mostrar'}
                         </Button>
                     </div>
 
-                    <div className={`mt-4 mb-4 ${isStatsExpanded ? 'block animate-in fade-in slide-in-from-top-2' : 'hidden md:block'}`}>
+                    <div className={`mt-4 flex ${isStatsExpanded ? 'block animate-in fade-in slide-in-from-top-2' : 'hidden md:block'}`}>
                         <MateriasProgreso progreso={progreso} materias={materias} />
                     </div>
                 </div>

@@ -22,11 +22,13 @@ function LeyendaEstados({ materias }) {
         success: "bg-success/20",
         primary: "bg-primary/20",
         warning: "bg-warning/20",
+        danger: "bg-danger/20",
+        secondary: "bg-secondary/20",
         default: "bg-default-100"
     }
 
     return (
-        <div className='p-5 flex flex-col gap-6'>
+        <div className='p-5 flex flex-col gap-6 w-full'>
             <Card className="shadow-sm border border-default-100">
                 <CardHeader className='font-bold text-foreground px-6 pt-6 text-lg'>
                     Leyenda de Estados
@@ -64,9 +66,9 @@ function LeyendaEstados({ materias }) {
                         <i className="fa-solid fa-scale-balanced text-primary"></i>
                         <span>Estatuto UNLu</span>
                     </div>
-                    <a 
-                        href="https://www.unlu.edu.ar/estatuto_unlu.pdf" 
-                        target="_blank" 
+                    <a
+                        href="https://www.unlu.edu.ar/estatuto_unlu.pdf"
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-primary hover:underline flex items-center gap-1 font-medium"
                     >

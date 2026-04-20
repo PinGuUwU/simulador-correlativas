@@ -25,7 +25,7 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
             isPressable={false}
             className={`w-full border transition-all duration-300 font-medium ${config.estilo} ${vista === 'list' ? 'flex-row items-center justify-between p-2 h-auto' : ''} ${estado === 'Bloqueado' ? 'opacity-60 grayscale-[0.2]' : ''} ${estado === 'Cursando' ? 'shadow-[0_0_14px_3px_rgba(99,102,241,0.30)] border-indigo-400/80' : 'shadow-sm hover:shadow-md hover:-translate-y-0.5'}`}
         >
-            <CardHeader className={`flex justify-between shrink-0 ${vista === 'list' ? 'w-auto gap-4 p-2' : ''}`}>
+            <CardHeader className={`flex flex-wrap gap-1 justify-between shrink-0 ${vista === 'list' ? 'w-auto gap-4 p-2' : ''}`}>
                 <Chip color={config.color} variant="flat">
                     <i className={config.icono} />
                 </Chip>

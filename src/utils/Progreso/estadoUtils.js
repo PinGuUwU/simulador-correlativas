@@ -26,8 +26,8 @@ const ESTADO_CONFIG = {
         icono: "fa-regular fa-circle-check",
     },
     Promocionado: {
-        estilo: "bg-emerald-500/15 border-emerald-400/60 hover:bg-emerald-500/20 hover:border-emerald-500/70 text-emerald-900 dark:text-emerald-100 font-black shadow-[0_0_10px_-2px_rgba(16,185,129,0.3)]",
-        color: "success",
+        estilo: "bg-violet-500/15 border-violet-400/60 hover:bg-violet-500/20 hover:border-violet-500/70 text-violet-900 dark:text-violet-100 font-black shadow-[0_0_12px_-2px_rgba(139,92,246,0.4)]",
+        color: "secondary",
         icono: "fa-solid fa-crown",
     },
     Libre: {

@@ -1,6 +1,8 @@
 //Estilos de los estados
 const obtenerEstiloPorEstado = (estado) => {
     switch (estado) {
+        case "Promocionado":
+            return { icon: "fa-crown", accent: "secondary", colorText: "text-violet-500" }
         case "Aprobado":
             return { icon: "fa-circle-check", accent: "success", colorText: "text-success" }
         case "Disponible":

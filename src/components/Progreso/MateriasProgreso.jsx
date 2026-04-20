@@ -158,7 +158,7 @@ function MateriasProgreso({ progreso, materias }) {
     }, [isOpen, onOpenChange, isDetailOpen])
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mt-2 mb-6 uppercase tracking-wider">
+        <div className="grid grid-cols-2 min-[425px]:grid-cols-3 min-[550px]:grid-cols-5 gap-3 sm:gap-4 mt-2 mb-6 uppercase tracking-wider">
             {stats.map((stat, index) => {
                 const porcentaje = Math.round(calcularPorcentaje(stat.count))
                 const textColors = {
@@ -183,7 +183,7 @@ function MateriasProgreso({ progreso, materias }) {
                         className={`bg-background/70 backdrop-blur-sm border border-default-200/60 hover:border-default-300/80 transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${glowClass} w-full group`}
                         onPress={() => handleClick(stat.estado, stat.label)}
                     >
-                        <CardBody className="py-2.5 px-3 sm:py-3 sm:px-4 flex flex-row items-center gap-3 sm:gap-4 overflow-visible">
+                        <CardBody className="py-2.5 px-3 sm:py-3 sm:px-4 flex flex-col items-center gap-3 sm:gap-4 overflow-visible">
                             <CircularProgress
                                 value={porcentaje}
                                 size="md"
@@ -196,7 +196,7 @@ function MateriasProgreso({ progreso, materias }) {
                                 }}
                             />
 
-                            <div className="flex flex-col text-left">
+                            <div className="flex flex-col text-center">
                                 <span className="text-[9px] sm:text-xs font-bold text-foreground/60 leading-tight">{stat.label}</span>
                                 <span className={`text-xs sm:text-base font-black ${textColorClass} tabular-nums`}>
                                     {porcentaje}%

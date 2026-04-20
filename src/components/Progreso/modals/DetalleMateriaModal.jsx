@@ -47,7 +47,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
     const estiloEstado = (estado) => {
         switch (estado) {
             case "Aprobado": return "success"
-            case "Promocionado": return "success"
+            case "Promocionado": return "secondary"
             case "Cursando": return "secondary"
             case "Disponible": return "primary"
             case "Regular": return "warning"

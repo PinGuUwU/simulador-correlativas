@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import MateriaCard from './MateriaCard.jsx'
-import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tab, Tabs, useDisclosure } from '@heroui/react'
+import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tab, Tabs, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react'
 import DetalleMateriaModal from './modals/DetalleMateriaModal.jsx'
 import ConfirmarCambioModal from './modals/ConfirmarCambioModal.jsx'
 import CapturaTransicionModal from './modals/CapturaTransicionModal.jsx'
@@ -15,18 +15,18 @@ import SyncCloud from './SyncCloud';
 function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan, busqueda = "", filtros = [] }) {
     const { updateAuthProgreso } = useAuth();
     const [infoMateria, setInfoMateria] = useState()
-    const { cambioDeEstado } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)
+    const { cambioDeEstado, cambioDeEstadoMultiple } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)
 
     // Lógica de filtrado
     const isSearching = busqueda.trim().length > 0 || filtros.length > 0;
 
     const materiasFiltradas = materias.filter(m => {
         // Función para quitar acentos
-        const normalize = (text) => 
+        const normalize = (text) =>
             text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
         const searchNormalized = normalize(busqueda);
-        
+
         const matchBusqueda = busqueda === "" ||
             normalize(m.nombre).includes(searchNormalized) ||
             normalize(m.codigo).includes(searchNormalized);
@@ -120,6 +120,15 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
     } = useDisclosure()
     const [capturaConfig, setCapturaConfig] = useState({ tipo: null, materia: null, pendingState: null })
 
+    // Para el Modal de Aprobar Año
+    const [anioAAprobar, setAnioAAprobar] = useState(null)
+    const {
+        isOpen: isAprobarAnioOpen,
+        onOpen: onAprobarAnioOpen,
+        onOpenChange: onAprobarAnioOpenChange,
+        onClose: onAprobarAnioClose
+    } = useDisclosure()
+
     //Abrir la info de una materia con Drawer de HeroUI
     const abrirInfo = (materia) => {
         setInfoMateria(materia)
@@ -147,6 +156,13 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
         if (isConfirmationOpen) window.addEventListener("popstate", handlePopState)
         return () => window.removeEventListener("popstate", handlePopState)
     }, [isConfirmationOpen, onConfirmationClose])
+
+    // Manejo de historial para modal de aprobar año
+    useEffect(() => {
+        const handlePopState = () => onAprobarAnioClose()
+        if (isAprobarAnioOpen) window.addEventListener("popstate", handlePopState)
+        return () => window.removeEventListener("popstate", handlePopState)
+    }, [isAprobarAnioOpen, onAprobarAnioClose])
 
     //Para cambiar el tamaño de la barra de progreso
     const getProgressBar = () => {
@@ -214,7 +230,9 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
         const estadoActual = progreso[codigo];
 
         if (mappedState === "Reiniciar") {
-            const baseState = materia?.correlativas?.length > 0 ? materiasUtils.bloquear : materiasUtils.estadosPosibles[0];
+            const ESTADOS_VALIDOS = [materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2], materiasUtils.estadosPosibles[4], 'Cursando'];
+            const todasBien = !materia?.correlativas?.length || materia.correlativas.every(c => ESTADOS_VALIDOS.includes(progreso[c]));
+            const baseState = todasBien ? materiasUtils.estadosPosibles[0] : materiasUtils.bloquear;
             cambioDeEstado(codigo, baseState);
             return;
         }
@@ -311,8 +329,8 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             }
 
             if (payload.notaFinal != null && (config.pendingState === 'Aprobado' || config.pendingState === 'Promocionado')) {
-                const fechaExamen = payload.anioExamen 
-                    ? new Date(payload.anioExamen, 11, 31).toISOString() 
+                const fechaExamen = payload.anioExamen
+                    ? new Date(payload.anioExamen, 11, 31).toISOString()
                     : new Date().toISOString();
 
                 const nuevoIntento = {
@@ -434,8 +452,58 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                 </ModalContent>
             </Modal>
 
+            {/* Modal para confirmar Aprobar Año */}
+            <Modal
+                isOpen={isAprobarAnioOpen}
+                onOpenChange={onAprobarAnioOpenChange}
+                backdrop="opaque"
+                placement="center"
+                classNames={{
+                    backdrop: "bg-black/50"
+                }}
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1 text-success">
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-solid fa-check-double"></i>
+                                    Aprobar {anioAAprobar?.valor === "taller" ? "Talleres" : `${anioAAprobar?.valor}° Año`}
+                                </div>
+                            </ModalHeader>
+                            <ModalBody>
+                                <p className="text-default-600">
+                                    ¿Estás seguro de que quieres <b>aprobar todas las materias</b> de {anioAAprobar?.valor === "taller" ? "Talleres" : `este año`}?
+                                </p>
+                                <p className="text-sm text-foreground/80 italic">
+                                    Esta acción actualizará en cadena todas las correlativas dependientes al estado Aprobado. Podrás modificar los detalles (como notas de cursada y final) más adelante.
+                                </p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button variant="light" onPress={onAprobarAnioClose}>
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    color="success"
+                                    className="font-bold"
+                                    onPress={() => {
+                                        if (anioAAprobar) {
+                                            const codigos = anioAAprobar.materias.map(m => m.codigo);
+                                            cambioDeEstadoMultiple(codigos, materiasUtils.estadosPosibles[2]);
+                                        }
+                                        onAprobarAnioClose();
+                                    }}
+                                >
+                                    Confirmar y Aprobar
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
             {/* Sección de botones */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+            <div className="sm:flex flex-wrap items-center sm:justify-between gap-3 mb-8">
                 {/* Grupo de Acciones Principales */}
                 <div className="flex items-center gap-2">
                     <Button
@@ -458,7 +526,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                         Simular Avance
                     </Button>
                 </div>
-                
+
                 {/* Herramientas de Sincronización y Vista */}
                 <div className="flex items-center gap-3">
                     <Button
@@ -560,13 +628,35 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                                             <section key={valor} className={`flex flex-col gap-6`}>
                                                 {/* Cabecera del Año */}
                                                 <div className="flex justify-between ">
-                                                    <div className='flex items-center gap-3 border-b border-default-200 pb-2'>
+                                                    <div className='flex items-center gap-3 border-b border-default-200 pb-2 grow'>
                                                         <div className="w-1.5 h-8 bg-primary rounded-full shadow-sm"></div>
                                                         <h2 className="text-2xl font-bold text-foreground tracking-tight">
                                                             {valor === "taller" ? "Talleres" : `${valor}° Año`}
                                                         </h2>
                                                     </div>
-                                                    <Button onPress={() => handleMostrar(valor)}>{isAnioOpen.includes(valor) ? "Mostrar más" : "Mostrar menos"}</Button>
+                                                    <div className="flex items-center gap-1 ml-2">
+                                                        <Button size="sm" variant="flat" className="font-medium" onPress={() => handleMostrar(valor)}>{isAnioOpen.includes(valor) ? "Mostrar" : "Ocultar"}</Button>
+                                                        <Dropdown>
+                                                            <DropdownTrigger>
+                                                                <Button isIconOnly variant="flat" size="sm">
+                                                                    <i className="fa-solid fa-ellipsis-vertical"></i>
+                                                                </Button>
+                                                            </DropdownTrigger>
+                                                            <DropdownMenu aria-label="Acciones de año">
+                                                                <DropdownItem
+                                                                    key="aprobar"
+                                                                    color="success"
+                                                                    startContent={<i className="fa-solid fa-check-double" />}
+                                                                    onPress={() => {
+                                                                        setAnioAAprobar({ valor, materias: materiasParaMostrar });
+                                                                        onAprobarAnioOpen();
+                                                                    }}
+                                                                >
+                                                                    Aprobar materias
+                                                                </DropdownItem>
+                                                            </DropdownMenu>
+                                                        </Dropdown>
+                                                    </div>
                                                 </div>
 
                                                 {/* Contenedor de Cuatrimestres */}
@@ -582,15 +672,15 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                                                         return (
                                                             <div key={cuatri} className="flex flex-col gap-4">
                                                                 {/* Cabecera del Cuatrimestre */}
-                                                                <div className="flex items-center justify-between bg-default-50 border border-default-200 rounded-lg px-4 py-3 shadow-sm">
+                                                                <div className="sm:flex items-center sm:justify-between bg-default-50 border border-default-200 rounded-lg px-4 py-3 shadow-sm">
                                                                     <div className="flex items-center gap-3">
                                                                         <div className="w-1 h-5 bg-default-400 rounded-full"></div>
                                                                         <h3 className="text-lg font-semibold text-default-700">
                                                                             {cuatri}° Cuatrimestre
                                                                         </h3>
                                                                     </div>
-                                                                    <Chip size="sm" variant="flat" className="bg-background border border-default-200 text-default-600 font-medium shadow-sm">
-                                                                        {materiasCuatri.length} {materiasCuatri.length === 1 ? 'Materia' : 'Materias'}
+                                                                    <Chip size="sm" variant="flat" className="bg-background border border-default-200 text-default-600 shadow-sm" startContent={<i className="fa-solid fa-book ml-1 text-default-400"></i>}>
+                                                                        <span className="font-bold ml-1">{materiasCuatri.length}</span> <span className="hidden sm:inline font-medium">{materiasCuatri.length === 1 ? 'materia' : 'materias'}</span>
                                                                     </Chip>
                                                                 </div>
 

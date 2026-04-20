@@ -39,8 +39,8 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
     // 2. Función para aprobar todas las materias (Aprobado Forzoso)
     const aprobarTodas = (nuevoProgreso, materiasModificadas) => {
         materias.forEach((m) => {
-            // Solo modificamos las que no estén ya aprobadas para evitar bucles
-            if (nuevoProgreso[m.codigo] !== materiasUtils.estadosPosibles[2]) {
+            // Solo modificamos las que no estén ya aprobadas o promocionadas para evitar bucles
+            if (![materiasUtils.estadosPosibles[2], materiasUtils.estadosPosibles[4]].includes(nuevoProgreso[m.codigo])) {
                 nuevoProgreso[m.codigo] = materiasUtils.estadosPosibles[2];
                 materiasModificadas.push(m.codigo);
             }
@@ -50,7 +50,7 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
     // 3. Funciones recursivas para la actualización de estado de materias 
     const regularizarCorrelativas = (codigosCorrelativas, nuevoProgreso, materiasModificadas) => {
         codigosCorrelativas.forEach((codigo) => {
-            if (!([materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2]].includes(nuevoProgreso[codigo]))) {
+            if (!([materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2], materiasUtils.estadosPosibles[4]].includes(nuevoProgreso[codigo]))) {
                 nuevoProgreso[codigo] = materiasUtils.estadosPosibles[1];
                 materiasModificadas.push(codigo);
                 const materiaActual = materias.find((materia) => materia.codigo === codigo);
@@ -71,7 +71,7 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
     }
 
     const desbloquearDependencias = (codigoMateria, nuevoProgreso) => {
-        const ESTADOS_VALIDOS_DESBLOQUEO = [materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2], 'Cursando'];
+        const ESTADOS_VALIDOS_DESBLOQUEO = [materiasUtils.estadosPosibles[1], materiasUtils.estadosPosibles[2], materiasUtils.estadosPosibles[4], 'Cursando'];
         materias.forEach((m) => {
             const todasBien = m.correlativas.every(c => ESTADOS_VALIDOS_DESBLOQUEO.includes(nuevoProgreso[c]));
             const buenEstado = ESTADOS_VALIDOS_DESBLOQUEO.includes(nuevoProgreso[m.codigo]);
@@ -83,7 +83,7 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
 
     const aprobarCorrelativas = (codigosCorrelativas, nuevoProgreso, materiasModificadas) => {
         codigosCorrelativas.forEach((codigo) => {
-            if (nuevoProgreso[codigo] !== materiasUtils.estadosPosibles[2]) {
+            if (![materiasUtils.estadosPosibles[2], materiasUtils.estadosPosibles[4]].includes(nuevoProgreso[codigo])) {
                 nuevoProgreso[codigo] = materiasUtils.estadosPosibles[2];
                 materiasModificadas.push(codigo);
                 const materiaActual = materias.find((materia) => materia.codigo === codigo);
@@ -128,7 +128,7 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
                 if (materiaActual.correlativas.length > 0) {
                     regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas);
                 }
-            } else if (estadoNuevo === materiasUtils.estadosPosibles[2]) { // Aprobado
+            } else if (estadoNuevo === materiasUtils.estadosPosibles[2] || estadoNuevo === materiasUtils.estadosPosibles[4]) { // Aprobado o Promocionado
                 if (materiaActual.correlativas.length > 0) {
                     aprobarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas);
                 }
@@ -150,7 +150,50 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
         updateAuthProgreso(plan, nuevoProgreso);
     }
 
-    return { cambioDeEstado }
+    // 6. Cambio para múltiples materias a la vez
+    const cambioDeEstadoMultiple = (codigosMaterias, targetState) => {
+        let nuevoProgreso = { ...progreso };
+        let materiasModificadas = [];
+
+        codigosMaterias.forEach(codigoMateria => {
+            const materiaActual = materias.find((m) => m.codigo === codigoMateria);
+            if (!materiaActual) return;
+
+            const estadoNuevo = targetState;
+            if (nuevoProgreso[codigoMateria] === estadoNuevo || 
+               (estadoNuevo === materiasUtils.estadosPosibles[2] && nuevoProgreso[codigoMateria] === materiasUtils.estadosPosibles[4])) {
+                return; // Evita actualizar si ya está igual o mejor
+            }
+
+            nuevoProgreso[codigoMateria] = estadoNuevo;
+            materiasModificadas.push(codigoMateria);
+
+            // Siempre asumiremos targetState === Aprobado para esta utilidad, pero por las dudas:
+            if (materiaActual.tesis && (estadoNuevo === materiasUtils.estadosPosibles[1] || estadoNuevo === materiasUtils.estadosPosibles[2])) {
+                aprobarTodas(nuevoProgreso, materiasModificadas);
+            } else if (estadoNuevo === materiasUtils.estadosPosibles[2] || estadoNuevo === 'Promocionado') {
+                if (materiaActual.correlativas.length > 0) {
+                    aprobarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas);
+                }
+            } else if (estadoNuevo === 'Cursando' || estadoNuevo === materiasUtils.estadosPosibles[1]) {
+                if (materiaActual.correlativas.length > 0) {
+                    regularizarCorrelativas(materiaActual.correlativas, nuevoProgreso, materiasModificadas);
+                }
+            } else if (estadoNuevo === materiasUtils.estadosPosibles[0] || estadoNuevo === materiasUtils.bloquear) {
+                bloquearDependencias(codigoMateria, nuevoProgreso);
+            }
+        });
+
+        if (materiasModificadas.length > 0) {
+            materiasModificadas.forEach((codMateria) => {
+                desbloquearDependencias(codMateria, nuevoProgreso);
+            });
+            setProgreso(nuevoProgreso);
+            updateAuthProgreso(plan, nuevoProgreso);
+        }
+    }
+
+    return { cambioDeEstado, cambioDeEstadoMultiple }
 }
 
 export default useProgresoMaterias;

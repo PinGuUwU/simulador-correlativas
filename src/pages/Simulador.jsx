@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Button, Spinner, useDisclosure, Card, CardBody, Modal, ModalContent, ModalBody } from '@heroui/react'
+import { Link } from 'react-router-dom'
 
 import HeaderSimulador from '../components/Simulador/HeaderSimulador'
 import MateriasSimulador from '../components/Simulador/MateriasSimulador'
@@ -145,6 +146,17 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                         <Button isIconOnly variant="flat" color="primary" onPress={onConfigOpen} className="rounded-xl">
                             <i className="fa-solid fa-sliders" />
                         </Button>
+                    </div>
+
+                    {/* Disclaimer Simulador vs Progreso */}
+                    <div className="flex bg-warning-50/50 dark:bg-warning-500/10 border border-warning-200 dark:border-warning-500/30 text-warning-800 dark:text-warning-300 rounded-xl p-4 mt-6 mb-2 items-start gap-3 shadow-sm">
+                        <i className="fa-solid fa-circle-info text-xl mt-0.5 text-warning-500" />
+                        <div className="flex-1">
+                            <h4 className="font-bold text-sm md:text-base text-warning-900 dark:text-warning-400">Modo de Prueba (Simulador)</h4>
+                            <p className="text-xs md:text-sm mt-1 opacity-90">
+                                Aquí puedes experimentar diferentes escenarios. <strong>Tus selecciones en esta pantalla no se guardan como tu avance real.</strong> Si quieres actualizar las materias que ya aprobaste o regularizaste, hazlo desde la sección <Link to="/progreso" className="underline font-bold hover:text-warning-700 dark:hover:text-warning-200">Mi Progreso</Link>.
+                            </p>
+                        </div>
                     </div>
 
                     {cargando ? (

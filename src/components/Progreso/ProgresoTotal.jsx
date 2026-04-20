@@ -1,5 +1,6 @@
 import { Progress, Button, Tooltip, Chip, Divider } from '@heroui/react'
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import MateriasProgreso from './MateriasProgreso'
 import regularidadUtils from '../../utils/Progreso/regularidadUtils'
 
@@ -86,8 +87,8 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                         </h1>
 
                         <p className="text-foreground/70 font-medium text-sm sm:text-base lg:text-lg max-w-3xl leading-relaxed mb-6">
-                            Gestioná tu avance en la <span className="text-foreground font-bold">Licenciatura en Sistemas de Información</span>.
-                            Mantené el control total de tus materias <span className="italic">aprobadas, regulares y pendientes</span> de forma centralizada.
+                            Gestioná tu avance <strong>real y oficial</strong> en la <span className="text-foreground font-bold">Licenciatura en Sistemas de Información</span>.<br/>
+                            Los cambios aquí realizados representan tu avance definitivo. <span className="text-sm border border-primary/30 bg-primary/10 px-2 py-1 ml-1 rounded-md mb-1 inline-block">Si solo querés planificar cómo sería tu cursada, usá el <Link to="/simulador" className="font-bold underline text-primary hover:text-primary-600">Simulador</Link>.</span>
                         </p>
 
                         {/* Sección Estadísticas: Grilla en móvil, flex en desktop */}

@@ -34,6 +34,7 @@ export const downloadAllProgress = async (uid) => {
 
         let progreso = cloudData.progreso || {};
         let detalles = cloudData.progresoDetalles || {};
+        let simulaciones = cloudData.simulaciones || {};
 
         // Normalización: Extraemos datos de llaves con puntos literales (ej: "progreso.17.14")
         // y también intentamos aplanar mapas anidados que pudieron crearse por el bug de updateDoc
@@ -45,6 +46,10 @@ export const downloadAllProgress = async (uid) => {
             if (key.startsWith('progresoDetalles.')) {
                 const plan = key.substring('progresoDetalles.'.length);
                 if (!detalles[plan]) detalles[plan] = cloudData[key];
+            }
+            if (key.startsWith('simulaciones.')) {
+                const plan = key.substring('simulaciones.'.length);
+                if (!simulaciones[plan]) simulaciones[plan] = cloudData[key];
             }
         });
 
@@ -65,7 +70,7 @@ export const downloadAllProgress = async (uid) => {
 
         // Limpiamos cualquier progreso local viejo para evitar mezclas indeseadas.
         Object.keys(localStorage).forEach(key => {
-            if (key.startsWith('progreso+') || key.startsWith('detalles_progreso+')) {
+            if (key.startsWith('progreso+') || key.startsWith('detalles_progreso+') || key.startsWith('simulacion+')) {
                 localStorage.removeItem(key);
             }
         });
@@ -77,6 +82,10 @@ export const downloadAllProgress = async (uid) => {
 
         for (const [plan, data] of Object.entries(detalles)) {
             localStorage.setItem(`detalles_progreso+${plan}`, JSON.stringify(data));
+        }
+
+        for (const [plan, data] of Object.entries(simulaciones)) {
+            localStorage.setItem(`simulacion+${plan}`, JSON.stringify(data));
         }
 
         if (cloudData.config?.tema) {

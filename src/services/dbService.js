@@ -81,3 +81,25 @@ export const updateUserConfig = async (uid, config) => {
     
     await setDoc(userRef, updates, { merge: true });
 };
+
+/**
+ * Guarda una simulación del usuario.
+ */
+export const saveUserSimulacion = async (uid, plan, simulacion) => {
+    if (!uid || !plan || !simulacion) return;
+
+    const userRef = doc(db, 'users', uid);
+    const currentUser = auth.currentUser;
+    
+    const updates = {
+        uid: uid,
+        email: currentUser?.email || "",
+        schemaVersion: SCHEMA_VERSION,
+        simulacionUpdatedAt: serverTimestamp(),
+        simulaciones: {
+            [plan]: simulacion
+        }
+    };
+    
+    await setDoc(userRef, updates, { merge: true });
+};

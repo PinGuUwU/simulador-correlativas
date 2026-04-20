@@ -45,7 +45,7 @@ export default function SettingsPage({ plan, setPlan }) {
                 if (loggedUser) {
                     addToast({ title: '¡Bienvenido!', description: 'Sesión iniciada correctamente.', color: 'success' });
                 }
-            } catch (err) {}
+            } catch (err) { }
             return;
         }
 
@@ -209,9 +209,9 @@ export default function SettingsPage({ plan, setPlan }) {
                     <CardBody className="px-6 pb-6 pt-2 flex flex-col gap-4">
                         <div className="flex flex-col gap-3">
                             <label className="text-sm font-medium text-foreground/80">Plan de Estudios Activo</label>
-                            <Tabs 
-                                aria-label="Selección de Plan" 
-                                color="primary" 
+                            <Tabs
+                                aria-label="Selección de Plan"
+                                color="primary"
                                 variant="bordered"
                                 fullWidth
                                 selectedKey={plan || '17.14'}
@@ -230,7 +230,7 @@ export default function SettingsPage({ plan, setPlan }) {
                                             <span className="text-xs sm:text-sm font-bold whitespace-nowrap">Plan 17.14</span>
                                             <Chip size="sm" variant="flat" color="primary" className="hidden xs:flex h-5 h-min min-w-0 px-1 text-[10px]">Actual</Chip>
                                         </div>
-                                    } 
+                                    }
                                 />
                                 <Tab key="17.13" title={<span className="text-xs sm:text-sm font-bold">Plan 17.13</span>} />
                             </Tabs>
@@ -267,8 +267,8 @@ export default function SettingsPage({ plan, setPlan }) {
                                         key={t.id}
                                         onClick={() => setTheme(t.id)}
                                         className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${theme === t.id
-                                                ? 'border-primary bg-primary/5 shadow-sm'
-                                                : 'border-default-100 bg-default-50 hover:border-default-200'
+                                            ? 'border-primary bg-primary/5 shadow-sm'
+                                            : 'border-default-100 bg-default-50 hover:border-default-200'
                                             }`}
                                     >
                                         <div className={`w-4 h-4 rounded-full ${t.color} border border-default-200 shadow-inner`} />
@@ -283,7 +283,7 @@ export default function SettingsPage({ plan, setPlan }) {
                     </CardBody>
                 </Card>
 
-                {/* Backup & Export Section */}
+                {/* Próximamente Section */}
                 <Card className="shadow-sm border border-dashed border-default-300 bg-default-50/30 overflow-hidden relative">
                     <div className="absolute top-2 right-2 rotate-12">
                         <Chip variant="flat" color="warning" size="sm" className="font-bold uppercase tracking-wider">Lab</Chip>
@@ -293,22 +293,29 @@ export default function SettingsPage({ plan, setPlan }) {
                             <i className="fa-solid fa-rocket text-default-400 w-4" />
                         </div>
                         <div className="flex flex-col">
-                            <p className="text-md font-bold leading-none">Backup y Exportación</p>
-                            <p className="text-xs text-default-400 italic">Funciones avanzadas de guardado</p>
+                            <p className="text-md font-bold leading-none">Nuevas Funciones</p>
+                            <p className="text-xs text-default-400 italic">En desarrollo activo</p>
                         </div>
                     </CardHeader>
-                    <Divider className="my-2 mx-6 w-auto" />
-                    <CardBody className="px-6 pb-6 pt-2 opacity-60">
-                        <Button
-                            variant="light"
-                            color="default"
-                            size="sm"
-                            className="font-bold justify-start px-2 h-9 text-default-400 cursor-not-allowed"
-                            startContent={<i className="fa-solid fa-file-export text-xs" />}
-                            isDisabled
-                        >
-                            Exportar Avance (Próximamente)
-                        </Button>
+                    <CardBody className="px-6 pb-6 pt-2 flex flex-col gap-3 opacity-60">
+                        <div className="flex items-center gap-3 p-2 border border-default-100 rounded-xl">
+                            <div className="p-2 rounded-lg bg-default-50">
+                                <i className="fa-solid fa-file-pdf text-default-400 w-4 flex justify-center" />
+                            </div>
+                            <p className="text-xs font-semibold">Subida de Analítico para actualizar el Progreso</p>
+                        </div>
+                        <div className="flex items-center gap-3 p-2 border border-default-100 rounded-xl">
+                            <div className="p-2 rounded-lg bg-default-50">
+                                <i className="fa-solid fa-bell text-default-400 w-4 flex justify-center" />
+                            </div>
+                            <p className="text-xs font-semibold">Alertas de Inscripción y Finales</p>
+                        </div>
+                        <div className="flex items-center gap-3 p-2 border border-default-100 rounded-xl">
+                            <div className="p-2 rounded-lg bg-default-50">
+                                <i className="fa-solid fa-file-export text-default-400 w-4 flex justify-center" />
+                            </div>
+                            <p className="text-xs font-semibold">Exportar avance (JSON)</p>
+                        </div>
                     </CardBody>
                 </Card>
             </div>

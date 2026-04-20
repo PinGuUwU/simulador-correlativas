@@ -6,7 +6,7 @@ import { loginConGoogle, logout } from '../services/authService';
 import { isIntentionalAuthCancel } from '../utils/errorCodes';
 import { logError } from '../services/logService';
 import { trackLogin, trackLogout } from '../services/analyticsService';
-import { getUserData } from '../services/dbService';
+import { getUserData, saveUserSimulacion } from '../services/dbService';
 import { uploadPlanProgress, downloadAllProgress } from '../services/syncService';
 import { addToast } from '@heroui/react';
 
@@ -241,7 +241,12 @@ export function AuthProvider({ children }) {
 
     const setSimulacionLocal = useCallback((plan, data) => {
         localStorage.setItem(`simulacion+${plan}`, JSON.stringify(data));
-    }, []);
+        if (user) {
+            saveUserSimulacion(user.uid, plan, data).catch(err => {
+                console.error("Error al guardar simulación en la nube:", err);
+            });
+        }
+    }, [user]);
 
     // --- Valor del Contexto ---
     const value = {

@@ -34,12 +34,5 @@ export default defineConfig({
         }
       }
     }
-  },
-  server: {
-    headers: {
-      // Sin este header, el browser bloquea el popup de Google Auth
-      // con el error: "Cross-Origin-Opener-Policy would block window.closed"
-      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
-    },
-  },
+  }
 })

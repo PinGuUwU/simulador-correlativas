@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import MateriasList from '../components/Progreso/MateriasList';
 import ProgresoTotal from '../components/Progreso/ProgresoTotal';
-import { Spinner } from '@heroui/react';
+import { Button, Spinner } from '@heroui/react';
+import { Network } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import LeyendaEstados from '../components/Progreso/LeyendaEstados';
 import PlanSelectionModal from '../components/Progreso/modals/PlanSelectionModal';
 import ConsejoAvanzadosModal from '../components/Progreso/modals/ConsejoAvanzadosModal';
 import usePlanData from '../hooks/usePlanData';
-import materiasUtils from '../utils/Progreso/materiasUtils';
 import ProgresoSearchFilters from '../components/Progreso/ProgresoSearchFilters';
 
 function Progreso({ plan, setPlan }) {
+    const navigate = useNavigate();
     // Usamos el hook centralizado para la carga de datos y progreso
     const { 
         materias, 
@@ -138,8 +140,24 @@ function Progreso({ plan, setPlan }) {
                         />
                     </div>
 
-                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between pb-6 mx-5 md:mx-10 lg:mx-15">
-                        <LeyendaEstados materias={materias} />
+                    <div className="flex flex-col md:flex-row gap-6 items-center justify-between pb-12 mx-5 md:mx-10 lg:mx-15 pt-8 border-t border-default-200 mt-10">
+                        <div className="order-2 md:order-1">
+                            <LeyendaEstados materias={materias} />
+                        </div>
+                        
+                        <div className="order-1 md:order-2 flex flex-col items-center md:items-end gap-3">
+                            <p className="text-[11px] font-bold text-foreground/40 uppercase tracking-widest">Vista Alternativa</p>
+                            <Button 
+                                color="primary" 
+                                variant="shadow" 
+                                size="lg"
+                                className="font-bold px-8 shadow-primary/30"
+                                startContent={<Network size={20} />}
+                                onPress={() => navigate('/red')}
+                            >
+                                Ver Red de Materias
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}

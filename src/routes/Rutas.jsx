@@ -5,6 +5,7 @@ import { Spinner } from '@heroui/react'
 import Progreso from '../pages/Progreso'
 import Inicio from '../pages/Inicio'
 import Simulador from '../pages/Simulador'
+import RedDeMaterias from '../pages/RedDeMaterias'
 
 const Equivalencias = lazy(() => import('../pages/Equivalencias'))
 const ChatBot = lazy(() => import('../pages/ChatBot'))
@@ -27,6 +28,10 @@ const Rutas = ({ plan, setPlan }) => {
         {
             path: "/progreso",
             element: <Progreso plan={plan} setPlan={setPlan} />
+        },
+        {
+            path: "/red",
+            element: <RedDeMaterias plan={plan} setPlan={setPlan} />
         },
         {
             path: "/simulador",

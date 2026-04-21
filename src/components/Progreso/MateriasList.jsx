@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import MateriaCard from './MateriaCard.jsx'
 import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tab, Tabs, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react'
 import DetalleMateriaModal from './modals/DetalleMateriaModal.jsx'
@@ -12,7 +12,7 @@ import regularidadUtils from '../../utils/Progreso/regularidadUtils.js'
 import { Search } from 'lucide-react'
 import SyncCloud from './SyncCloud';
 
-function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan, busqueda = "", filtros = [], isAnioOpen, setIsAnioOpen, handleMostrarTodo }) {
+function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, plan, busqueda = "", filtros = [], isAnioOpen, setIsAnioOpen, handleMostrarTodo }) {
     const { updateAuthProgreso } = useAuth();
     const [infoMateria, setInfoMateria] = useState()
     const { cambioDeEstado, cambioDeEstadoMultiple } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)

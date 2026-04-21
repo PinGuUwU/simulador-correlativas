@@ -182,6 +182,7 @@ const NavLinks = ({ onItemClick, isCollapsed }) => {
     const menuItems = [
         { name: 'Inicio', icon: 'fa-house', path: '/', isDeactivated: false },
         { name: 'Progreso', icon: 'fa-graduation-cap', path: '/progreso', isDeactivated: false },
+        { name: 'Red de Materias', icon: 'fa-circle-nodes', path: '/red', isDeactivated: false },
         { name: 'Simulador de Avance', icon: 'fa-route', path: '/simulador', isDeactivated: false },
         { name: 'Equivalencias', icon: 'fa-right-left', path: '/equivalencias', isDeactivated: false },
         { name: 'Chat IA', icon: 'fa-robot', path: '/chatbot', isDeactivated: true },

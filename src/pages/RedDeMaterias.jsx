@@ -1,47 +1,18 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import React from 'react';
 import usePlanData from '../hooks/usePlanData';
-import useProgresoMaterias from '../hooks/Progreso/useProgresoMaterias';
 import MateriasGrafo from '../components/Progreso/MateriasGrafo';
 import { Spinner, Card, CardBody, Chip, Button } from '@heroui/react';
 import { Network, Info } from 'lucide-react';
-import { useDisclosure } from '@heroui/react';
-import DetalleMateriaModal from '../components/Progreso/modals/DetalleMateriaModal';
 import { useNavigate } from 'react-router-dom';
 
 const RedDeMaterias = ({ plan }) => {
-    const { updateAuthProgreso } = useAuth();
     const { 
         materias, 
         progreso, 
-        setProgreso, 
-        progresoDetalles, 
-        setProgresoDetalles,
         cargandoPlan: loadingPlan 
     } = usePlanData(plan);
     
-    const [infoMateria, setInfoMateria] = useState(null);
     const navigate = useNavigate();
-    
-    const { 
-        isOpen: isDetailOpen, 
-        onOpen: onDetailOpen, 
-        onOpenChange: onDetailOpenChange,
-        onClose: onDetailClose 
-    } = useDisclosure();
-
-    const { cambioDeEstado } = useProgresoMaterias(
-        progreso, 
-        setProgreso, 
-        materias, 
-        plan, 
-        updateAuthProgreso
-    );
-
-    const abrirInfo = (materia) => {
-        setInfoMateria(materia);
-        onDetailOpen();
-    };
 
     if (loadingPlan) {
         return (
@@ -66,8 +37,8 @@ const RedDeMaterias = ({ plan }) => {
                             </h1>
                         </div>
                         <p className="text-foreground/60 text-lg font-medium max-w-2xl leading-relaxed">
-                            Visualizá tu carrera como un mapa interactivo. Explorá las correlatividades, 
-                            descubrí qué materias desbloqueás y gestioná tu avance académico de forma gráfica.
+                            Visualizá tu carrera como un mapa. Explorá las correlatividades 
+                            y descubrí cómo se conectan las materias de tu plan de estudios.
                         </p>
                         <div className="pt-2 flex items-center">
                             Si querés actualizar el estado de tus materias: 
@@ -90,7 +61,7 @@ const RedDeMaterias = ({ plan }) => {
                                 <Info size={18} />
                             </div>
                             <p className="text-[11px] leading-snug text-foreground/70">
-                                <span className="font-bold text-foreground">Tip:</span> Mantené el mouse sobre una materia para ver sus conexiones de entrada y salida. Hacé clic para ver detalles.
+                                <span className="font-bold text-foreground">Tip:</span> Mantené el mouse sobre una materia para resaltar sus conexiones de entrada y salida.
                             </p>
                         </CardBody>
                     </Card>
@@ -98,13 +69,10 @@ const RedDeMaterias = ({ plan }) => {
 
                 <div className="flex flex-wrap gap-2 mb-6">
                     <Chip variant="flat" color="primary" size="sm" className="font-bold uppercase tracking-wider text-[10px]">
-                        Interactiva
+                        Visualización
                     </Chip>
                     <Chip variant="flat" color="secondary" size="sm" className="font-bold uppercase tracking-wider text-[10px]">
                         Correlatividades
-                    </Chip>
-                    <Chip variant="flat" color="success" size="sm" className="font-bold uppercase tracking-wider text-[10px]">
-                        Sincronizada
                     </Chip>
                 </div>
             </div>
@@ -115,22 +83,9 @@ const RedDeMaterias = ({ plan }) => {
                     <MateriasGrafo 
                         materias={materias}
                         progreso={progreso}
-                        abrirInfo={abrirInfo}
-                        selectedMateriaCode={isDetailOpen ? infoMateria?.codigo : null}
                     />
                 </div>
             </div>
-
-            {/* Modal de Detalle */}
-            <DetalleMateriaModal
-                isOpen={isDetailOpen}
-                onOpenChange={onDetailOpenChange}
-                materia={infoMateria}
-                progreso={progreso}
-                progresoDetalles={progresoDetalles}
-                onEstadoChange={cambioDeEstado}
-                onClose={onDetailClose}
-            />
         </div>
     );
 };

@@ -61,6 +61,28 @@ function Progreso({ plan, setPlan }) {
     const [busqueda, setBusqueda] = useState("");
     const [filtros, setFiltros] = useState([]);
 
+    // Manejo de años abiertos/cerrados subido al nivel superior para compartir el botón con el buscador
+    const [isAnioOpen, setIsAnioOpen] = useState(() => {
+        const guardado = localStorage.getItem('materias_isAnioOpen');
+        if (guardado) {
+            try { return JSON.parse(guardado); } catch (e) { return []; }
+        }
+        return [];
+    });
+
+    useEffect(() => {
+        localStorage.setItem('materias_isAnioOpen', JSON.stringify(isAnioOpen));
+    }, [isAnioOpen]);
+
+    const handleMostrarTodo = () => {
+        if (isAnioOpen.length > 0) {
+            setIsAnioOpen([]);
+        } else {
+            const anios = [...new Set(materias.map((m) => Number(m.anio)))].sort((a, b) => a - b);
+            setIsAnioOpen(anios);
+        }
+    };
+
     return (
         <div className="overflow-visible bg-default-100 min-h-screen">
             <PlanSelectionModal 
@@ -110,6 +132,9 @@ function Progreso({ plan, setPlan }) {
                             isProgressSticky={isSticky}
                             busqueda={busqueda}
                             filtros={filtros}
+                            isAnioOpen={isAnioOpen}
+                            setIsAnioOpen={setIsAnioOpen}
+                            handleMostrarTodo={handleMostrarTodo}
                         />
                     </div>
 

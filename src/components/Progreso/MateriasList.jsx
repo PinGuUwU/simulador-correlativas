@@ -12,7 +12,7 @@ import regularidadUtils from '../../utils/Progreso/regularidadUtils.js'
 import { Search } from 'lucide-react'
 import SyncCloud from './SyncCloud';
 
-function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan, busqueda = "", filtros = [] }) {
+function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, isProgressSticky, plan, busqueda = "", filtros = [], isAnioOpen, setIsAnioOpen, handleMostrarTodo }) {
     const { updateAuthProgreso } = useAuth();
     const [infoMateria, setInfoMateria] = useState()
     const { cambioDeEstado, cambioDeEstadoMultiple } = useProgresoMaterias(progreso, setProgreso, materias, plan, updateAuthProgreso)
@@ -67,14 +67,6 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
     }, []);
     const [confirmacion, setConfirmacion] = useState(false)
     const [mostrar, setMostrar] = useState(true)
-    //Logica para mostrar u ocultar las materias de un año
-    const [isAnioOpen, setIsAnioOpen] = useState(() => {
-        const guardado = localStorage.getItem('materias_isAnioOpen');
-        if (guardado) {
-            try { return JSON.parse(guardado); } catch (e) { return []; }
-        }
-        return [];
-    });
 
     const [vista, setVista] = useState(() => localStorage.getItem('materias_vista_preferida') || 'grid');
 
@@ -82,9 +74,6 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
         localStorage.setItem('materias_vista_preferida', vista);
     }, [vista]);
 
-    useEffect(() => {
-        localStorage.setItem('materias_isAnioOpen', JSON.stringify(isAnioOpen));
-    }, [isAnioOpen]);
     const navigate = useNavigate()
 
     // Para el Drawer/Info de la materia
@@ -120,8 +109,8 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
     } = useDisclosure()
     const [capturaConfig, setCapturaConfig] = useState({ tipo: null, materia: null, pendingState: null })
 
-    // Para el Modal de Aprobar Año
-    const [anioAAprobar, setAnioAAprobar] = useState(null)
+    // Para el Modal de Aprobar Año o Grupo
+    const [grupoAAprobar, setGrupoAAprobar] = useState(null)
     const {
         isOpen: isAprobarAnioOpen,
         onOpen: onAprobarAnioOpen,
@@ -129,6 +118,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
         onClose: onAprobarAnioClose
     } = useDisclosure()
 
+    // ... down below ...
     //Abrir la info de una materia con Drawer de HeroUI
     const abrirInfo = (materia) => {
         setInfoMateria(materia)
@@ -173,22 +163,35 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
     }
     const currentSize = getProgressBar()
 
-    //Ordeno las materias dentro del array cuatrimestres, para poder mostrarlas en orden y separarlas por cuatrimestre
-    const anios = [...new Set(materias.map((m) => Number(m.anio)))].sort((a, b) => a - b)
+    // Ordeno las materias dentro del array cuatrimestres, para poder mostrarlas en orden y separarlas por cuatrimestre
+    const aniosTotales = [...new Set(materias.map((m) => Number(m.anio)))].sort((a, b) => a - b)
     const talleres = materias.filter(m => m.taller === true)
+
+    // Logica Título Intermedio
+    let tituloIntermedioText = "";
+    let materiasIntermedio = [];
+
+    if (plan === "Sistemas 17.14" || plan?.includes("17.14")) {
+        tituloIntermedioText = "Título Intermedio (Analista)";
+        materiasIntermedio = materias.filter(m => Number(m.cuatrimestre) <= 6 && !m.tesis && m.codigo !== "N/A");
+    } else if (plan === "Sistemas 17.13" || plan?.includes("17.13")) {
+        tituloIntermedioText = "Título Intermedio (Analista)";
+        materiasIntermedio = materias.filter(m => Number(m.cuatrimestre) <= 7 && !m.tesis && m.codigo !== "N/A");
+    }
+
     // Para poder filtrar las materias
     const tabs = [
         {
             id: "todas",
             label: "Todas",
-            content: anios
+            content: aniosTotales
         },
         ...(talleres.length > 0 ? [{
             id: "talleres",
             label: "Talleres",
             content: ["taller"]
         }] : []),
-        ...anios.map(anio => ({
+        ...aniosTotales.map(anio => ({
             id: anio.toString(),
             label: `${anio}° Año`,
             content: [anio]
@@ -394,18 +397,6 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
         }
     }
 
-    const handleMostrarTodo = () => {
-        // Si ya hay algo abierto, cerramos todo (vaciamos el array)
-        if (isAnioOpen.length > 0) {
-            setIsAnioOpen([]);
-        } else {
-            // IMPORTANTE: Creamos un nuevo array con todos los años de una
-            // Usamos .map() para extraer solo los identificadores o el objeto año
-            const todosLosAnios = anios.map(anio => anio);
-            setIsAnioOpen(todosLosAnios);
-        }
-    };
-
     return (
         <div className='pb-50'>
             {/* Modal para confirmar reset */}
@@ -468,15 +459,15 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                             <ModalHeader className="flex flex-col gap-1 text-success">
                                 <div className="flex items-center gap-2">
                                     <i className="fa-solid fa-check-double"></i>
-                                    Aprobar {anioAAprobar?.valor === "taller" ? "Talleres" : `${anioAAprobar?.valor}° Año`}
+                                    Aprobar {grupoAAprobar?.label || ""}
                                 </div>
                             </ModalHeader>
                             <ModalBody>
                                 <p className="text-default-600">
-                                    ¿Estás seguro de que quieres <b>aprobar todas las materias</b> de {anioAAprobar?.valor === "taller" ? "Talleres" : `este año`}?
+                                    ¿Estás seguro de que quieres <b>aprobar todas las materias</b> de {grupoAAprobar?.label || ""} y sus correlativas anteriores?
                                 </p>
                                 <p className="text-sm text-foreground/80 italic">
-                                    Esta acción actualizará en cadena todas las correlativas dependientes al estado Aprobado. Podrás modificar los detalles (como notas de cursada y final) más adelante.
+                                    Esta acción actualizará en cadena todas las materias y correlativas dependientes al estado Aprobado. Podrás modificar los detalles (como notas de cursada y final) más adelante.
                                 </p>
                             </ModalBody>
                             <ModalFooter>
@@ -487,8 +478,8 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                                     color="success"
                                     className="font-bold"
                                     onPress={() => {
-                                        if (anioAAprobar) {
-                                            const codigos = anioAAprobar.materias.map(m => m.codigo);
+                                        if (grupoAAprobar) {
+                                            const codigos = grupoAAprobar.materias.map(m => m.codigo);
                                             cambioDeEstadoMultiple(codigos, materiasUtils.estadosPosibles[2]);
                                         }
                                         onAprobarAnioClose();
@@ -505,7 +496,67 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             {/* Sección de botones */}
             <div className="sm:flex flex-wrap items-center sm:justify-between gap-3 mb-8">
                 {/* Grupo de Acciones Principales */}
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <Button
+                                size="sm"
+                                variant="flat"
+                                color="primary"
+                                className="font-bold rounded-xl"
+                            >
+                                <span>Aprobar hasta...</span>
+                                <i className="fa-solid fa-chevron-down ml-1"></i>
+                            </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Aprobar hasta">
+                            {tituloIntermedioText !== "" && (
+                                <DropdownItem
+                                    key="titulo_intermedio"
+                                    color="success"
+                                    startContent={<i className="fa-solid fa-graduation-cap"></i>}
+                                    onPress={() => {
+                                        setGrupoAAprobar({
+                                            label: tituloIntermedioText,
+                                            materias: materiasIntermedio
+                                        });
+                                        onAprobarAnioOpen();
+                                    }}
+                                >
+                                    {tituloIntermedioText}
+                                </DropdownItem>
+                            )}
+                            {aniosTotales.map(anio => {
+                                const materiasHastaAnio = materias.filter(m => Number(m.anio) <= anio && !m.tesis && m.codigo !== "N/A");
+                                return (
+                                    <DropdownItem
+                                        key={`anio_${anio}`}
+                                        color="success"
+                                        startContent={<i className="fa-solid fa-check-double" />}
+                                        onPress={() => {
+                                            setGrupoAAprobar({
+                                                label: `el ${anio}° Año`,
+                                                materias: materiasHastaAnio
+                                            });
+                                            onAprobarAnioOpen();
+                                        }}
+                                    >
+                                        {`${anio}° Año`}
+                                    </DropdownItem>
+                                )
+                            })}
+                        </DropdownMenu>
+                    </Dropdown>
+                    <Button
+                        size="sm"
+                        variant="flat"
+                        color="default"
+                        className="font-bold rounded-xl"
+                        startContent={<i className={`fa-solid ${isAnioOpen.length > 0 ? 'fa-eye' : 'fa-eye-slash'}`}></i>}
+                        onPress={handleMostrarTodo}
+                    >
+                        <span className="max-sm:hidden">{isAnioOpen.length > 0 ? "Ocultar" : "Mostrar"}</span>
+                    </Button>
                     <Button
                         size="sm"
                         variant="flat"
@@ -514,32 +565,12 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                         startContent={<i className="fa-solid fa-trash-can"></i>}
                         onPress={() => handleBorrado()}
                     >
-                        Reestablecer
-                    </Button>
-                    <Button
-                        size='sm'
-                        variant="flat"
-                        color="success"
-                        className="font-bold rounded-xl text-success-800"
-                        onPress={() => navigate("/simulador")}
-                    >
-                        Simular Avance
+                        <span>Reestablecer</span>
                     </Button>
                 </div>
 
                 {/* Herramientas de Sincronización y Vista */}
                 <div className="flex items-center gap-3">
-                    <Button
-                        size="sm"
-                        variant="flat"
-                        color="default"
-                        className="font-bold rounded-xl max-sm:hidden"
-                        startContent={<i className={`fa-solid ${isAnioOpen.length > 0 ? 'fa-eye' : 'fa-eye-slash'}`}></i>}
-                        onPress={handleMostrarTodo}
-                    >
-                        {isAnioOpen.length > 0 ? "Mostrar todo" : "Ocultar todo"}
-                    </Button>
-
                     <SyncCloud plan={plan} />
 
                     <div id="wrapper-view-selector" className="max-md:hidden">
@@ -648,11 +679,18 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                                                                     color="success"
                                                                     startContent={<i className="fa-solid fa-check-double" />}
                                                                     onPress={() => {
-                                                                        setAnioAAprobar({ valor, materias: materiasParaMostrar });
+                                                                        const materiasConAnteriores = valor === "taller"
+                                                                            ? materiasParaMostrar
+                                                                            : materias.filter(m => Number(m.anio) <= valor && !m.tesis && m.codigo !== "N/A");
+
+                                                                        setGrupoAAprobar({
+                                                                            label: valor === "taller" ? "Talleres" : `el ${valor}° Año`,
+                                                                            materias: materiasConAnteriores
+                                                                        });
                                                                         onAprobarAnioOpen();
                                                                     }}
                                                                 >
-                                                                    Aprobar materias
+                                                                    Aprobar materias de este año y anteriores
                                                                 </DropdownItem>
                                                             </DropdownMenu>
                                                         </Dropdown>

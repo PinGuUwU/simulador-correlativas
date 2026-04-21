@@ -71,15 +71,17 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                             <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary font-black text-[10px] uppercase tracking-tighter shrink-0">UNLu</span>
                             <span className="text-secondary font-bold text-xs lg:text-sm tracking-wide uppercase">{carrera}</span>
                             <Divider orientation="vertical" className="h-4 bg-default-300 hidden sm:block" />
-                            <Chip
-                                size="sm"
-                                variant="flat"
-                                color="warning"
-                                className="font-bold text-[10px] h-5 border border-warning/20"
-                                startContent={<i className="fa-solid fa-scroll text-[9px] mr-1" />}
-                            >
-                                Plan {plan || '---'}
-                            </Chip>
+                            <Link to="/config" className="hover:opacity-80 transition-opacity" title="Cambiar Plan de Estudios">
+                                <Chip
+                                    size="sm"
+                                    variant="flat"
+                                    color="warning"
+                                    className="font-bold text-[10px] h-5 border border-warning/20 cursor-pointer"
+                                    startContent={<i className="fa-solid fa-scroll text-[9px] mr-1" />}
+                                >
+                                    Plan {plan || '---'}
+                                </Chip>
+                            </Link>
                         </div>
 
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-none mb-3">
@@ -87,7 +89,7 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                         </h1>
 
                         <p className="text-foreground/70 font-medium text-sm sm:text-base lg:text-lg max-w-3xl leading-relaxed mb-6">
-                            Gestioná tu avance <strong>real y oficial</strong> en la <span className="text-foreground font-bold">Licenciatura en Sistemas de Información</span>.<br/>
+                            Gestioná tu avance <strong>real y oficial</strong> en la <span className="text-foreground font-bold">Licenciatura en Sistemas de Información</span>.<br />
                             Los cambios aquí realizados representan tu avance definitivo. <span className="text-sm border border-primary/30 bg-primary/10 px-2 py-1 ml-1 rounded-md mb-1 inline-block">Si solo querés planificar cómo sería tu cursada, usá el <Link to="/simulador" className="font-bold underline text-primary hover:text-primary-600">Simulador</Link>.</span>
                         </p>
 
@@ -152,8 +154,15 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
 
                 {/* Materias Progreso (Cards) */}
                 <div className="pt-4">
-                    <div className="flex items-center justify-between mb-1">
-                        <p className="text-default-500 text-xs uppercase tracking-widest font-black">Progresos generales</p>
+                    <div className="flex items-start sm:items-center justify-between mb-1 gap-2">
+                        <div className="flex flex-col">
+                            <p className="text-default-500 text-xs sm:text-sm uppercase tracking-widest font-black">Progresos generales</p>
+                            <p className="text-[10px] sm:text-xs text-primary-500/80 font-medium italic mt-0.5 flex items-center gap-1">
+                                <i className="fa-regular fa-hand-pointer text-[9px] sm:hidden" /> 
+                                <i className="fa-solid fa-mouse-pointer text-[9px] hidden sm:block" /> 
+                                Tocá una tarjeta para ver más info
+                            </p>
+                        </div>
                         {/* Toggle exclusivo para celular */}
                         <Button
                             size="sm"

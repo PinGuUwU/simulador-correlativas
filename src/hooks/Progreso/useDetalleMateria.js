@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import regularidadUtils from '../../utils/Progreso/regularidadUtils';
+import reglas from '../../utils/Progreso/reglas_universidad.json';
 import { useAuth } from '../../context/AuthContext';
 
 /**
@@ -76,7 +77,7 @@ export default function useDetalleMateria(infoMateria, progresoDetalles, setProg
         const currentData = progresoDetalles[infoMateria?.codigo] || { intentosFinal: [] };
         const intentosActuales = currentData.intentosFinal || [];
 
-        if (intentosActuales.length >= 5) return;
+        if (intentosActuales.length >= reglas.limites.intentos_final) return;
 
         const newIntentos = [...intentosActuales, {
             nota: notaParsed,

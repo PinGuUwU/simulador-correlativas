@@ -21,15 +21,34 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
-    chunkSizeWarningLimit: 1500,
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // Firebase es enorme y aislado, puede vivir en su propio chunk
+            // Firebase es enorme
             if (id.includes('firebase')) return 'vendor-firebase';
-            // Consolidamos todo lo demás en vendor-app para evitar desincronización de hooks
-            return 'vendor-app';
+            
+            // UI Frameworks y Animaciones
+            if (id.includes('@heroui') || id.includes('framer-motion') || id.includes('@react-aria')) {
+              return 'vendor-ui';
+            }
+            
+            // Librerías de gráficos/flujo
+            if (id.includes('@xyflow')) return 'vendor-flow';
+            
+            // Utilidades pesadas (PDF, imágenes)
+            if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('html-to-image')) {
+              return 'vendor-utils';
+            }
+            
+            // Iconos
+            if (id.includes('lucide') || id.includes('fontawesome')) {
+              return 'vendor-icons';
+            }
+
+            // El resto de dependencias pequeñas
+            return 'vendor-base';
           }
         }
       }

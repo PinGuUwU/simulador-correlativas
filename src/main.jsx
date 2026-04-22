@@ -17,7 +17,7 @@ if (import.meta.env.PROD) {
 createRoot(document.getElementById('root')).render(
   <HeroUIProvider>
     <ToastProvider placement="bottom-right" maxVisibleToasts={1} />
-    <NextThemesProvider attribute="class" defaultTheme='light' themes={['light', 'dark', 'girlie', 'pastel']} enableSystem={false}>
+    <NextThemesProvider attribute="class" defaultTheme='light' themes={['light', 'dark', 'girlie', 'boyie']} enableSystem={false}>
       {/* Esta etiqueta main es la clave para que pinte todo el fondo y cambie el color del texto base */}
       <main className="text-foreground bg-background min-h-screen">
         <App />

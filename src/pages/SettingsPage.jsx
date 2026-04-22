@@ -260,8 +260,8 @@ export default function SettingsPage({ plan, setPlan }) {
                                 {[
                                     { id: 'light', label: 'Claro', icon: 'fa-sun', color: 'bg-white' },
                                     { id: 'dark', label: 'Oscuro', icon: 'fa-moon', color: 'bg-slate-900' },
-                                    { id: 'girlie', label: 'Girlie', icon: 'fa-heart', color: 'bg-pink-100' },
-                                    { id: 'pastel', label: 'Pastel', icon: 'fa-palette', color: 'bg-blue-50' }
+                                    { id: 'girlie', label: 'Girlie', icon: 'fa-wand-magic-sparkles', color: 'bg-pink-100' },
+                                    { id: 'boyie', label: 'Boyie', icon: 'fa-snowflake', color: 'bg-blue-200' }
                                 ].map((t) => (
                                     <button
                                         key={t.id}

@@ -2,11 +2,10 @@ import React, { Suspense, lazy } from 'react'
 import { useRoutes } from 'react-router-dom'
 import { Spinner } from '@heroui/react'
 
-import Progreso from '../pages/Progreso'
-import Inicio from '../pages/Inicio'
-import Simulador from '../pages/Simulador'
-import RedDeMaterias from '../pages/RedDeMaterias'
-
+const Inicio = lazy(() => import('../pages/Inicio'))
+const Progreso = lazy(() => import('../pages/Progreso'))
+const Simulador = lazy(() => import('../pages/Simulador'))
+const RedDeMaterias = lazy(() => import('../pages/RedDeMaterias'))
 const Equivalencias = lazy(() => import('../pages/Equivalencias'))
 const ChatBot = lazy(() => import('../pages/ChatBot'))
 const ComoUsar = lazy(() => import('../pages/ComoUsar'))

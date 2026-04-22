@@ -171,71 +171,70 @@ export default heroui({
             }
         },
 
-        /* --- 4. MODO PASTEL 🎨 --- */
-        /* Todos los colores en tonalidades suaves y desaturadas */
-        pastel: {
+        /* --- 4. MODO BOYIE 🌊 --- */
+        /* Paleta 100% azul: desde el blanco glaciar hasta el azul profundo */
+        boyie: {
             extend: "light",
             colors: {
-                background: "#fdfbf7",   // Fondo crema muy suave
-                foreground: "#2d2d2d",   // Texto oscuro — alto contraste sobre crema
-                focus: "#c4b5fd",
-                overlay: "#fdfbf7",
+                background: "#f0f9ff",   // Fondo azul glaciar muy pálido
+                foreground: "#0c4a6e",   // Texto principal: azul oscuro (sky-900)
+                focus: "#0ea5e9",
+                overlay: "#f0f9ff",
 
-                /* Grises → Grises lavanda cálidos */
+                /* Grises → grises azulados */
                 default: {
-                    /* Lavanda-gris: 400+ oscuros para legibilidad en texto */
-                    50: "#f9f8fb",   100: "#f2f0f8",   200: "#e8e4f3",   300: "#dad4ec",
-                    400: "#9e97c9",  500: "#7a73a8",   600: "#5c5687",   700: "#45406a",
-                    800: "#30294d",  900: "#1c1733",
-                    foreground: "#2d2d2d", DEFAULT: "#9e97c9"
+                    50: "#f8fafc",   100: "#f1f5f9",   200: "#e2e8f0",   300: "#cbd5e1",
+                    400: "#64748b",  500: "#475569",   600: "#334155",   700: "#1e293b",
+                    800: "#0f172a",  900: "#020617",
+                    foreground: "#0c4a6e", DEFAULT: "#64748b"
                 },
 
-                /* Azules → Lavanda / Lila pastel */
+                /* Primario → Azul vibrante / Royal Blue */
                 primary: {
-                    50: "#f5f3ff",   100: "#ede9fe",   200: "#ddd6fe",   300: "#c4b5fd",
-                    400: "#a78bfa",  500: "#8b5cf6",   600: "#7c3aed",   700: "#6d28d9",
-                    800: "#5b21b6",  900: "#4c1d95",
-                    foreground: "#ffffff", DEFAULT: "#c4b5fd"
-                },
-
-                /* Secundario → Azul cielo pastel / Periwinkle */
-                secondary: {
                     50: "#eff6ff",   100: "#dbeafe",   200: "#bfdbfe",   300: "#93c5fd",
                     400: "#60a5fa",  500: "#3b82f6",   600: "#2563eb",   700: "#1d4ed8",
                     800: "#1e40af",  900: "#1e3a8a",
-                    foreground: "#ffffff", DEFAULT: "#93c5fd"
+                    foreground: "#ffffff", DEFAULT: "#3b82f6"
                 },
 
-                /* Verde → Menta pastel */
+                /* Secundario → Cyan / Sky vibrante */
+                secondary: {
+                    50: "#f0f9ff",   100: "#e0f2fe",   200: "#bae6fd",   300: "#7dd3fc",
+                    400: "#38bdf8",  500: "#0ea5e9",   600: "#0284c7",   700: "#0369a1",
+                    800: "#075985",  900: "#0c4a6e",
+                    foreground: "#ffffff", DEFAULT: "#0ea5e9"
+                },
+
+                /* Verde → Esmeralda */
                 success: {
-                    50: "#f0fdf4",   100: "#dcfce7",   200: "#bbf7d0",   300: "#86efac",
-                    400: "#4ade80",  500: "#22c55e",   600: "#16a34a",   700: "#15803d",
-                    800: "#166534",  900: "#14532d",
-                    foreground: "#064e3b", DEFAULT: "#86efac"
+                    50: "#ecfdf5",   100: "#d1fae5",   200: "#a7f3d0",   300: "#6ee7b7",
+                    400: "#34d399",  500: "#10b981",   600: "#059669",   700: "#047857",
+                    800: "#065f46",  900: "#064e3b",
+                    foreground: "#fff", DEFAULT: "#10b981"
                 },
 
-                /* Amarillo → Amarillo patito pastel */
+                /* Amarillo → Ámbar */
                 warning: {
                     50: "#fffbeb",   100: "#fef3c7",   200: "#fde68a",   300: "#fcd34d",
                     400: "#fbbf24",  500: "#f59e0b",   600: "#d97706",   700: "#b45309",
                     800: "#92400e",  900: "#78350f",
-                    foreground: "#713f12", DEFAULT: "#fde68a"
+                    foreground: "#fff", DEFAULT: "#f59e0b"
                 },
 
-                /* Rojo → Coral / Durazno pastel */
+                /* Rojo → Rose / Crimson */
                 danger: {
-                    50: "#fff1f2",   100: "#ffe4e6",   200: "#fecdd3",   300: "#fca5a5",
-                    400: "#f87171",  500: "#ef4444",   600: "#dc2626",   700: "#b91c1c",
-                    800: "#991b1b",  900: "#7f1d1d",
-                    foreground: "#7f1d1d", DEFAULT: "#fca5a5"
+                    50: "#fff1f2",   100: "#ffe4e6",   200: "#fecdd3",   300: "#fda4af",
+                    400: "#fb7185",  500: "#f43f5e",   600: "#e11d48",   700: "#be123c",
+                    800: "#9f1239",  900: "#881337",
+                    foreground: "#fff", DEFAULT: "#f43f5e"
                 },
 
-                /* Tarjetas y superficies con toque lavanda */
-                content1: { DEFAULT: "#ffffff",  foreground: "#2d2d2d" },
-                content2: { DEFAULT: "#f5f3ff",  foreground: "#2d2d2d" },
-                content3: { DEFAULT: "#ede9fe",  foreground: "#2d2d2d" },
-                content4: { DEFAULT: "#ddd6fe",  foreground: "#2d2d2d" },
-                divider: "#e5e7eb",
+                /* Tarjetas y superficies en la gamma azul */
+                content1: { DEFAULT: "#e0f2fe", foreground: "#0c4a6e" },
+                content2: { DEFAULT: "#bae6fd", foreground: "#0c4a6e" },
+                content3: { DEFAULT: "#7dd3fc", foreground: "#0c4a6e" },
+                content4: { DEFAULT: "#38bdf8", foreground: "#ffffff" },
+                divider: "#bae6fd",
             }
         }
     }

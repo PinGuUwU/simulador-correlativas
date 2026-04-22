@@ -14,8 +14,8 @@ const ThemeSwitcher = ({ isCollapsed }) => {
     const themes = [
         { key: 'light', label: 'Claro', icon: 'fa-sun' },
         { key: 'dark', label: 'Oscuro', icon: 'fa-moon' },
-        { key: 'girlie', label: 'Girlie', icon: 'fa-heart' },
-        { key: 'pastel', label: 'Pastel', icon: 'fa-palette' },
+        { key: 'girlie', label: 'Girlie', icon: 'fa-wand-magic-sparkles' },
+        { key: 'boyie', label: 'Boyie', icon: 'fa-snowflake' },
     ];
 
     if (isCollapsed) {

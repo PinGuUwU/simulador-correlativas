@@ -150,7 +150,7 @@ export default function SettingsPage({ plan, setPlan }) {
                                     imgProps={{ referrerPolicy: "no-referrer" }}
                                 />
                                 <div className="flex flex-col overflow-hidden">
-                                    <p className="text-sm font-bold truncate">{user.displayName}</p>
+                                    <p className="text-md font-bold truncate">{user.displayName}</p>
                                     <p className="text-xs text-default-500 truncate">{user.email}</p>
                                 </div>
                             </div>
@@ -165,11 +165,11 @@ export default function SettingsPage({ plan, setPlan }) {
                             onValueChange={setAlias}
                             variant="flat"
                             isDisabled={!user}
-                            startContent={<i className="fa-solid fa-user text-default-400 text-sm mr-2" />}
+                            startContent={<i className="fa-solid fa-user text-default-400 text-md mr-2" />}
                             endContent={
                                 user && (
                                     <Button
-                                        size="sm"
+                                        size="md"
                                         color={alias !== (userData?.config?.alias || user.displayName?.split(' ')[0]) ? "primary" : "default"}
                                         variant={alias !== (userData?.config?.alias || user.displayName?.split(' ')[0]) ? "shadow" : "flat"}
                                         className="h-8 font-bold px-4"
@@ -189,7 +189,7 @@ export default function SettingsPage({ plan, setPlan }) {
                             variant="bordered"
                             isReadOnly
                             isDisabled={!user}
-                            startContent={<i className="fa-solid fa-envelope text-default-400 text-sm mr-2" />}
+                            startContent={<i className="fa-solid fa-envelope text-default-400 text-md mr-2" />}
                         />
                     </CardBody>
                 </Card>
@@ -275,7 +275,7 @@ export default function SettingsPage({ plan, setPlan }) {
                                         <span className={`text-xs font-bold ${theme === t.id ? 'text-primary' : 'text-foreground/70'}`}>
                                             {t.label}
                                         </span>
-                                        {theme === t.id && <i className="fa-solid fa-check ml-auto text-[10px] text-primary" />}
+                                        {theme === t.id && <i className="fa-solid fa-check ml-auto text-primary" />}
                                     </button>
                                 ))}
                             </div>

@@ -25,10 +25,10 @@ export default function ComoUsar() {
                 </div>
 
                 {/* Tabs de Navegación */}
-                <Tabs 
+                <Tabs
                     fullWidth
-                    aria-label="Opciones de ayuda" 
-                    color="primary" 
+                    aria-label="Opciones de ayuda"
+                    color="primary"
                     variant="underlined"
                     classNames={{
                         tabList: "w-full relative rounded-none border-b border-divider p-0 gap-0",

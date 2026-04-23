@@ -30,11 +30,11 @@ function ListaMaterias({ materiasFiltradas, progresoSimulado, onToggleEstado }) 
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Encabezados Desktop */}
       <div className="hidden sm:grid sm:grid-cols-11 gap-4 px-6 py-2 items-center">
-        <div className="col-span-5 text-[10px] font-black uppercase text-default-600 dark:text-default-400 text-center tracking-[0.2em] flex items-center justify-center gap-2">
+        <div className="col-span-5 text-xs font-black uppercase text-default-700 dark:text-default-500 text-center tracking-[0.2em] flex items-center justify-center gap-2">
           <Repeat size={12} /> Plan 17.13 (Origen)
         </div>
         <div className="col-span-1"></div>
-        <div className="col-span-5 text-[10px] font-black uppercase text-primary text-center tracking-[0.2em] flex items-center justify-center gap-2">
+        <div className="col-span-5 text-xs font-black uppercase text-primary-700 dark:text-primary-500 girlie:text-primary-800 boyie:text-primary-800 text-center tracking-[0.2em] flex items-center justify-center gap-2">
           <ArrowRight size={12} /> Plan 17.14 (Destino)
         </div>
       </div>
@@ -65,7 +65,7 @@ function ListaMaterias({ materiasFiltradas, progresoSimulado, onToggleEstado }) 
             title={`${anio}º Año`}
             subtitle={
               <div className="flex gap-2 mt-0.5">
-                <span className="text-[10px] text-default-600 dark:text-default-400 font-black uppercase">
+                <span className="text-xs text-default-700 dark:text-default-500 font-black uppercase">
                   {materias.length} equivalencias
                 </span>
               </div>
@@ -86,14 +86,14 @@ function ListaMaterias({ materiasFiltradas, progresoSimulado, onToggleEstado }) 
                     <div className="flex items-center justify-between bg-default-100/30 border border-default-200/50 rounded-2xl px-5 py-3 shadow-sm">
                       <div className="flex items-center gap-3">
                         <div className="w-1.5 h-6 bg-primary/40 rounded-full"></div>
-                        <h3 className="text-[13px] font-black text-default-800 dark:text-default-400 uppercase tracking-widest">
+                        <h3 className="text-[13px] font-black text-foreground uppercase tracking-widest">
                           {cuatri}° Cuatrimestre
                         </h3>
                       </div>
                       <Chip
                         size="sm"
                         variant="flat"
-                        className="bg-background/80 border border-default-300 text-default-700 dark:text-foreground font-black text-[10px] uppercase px-3"
+                        className="bg-background/80 border border-default-300 text-default-700 dark:text-foreground font-black text-xs uppercase px-3"
                       >
                         {gruposCuatri.length} {gruposCuatri.length === 1 ? 'grupo' : 'grupos'}
                       </Chip>

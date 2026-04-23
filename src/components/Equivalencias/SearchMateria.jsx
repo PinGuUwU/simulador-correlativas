@@ -10,13 +10,13 @@ function SearchMateria({ busqueda, setBusqueda }) {
                 radius="xl"
                 placeholder="Buscar materia por nombre o código..."
                 startContent={
-                    <Search size={18} className="text-default-400 pointer-events-none flex-shrink-0" />
+                    <Search size={18} className="text-default-400 pointer-events-none flex-shrink-0 text-md" />
                 }
                 value={busqueda}
                 onValueChange={setBusqueda}
                 onClear={() => setBusqueda("")}
                 classNames={{
-                    input: "text-small",
+                    input: "text-base",
                     inputWrapper: "h-11 bg-default-100 border-none shadow-none focus-within:ring-2 ring-primary/20",
                 }}
             />

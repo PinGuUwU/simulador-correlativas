@@ -364,7 +364,7 @@ export default function NavBar({ setPlan, plan, isCollapsed, setIsCollapsed }) {
                     {!isCollapsed && (
                         <div className="flex flex-col transition-opacity duration-300">
                             <span className="font-black text-foreground text-xl tracking-tight leading-none">UNLu</span>
-                            <span className="text-primary font-bold text-[10px] tracking-widest uppercase">Simulador</span>
+                            <span className="text-primary font-bold text-sm tracking-widest uppercase">Simulador</span>
                         </div>
                     )}
                 </div>
@@ -386,7 +386,7 @@ export default function NavBar({ setPlan, plan, isCollapsed, setIsCollapsed }) {
                 onOpenChange={onDrawerOpenChange}
                 placement="left"
                 backdrop="opaque"
-                classNames={{ 
+                classNames={{
                     base: 'bg-background shadow-none border-r border-default-200',
                     backdrop: 'bg-black/30'
                 }}

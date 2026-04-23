@@ -19,12 +19,12 @@ export default function EquivalenciasHelp() {
                         <div className="absolute top-0 right-0 p-4 opacity-10">
                             <i className="fa-solid fa-triangle-exclamation text-8xl text-warning"></i>
                         </div>
-                        
-                        <h4 className="text-xl font-black text-warning-700 mb-4 flex items-center gap-2">
+
+                        <h4 className="text-xl font-black text-warning-800 mb-4 flex items-center gap-2">
                             <i className="fa-solid fa-circle-exclamation"></i>
                             ¿Qué pasa con mis Regularidades?
                         </h4>
-                        
+
                         <div className="space-y-4 text-warning-900/80 relative z-10">
                             <p className="font-medium">
                                 Es muy importante entender este punto para no entrar en pánico:
@@ -76,7 +76,7 @@ export default function EquivalenciasHelp() {
                 <div className="space-y-6">
                     <div className="p-6 bg-primary text-white rounded-3xl shadow-xl shadow-primary/20">
                         <h4 className="font-bold text-lg mb-4">¿Cómo simular?</h4>
-                        <ol className="space-y-4 text-sm opacity-90 list-decimal list-inside">
+                        <ol className="space-y-4 text-sm list-decimal list-inside">
                             <li>Seleccioná tu estado actual en el <b>Plan 17.13</b>.</li>
                             <li>Observá la columna del <b>Plan 17.14</b> a la derecha.</li>
                             <li>Revisá los indicadores de "Horas a favor" o "Materias ganadas".</li>

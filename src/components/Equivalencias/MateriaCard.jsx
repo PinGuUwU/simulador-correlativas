@@ -76,11 +76,11 @@ const MateriaCard = ({ materia, estado, isNewPlan = false, onClick }) => {
                         </h4>
 
                         <div className="flex items-center gap-2 mt-1.5">
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${config.accent}`}>
+                            <span className={`text-xs font-black uppercase tracking-widest ${config.accent}`}>
                                 {materia.mostrarCodigo === false ? '---' : materia.codigo}
                             </span>
                             <div className="w-1 h-1 rounded-full bg-default-200" />
-                            <span className="text-[9px] font-black text-default-600 dark:text-default-400 uppercase tracking-wider">
+                            <span className="text-xs font-black text-default-700 dark:text-default-500 uppercase tracking-wider">
                                 {isNewPlan ? "Plan Nuevo" : "Plan Viejo"}
                             </span>
                         </div>
@@ -91,18 +91,18 @@ const MateriaCard = ({ materia, estado, isNewPlan = false, onClick }) => {
                         variant="flat"
                         color={config.chip}
                         startContent={config.icon}
-                        className="h-6 text-[9px] font-black uppercase pl-1 shadow-sm border border-white/20 shrink-0"
+                        className="h-6 text-xs font-black uppercase pl-1 shadow-sm border border-white/20 shrink-0"
                     >
                         {config.label}
                     </Chip>
                 </div>
 
                 <div className="flex items-center gap-4 mt-auto">
-                    <div className="flex items-center gap-1.5 text-[10px] text-default-800 dark:text-default-200 font-black bg-default-100 dark:bg-default-200 px-2 py-1 rounded-lg">
+                    <div className="flex items-center gap-1.5 text-xs text-foreground font-black bg-default-100 dark:bg-default-200 px-2 py-1 rounded-lg">
                         <Clock size={12} className="text-default-500 dark:text-default-400" />
                         <span>{materia.horas_totales}h</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-default-800 dark:text-default-200 font-black bg-default-100 dark:bg-default-200 px-2 py-1 rounded-lg">
+                    <div className="flex items-center gap-1.5 text-xs text-foreground font-black bg-default-100 dark:bg-default-200 px-2 py-1 rounded-lg">
                         <Calendar size={12} className="text-default-500 dark:text-default-400" />
                         <span>{materia.horas_semanales}h/s</span>
                     </div>

@@ -24,10 +24,10 @@ export default function TutorialTour({ onComplete, onCancel }) {
     // Trackear vista de cada paso
     useEffect(() => {
         if (step) {
-            trackTutorial({ 
-                action: 'step_view', 
-                stepIndex: currentStepIndex + 1, 
-                stepTitle: step.title 
+            trackTutorial({
+                action: 'step_view',
+                stepIndex: currentStepIndex + 1,
+                stepTitle: step.title
             });
         }
     }, [currentStepIndex, step]);
@@ -125,10 +125,10 @@ export default function TutorialTour({ onComplete, onCancel }) {
     const offsetX = step.targetOffset?.x ?? 0;
     const offsetY = step.targetOffset?.y ?? 0;
 
-    const fixedTop    = hasTarget ? targetRect.top  + offsetY : window.innerHeight / 2 - 20;
-    const fixedLeft   = hasTarget ? targetRect.left + offsetX : window.innerWidth  / 2 - 20;
+    const fixedTop = hasTarget ? targetRect.top + offsetY : window.innerHeight / 2 - 20;
+    const fixedLeft = hasTarget ? targetRect.left + offsetX : window.innerWidth / 2 - 20;
     // Podés agrandar el anillo sumando px: targetRect.width + 8 y fixedLeft - 4
-    const fixedWidth  = hasTarget ? targetRect.width  : 40;
+    const fixedWidth = hasTarget ? targetRect.width : 40;
     const fixedHeight = hasTarget ? targetRect.height : 40;
 
     return (

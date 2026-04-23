@@ -6,12 +6,12 @@ import { Network, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const RedDeMaterias = ({ plan }) => {
-    const { 
-        materias, 
-        progreso, 
-        cargandoPlan: loadingPlan 
+    const {
+        materias,
+        progreso,
+        cargandoPlan: loadingPlan
     } = usePlanData(plan);
-    
+
     const navigate = useNavigate();
 
     if (loadingPlan) {
@@ -37,30 +37,30 @@ const RedDeMaterias = ({ plan }) => {
                             </h1>
                         </div>
                         <p className="text-foreground/60 text-lg font-medium max-w-2xl leading-relaxed">
-                            Visualizá tu carrera como un mapa. Explorá las correlatividades 
+                            Visualizá tu carrera como un mapa. Explorá las correlatividades
                             y descubrí cómo se conectan las materias de tu plan de estudios.
                         </p>
                         <div className="pt-2 flex items-center">
-                            Si querés actualizar el estado de tus materias: 
-                            <Button 
-                                size="sm" 
-                                color="primary" 
-                                variant="flat" 
-                                className="font-bold"
+                            Si querés actualizar el estado de tus materias:
+                            <Button
+                                size="sm"
+                                color="primary"
+                                variant="flat"
+                                className="font-bold w-full"
                                 startContent={<i className="fa-solid fa-graduation-cap" />}
                                 onPress={() => navigate('/progreso')}
                             >
-                                 ir a mi progreso
+                                ir a mi progreso
                             </Button>
                         </div>
                     </div>
-                    
+
                     <Card className="bg-default-100/50 border-none shadow-none backdrop-blur-md max-w-xs">
                         <CardBody className="flex flex-row gap-3 p-4">
                             <div className="mt-1 text-primary">
                                 <Info size={18} />
                             </div>
-                            <p className="text-[11px] leading-snug text-foreground/70">
+                            <p className="text-md leading-snug text-foreground/70">
                                 <span className="font-bold text-foreground">Tip:</span> Mantené el mouse sobre una materia para resaltar sus conexiones de entrada y salida.
                             </p>
                         </CardBody>
@@ -68,10 +68,10 @@ const RedDeMaterias = ({ plan }) => {
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-6">
-                    <Chip variant="flat" color="primary" size="sm" className="font-bold uppercase tracking-wider text-[10px]">
+                    <Chip variant="flat" color="primary" size="sm" className="font-bold uppercase tracking-wider text-sm">
                         Visualización
                     </Chip>
-                    <Chip variant="flat" color="secondary" size="sm" className="font-bold uppercase tracking-wider text-[10px]">
+                    <Chip variant="flat" color="secondary" size="sm" className="font-bold uppercase tracking-wider text-sm">
                         Correlatividades
                     </Chip>
                 </div>
@@ -80,7 +80,7 @@ const RedDeMaterias = ({ plan }) => {
             {/* Grafo */}
             <div className="max-w-300 mx-auto px-4">
                 <div className="bg-background/50 backdrop-blur-sm rounded-[2.5rem] border border-default-200/60 p-2 shadow-2xl">
-                    <MateriasGrafo 
+                    <MateriasGrafo
                         materias={materias}
                         progreso={progreso}
                     />

@@ -20,7 +20,7 @@ export default heroui({
                     50: "#dfedfd", 100: "#b3d4fa", 200: "#86bbf7", 300: "#59a1f4",
                     400: "#2d88f1", 500: "#006fee", 600: "#005cc4", 700: "#00489b",
                     800: "#003571", 900: "#002147",
-                    foreground: "#fff", DEFAULT: "#006fee"
+                    foreground: "#fff", DEFAULT: "#006eec"
                 },
                 secondary: {
                     50: "#eee4f8", 100: "#d7bfef", 200: "#bf99e5", 300: "#a773db",
@@ -116,50 +116,50 @@ export default heroui({
                 /* Grises → grises rosados */
                 default: {
                     /* Rosa-gris: 400+ oscuros para legibilidad en texto */
-                    50: "#fdf5f9",   100: "#faeaf4",   200: "#f5d5ea",   300: "#efbfdf",
-                    400: "#a05e86",  500: "#7e4068",   600: "#5d264c",   700: "#3e1332",
-                    800: "#2d0d24",  900: "#1a0615",
+                    50: "#fdf5f9", 100: "#faeaf4", 200: "#f5d5ea", 300: "#efbfdf",
+                    400: "#a05e86", 500: "#7e4068", 600: "#5d264c", 700: "#3e1332",
+                    800: "#2d0d24", 900: "#1a0615",
                     foreground: "#4a0028", DEFAULT: "#a05e86"
                 },
 
                 /* Azules → Rosa fuerte / Hot pink (color de marca) */
                 primary: {
-                    50: "#fff0f6",   100: "#ffd6e8",   200: "#ffadd1",   300: "#ff85ba",
-                    400: "#f85ca1",  500: "#ec4899",   600: "#d63384",   700: "#b91c6e",
-                    800: "#831843",  900: "#4a0028",
+                    50: "#fff0f6", 100: "#ffd6e8", 200: "#ffadd1", 300: "#ff85ba",
+                    400: "#f85ca1", 500: "#ec4899", 600: "#d63384", 700: "#b91c6e",
+                    800: "#831843", 900: "#4a0028",
                     foreground: "#4a0028", DEFAULT: "#ec4899"
                 },
 
                 /* Secundario → Fucsia / Magenta vibrante */
                 secondary: {
-                    50: "#fdf4ff",   100: "#fae8ff",   200: "#f3d0fe",   300: "#e9a8fd",
-                    400: "#d973f8",  500: "#c026d3",   600: "#a21caf",   700: "#86198f",
-                    800: "#701a75",  900: "#581c6d",
+                    50: "#fdf4ff", 100: "#fae8ff", 200: "#f3d0fe", 300: "#e9a8fd",
+                    400: "#d973f8", 500: "#c026d3", 600: "#a21caf", 700: "#86198f",
+                    800: "#701a75", 900: "#581c6d",
                     foreground: "#ffffff", DEFAULT: "#d946ef"
                 },
 
                 /* Verde → Verde menta femenino */
                 success: {
-                    50: "#f0fdf4",   100: "#dcfce7",   200: "#bbf7d0",   300: "#86efac",
-                    400: "#4ade80",  500: "#22c55e",   600: "#16a34a",   700: "#15803d",
-                    800: "#166534",  900: "#14532d",
+                    50: "#f0fdf4", 100: "#dcfce7", 200: "#bbf7d0", 300: "#86efac",
+                    400: "#4ade80", 500: "#22c55e", 600: "#16a34a", 700: "#15803d",
+                    800: "#166534", 900: "#14532d",
                     foreground: "#fff", DEFAULT: "#22c55e"
                 },
 
                 /* Amarillo → Naranja melocotón cálido */
                 warning: {
-                    50: "#fff7ed",   100: "#ffedd5",   200: "#fed7aa",   300: "#fdba74",
-                    400: "#fb923c",  500: "#f97316",   600: "#ea580c",   700: "#c2410c",
-                    800: "#9a3412",  900: "#7c2d12",
+                    50: "#fff7ed", 100: "#ffedd5", 200: "#fed7aa", 300: "#fdba74",
+                    400: "#fb923c", 500: "#f97316", 600: "#ea580c", 700: "#c2410c",
+                    800: "#9a3412", 900: "#7c2d12",
                     foreground: "#fff", DEFAULT: "#fb923c"
                 },
 
                 /* Rojo → Rojo cereza / Carmine */
                 danger: {
-                    50: "#fff1f2",   100: "#ffe4e8",   200: "#fecdd3",   300: "#fda4af",
-                    400: "#fb7185",  500: "#f43f5e",   600: "#e11d48",   700: "#be123c",
-                    800: "#9f1239",  900: "#881337",
-                    foreground: "#fff", DEFAULT: "#f43f5e"
+                    50: "#fff1f2", 100: "#ffe4e8", 200: "#fecdd3", 300: "#fda4af",
+                    400: "#fb7185", 500: "#f43f5e", 600: "#e11d48", 700: "#be123c",
+                    800: "#9f1239", 900: "#881337",
+                    foreground: "#fff", DEFAULT: "#c53976"
                 },
 
                 /* Tarjetas y superficies en la gamma rosa */
@@ -183,49 +183,49 @@ export default heroui({
 
                 /* Grises → grises azulados */
                 default: {
-                    50: "#f8fafc",   100: "#f1f5f9",   200: "#e2e8f0",   300: "#cbd5e1",
-                    400: "#64748b",  500: "#475569",   600: "#334155",   700: "#1e293b",
-                    800: "#0f172a",  900: "#020617",
+                    50: "#f8fafc", 100: "#f1f5f9", 200: "#e2e8f0", 300: "#cbd5e1",
+                    400: "#64748b", 500: "#475569", 600: "#334155", 700: "#1e293b",
+                    800: "#0f172a", 900: "#020617",
                     foreground: "#0c4a6e", DEFAULT: "#64748b"
                 },
 
                 /* Primario → Azul vibrante / Royal Blue */
                 primary: {
-                    50: "#eff6ff",   100: "#dbeafe",   200: "#bfdbfe",   300: "#93c5fd",
-                    400: "#60a5fa",  500: "#3b82f6",   600: "#2563eb",   700: "#1d4ed8",
-                    800: "#1e40af",  900: "#1e3a8a",
+                    50: "#eff6ff", 100: "#dbeafe", 200: "#bfdbfe", 300: "#93c5fd",
+                    400: "#60a5fa", 500: "#3b82f6", 600: "#2563eb", 700: "#1d4ed8",
+                    800: "#1e40af", 900: "#1e3a8a",
                     foreground: "#ffffff", DEFAULT: "#3b82f6"
                 },
 
                 /* Secundario → Cyan / Sky vibrante */
                 secondary: {
-                    50: "#f0f9ff",   100: "#e0f2fe",   200: "#bae6fd",   300: "#7dd3fc",
-                    400: "#38bdf8",  500: "#0ea5e9",   600: "#0284c7",   700: "#0369a1",
-                    800: "#075985",  900: "#0c4a6e",
+                    50: "#f0f9ff", 100: "#e0f2fe", 200: "#bae6fd", 300: "#7dd3fc",
+                    400: "#38bdf8", 500: "#0ea5e9", 600: "#0284c7", 700: "#0369a1",
+                    800: "#075985", 900: "#0c4a6e",
                     foreground: "#ffffff", DEFAULT: "#0ea5e9"
                 },
 
                 /* Verde → Esmeralda */
                 success: {
-                    50: "#ecfdf5",   100: "#d1fae5",   200: "#a7f3d0",   300: "#6ee7b7",
-                    400: "#34d399",  500: "#10b981",   600: "#059669",   700: "#047857",
-                    800: "#065f46",  900: "#064e3b",
+                    50: "#ecfdf5", 100: "#d1fae5", 200: "#a7f3d0", 300: "#6ee7b7",
+                    400: "#34d399", 500: "#10b981", 600: "#059669", 700: "#047857",
+                    800: "#065f46", 900: "#064e3b",
                     foreground: "#fff", DEFAULT: "#10b981"
                 },
 
                 /* Amarillo → Ámbar */
                 warning: {
-                    50: "#fffbeb",   100: "#fef3c7",   200: "#fde68a",   300: "#fcd34d",
-                    400: "#fbbf24",  500: "#f59e0b",   600: "#d97706",   700: "#b45309",
-                    800: "#92400e",  900: "#78350f",
+                    50: "#fffbeb", 100: "#fef3c7", 200: "#fde68a", 300: "#fcd34d",
+                    400: "#fbbf24", 500: "#f59e0b", 600: "#d97706", 700: "#b45309",
+                    800: "#92400e", 900: "#78350f",
                     foreground: "#fff", DEFAULT: "#f59e0b"
                 },
 
                 /* Rojo → Rose / Crimson */
                 danger: {
-                    50: "#fff1f2",   100: "#ffe4e6",   200: "#fecdd3",   300: "#fda4af",
-                    400: "#fb7185",  500: "#f43f5e",   600: "#e11d48",   700: "#be123c",
-                    800: "#9f1239",  900: "#881337",
+                    50: "#fff1f2", 100: "#ffe4e6", 200: "#fecdd3", 300: "#fda4af",
+                    400: "#fb7185", 500: "#f43f5e", 600: "#e11d48", 700: "#be123c",
+                    800: "#9f1239", 900: "#881337",
                     foreground: "#fff", DEFAULT: "#f43f5e"
                 },
 

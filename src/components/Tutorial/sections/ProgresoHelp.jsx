@@ -38,22 +38,22 @@ export default function ProgresoHelp() {
                                 </p>
                             </CardBody>
                         </Card>
-                        </div>
+                    </div>
 
-                        {/* Nueva utilidad: Filtro por estado */}
-                        <div className="bg-primary/5 rounded-3xl p-6 border border-primary/10">
+                    {/* Nueva utilidad: Filtro por estado */}
+                    <div className="bg-primary/5 rounded-3xl p-6 border border-primary/10">
                         <h4 className="font-bold text-foreground flex items-center gap-2 mb-3">
                             <i className="fa-solid fa-filter text-primary" />
                             Resumen e Interacción
                         </h4>
                         <p className="text-sm text-foreground/70 leading-relaxed">
-                            Las tarjetas superiores (Disponibles, Regulares, etc.) no son solo informativas: 
-                            <b> si haces clic en ellas</b>, se abrirá un panel con el listado detallado de todas las materias que tienen ese estado. 
+                            Las tarjetas superiores (Disponibles, Regulares, etc.) no son solo informativas:
+                            <b> si haces clic en ellas</b>, se abrirá un panel con el listado detallado de todas las materias que tienen ese estado.
                             Esto te permite revisar rápidamente qué te falta o qué tenés pendiente sin navegar por toda la lista.
                         </p>
-                        </div>
+                    </div>
 
-                        {/* Tip para avanzados */}
+                    {/* Tip para avanzados */}
                     <Card className="bg-gradient-to-br from-secondary/10 to-primary/10 border-none shadow-none">
                         <CardBody className="p-6 flex flex-col sm:flex-row gap-5 items-center">
                             <div className="p-4 bg-background/50 rounded-2xl text-secondary shadow-sm shrink-0">
@@ -62,7 +62,7 @@ export default function ProgresoHelp() {
                             <div>
                                 <h4 className="font-bold text-foreground text-lg mb-1">¡Tip para avanzados!</h4>
                                 <p className="text-sm text-foreground/70 leading-relaxed">
-                                    ¿Ya tenés muchas materias hechas? No hace falta marcar una por una. 
+                                    ¿Ya tenés muchas materias hechas? No hace falta marcar una por una.
                                     Si marcás tus <b>últimas materias</b> aprobadas, regulares o promocionadas, el sistema <b>actualizará automáticamente</b> todas sus correlativas previas en cascada.
                                 </p>
                             </div>
@@ -76,7 +76,7 @@ export default function ProgresoHelp() {
                         <i className="fa-solid fa-cloud text-3xl opacity-80"></i>
                     </div>
                     <h4 className="font-bold text-2xl mb-4">Sincronización Manual</h4>
-                    <p className="opacity-90 text-sm leading-relaxed mb-6">
+                    <p className="text-sm leading-relaxed mb-6">
                         Tus datos se guardan **localmente**. Para llevarlos a otro dispositivo o hacer un backup, usá los botones de la página de Progreso:
                     </p>
                     <ul className="space-y-4 text-sm">
@@ -84,14 +84,14 @@ export default function ProgresoHelp() {
                             <i className="fa-solid fa-cloud-arrow-up w-5"></i>
                             <div>
                                 <span className="font-bold">Guardar:</span>
-                                <p className="opacity-80">Sube tus cambios actuales a tu cuenta.</p>
+                                <p>Sube tus cambios actuales a tu cuenta.</p>
                             </div>
                         </li>
                         <li className="flex gap-3 items-center">
                             <i className="fa-solid fa-cloud-arrow-down w-5"></i>
                             <div>
                                 <span className="font-bold">Cargar:</span>
-                                <p className="opacity-80">Reemplaza lo local con tu última copia guardada.</p>
+                                <p>Reemplaza lo local con tu última copia guardada.</p>
                             </div>
                         </li>
                     </ul>

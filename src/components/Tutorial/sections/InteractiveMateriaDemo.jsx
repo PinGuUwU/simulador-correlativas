@@ -61,7 +61,7 @@ export default function InteractiveMateriaDemo() {
                 {/* Columna de la Tarjeta (Demo) */}
                 <div className="lg:col-span-5 flex justify-center sticky top-24">
                     <div className="w-full max-w-[320px]">
-                        <MateriaCard 
+                        <MateriaCard
                             materia={materiaDemo}
                             estado={estado}
                             detalles={detalles}
@@ -82,32 +82,32 @@ export default function InteractiveMateriaDemo() {
                             Gestión de Estados
                         </h4>
                         <p className="text-sm text-foreground/70 leading-relaxed">
-                            Al hacer <b>clic en la tarjeta</b>, se abrirá un menú con los estados posibles. Al seleccionar uno, la tarjeta cambiará su color e ícono. 
+                            Al hacer <b>clic en la tarjeta</b>, se abrirá un menú con los estados posibles. Al seleccionar uno, la tarjeta cambiará su color e ícono.
                         </p>
                     </section>
 
                     <section className="bg-default-100 p-5 rounded-3xl border border-default-200">
-                        <h4 className="text-sm font-black text-default-500 uppercase tracking-widest mb-4">Guía de Indicadores</h4>
+                        <h4 className="text-sm font-black text-default-600 uppercase tracking-widest mb-4">Guía de Indicadores</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="flex flex-col gap-2">
                                 <div className="flex items-center gap-2">
                                     <Chip size="sm" color="danger" variant="flat" className="animate-pulse">Falta Info</Chip>
-                                    <span className="text-xs font-bold text-foreground/80">Vacío total</span>
+                                    <span className="text-sm font-bold text-foreground/80">Vacío total</span>
                                 </div>
-                                <p className="text-[11px] text-foreground/60 leading-tight">Aparece en Regular si no cargaste ni año ni nota.</p>
+                                <p className="text-[12px] text-foreground/60 leading-tight">Aparece en Regular si no cargaste ni año ni nota.</p>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <div className="flex items-center gap-2">
                                     <Chip size="sm" color="danger" variant="flat" className="animate-pulse">Falta Nota</Chip>
                                     <span className="text-xs font-bold text-foreground/80">Nota pendiente</span>
                                 </div>
-                                <p className="text-[11px] text-foreground/60 leading-tight">Falta la nota de cursada o el examen final.</p>
+                                <p className="text-[12px] text-foreground/60 leading-tight">Falta la nota de cursada o el examen final.</p>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <div className="flex items-center gap-2">
                                     <Chip size="sm" color="warning" variant="dot">Vence: Jul 2027</Chip>
                                 </div>
-                                <p className="text-[11px] text-foreground/60 leading-tight">El sistema calcula automáticamente cuándo vence tu regularidad por tiempo.</p>
+                                <p className="text-[12px] text-foreground/60 leading-tight">El sistema calcula automáticamente cuándo vence tu regularidad por tiempo.</p>
                             </div>
                         </div>
                     </section>
@@ -139,7 +139,7 @@ export default function InteractiveMateriaDemo() {
             </div>
 
             {/* Modal de Detalles para la Demo */}
-            <DetalleMateriaModal 
+            <DetalleMateriaModal
                 isOpen={isDetailOpen}
                 onOpenChange={setIsDetailOpen}
                 infoMateria={materiaDemo}

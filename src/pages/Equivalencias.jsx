@@ -95,14 +95,14 @@ function Equivalencias() {
                             </div>
                             <Chip 
                                 aria-label="Estado de balance de horas"
-                                size="sm" variant="flat" color="primary" className="font-bold">
+                                size="sm" variant="flat" color="primary" className="font-bold text-primary-800 dark:text-primary-200 girlie:text-primary-900 boyie:text-primary-900">
                                 {comparativaHoras?.nuevo.restantes < comparativaHoras?.viejo.restantes ? 'Más Eficiente' : 'Balance'}
                             </Chip>
                         </div>
                         
                         <div className="space-y-4">
                             <div>
-                                <div className="flex justify-between text-[11px] font-black uppercase text-default-800 dark:text-default-400 mb-1">
+                                <div className="flex justify-between text-xs font-black uppercase text-foreground mb-1">
                                     <span>Plan 17.13 (Actual)</span>
                                     <span>{comparativaHoras?.viejo.restantes}h / {comparativaHoras?.viejo.totales}h</span>
                                 </div>
@@ -115,7 +115,7 @@ function Equivalencias() {
                                 />
                             </div>
                             <div>
-                                <div className="flex justify-between text-[11px] font-bold uppercase text-primary mb-1">
+                                <div className="flex justify-between text-xs font-bold uppercase text-primary-800 dark:text-primary-500 girlie:text-primary-900 boyie:text-primary-800 mb-1">
                                     <span>Plan 17.14 (Nuevo)</span>
                                     <span>{comparativaHoras?.nuevo.restantes}h / {comparativaHoras?.nuevo.totales}h</span>
                                 </div>
@@ -131,17 +131,17 @@ function Equivalencias() {
                     </CardBody>
                 </Card>
 
-                <Card className="bg-primary border-none shadow-lg shadow-primary/20 text-primary-foreground">
+                <Card className="bg-primary-700 dark:bg-primary-300 girlie:bg-primary-700 boyie:bg-primary-700 border-none shadow-lg shadow-primary/20 text-white">
                     <CardBody className="p-4 flex flex-row items-center gap-4">
                         <div className="bg-white/20 p-3 rounded-2xl">
                             <TrendingDown size={32} />
                         </div>
                         <div>
-                            <h4 className="text-xs font-black uppercase tracking-widest text-primary-foreground/90">Diferencia de cursada</h4>
-                            <p className="text-2xl font-black text-primary-foreground">
+                            <h4 className="text-xs font-black uppercase tracking-widest text-white">Diferencia de cursada</h4>
+                            <p className="text-2xl font-black text-white">
                                 {Math.abs(comparativaHoras?.viejo.restantes - comparativaHoras?.nuevo.restantes)} horas
                             </p>
-                            <p className="text-[10px] font-bold text-primary-foreground/95 mt-1 italic">
+                            <p className="text-xs font-bold text-white mt-1 italic">
                                 {comparativaHoras?.nuevo.restantes < comparativaHoras?.viejo.restantes 
                                     ? '* El plan nuevo reduce tu carga horaria total restante.' 
                                     : '* El plan nuevo mantiene o incrementa levemente tu carga horaria.'}
@@ -161,7 +161,7 @@ function Equivalencias() {
                             </div>
                             <div>
                                 <p className="text-xs font-black uppercase tracking-wider text-foreground">Modo Simulación</p>
-                                <p className="text-[10px] text-default-800 dark:text-default-400 leading-none font-bold">Edita estados para proyectar tu avance</p>
+                                <p className="text-xs text-default-600 dark:text-default-500 leading-none font-bold">Edita estados para proyectar tu avance</p>
                             </div>
                         </div>
                         <Switch 
@@ -212,14 +212,14 @@ function Equivalencias() {
                             <div className="grid grid-cols-1 gap-2">
                                 <Button 
                                     aria-label="Guardar cambios de simulación"
-                                    size="sm" variant="flat" color="primary" startContent={<Save size={14}/>} onPress={guardarSimulacion} className="font-bold uppercase text-[10px]">Guardar Cambios</Button>
+                                    size="sm" variant="flat" color="primary" startContent={<Save size={14}/>} onPress={guardarSimulacion} className="font-bold uppercase text-xs">Guardar Cambios</Button>
                                 <div className="grid grid-cols-2 gap-2">
                                     <Button 
                                         aria-label="Cargar simulación guardada"
-                                        size="sm" variant="bordered" startContent={<Download size={14}/>} onPress={cargarSimulacion} className="font-bold uppercase text-[10px]">Cargar</Button>
+                                        size="sm" variant="bordered" startContent={<Download size={14}/>} onPress={cargarSimulacion} className="font-bold uppercase text-xs">Cargar</Button>
                                     <Button 
                                         aria-label="Reiniciar simulación al progreso real"
-                                        size="sm" variant="bordered" color="danger" startContent={<RotateCcw size={14}/>} onPress={cargarProgresoReal} className="font-bold uppercase text-[10px]">Reiniciar</Button>
+                                        size="sm" variant="bordered" color="danger" startContent={<RotateCcw size={14}/>} onPress={cargarProgresoReal} className="font-bold uppercase text-xs">Reiniciar</Button>
                                 </div>
                             </div>
                         </CardBody>

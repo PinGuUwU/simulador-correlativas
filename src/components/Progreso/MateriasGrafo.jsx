@@ -21,7 +21,7 @@ import { ArrowRight, ArrowDown, ZoomIn, ZoomOut, Home } from 'lucide-react';
  */
 const SemesterNode = ({ data }) => {
   const isHorizontal = data.direction === 'LR';
-  
+
   if (data.variant === 'separator') {
     return (
       <div className="pointer-events-none select-none flex items-center justify-center">
@@ -33,7 +33,7 @@ const SemesterNode = ({ data }) => {
 
   return (
     <div className="pointer-events-none select-none">
-      <div className="bg-default-800 font-black text-white px-3 py-1.5 rounded-lg text-sm tracking-widest shadow-lg opacity-40">
+      <div className="bg-default-800 font-black text-white px-3 py-1.5 rounded-lg text-md tracking-widest shadow-lg opacity-40">
         {data.label}
       </div>
     </div>
@@ -52,7 +52,7 @@ const nodeTypes = {
  */
 const getLayoutedElements = (nodes, edges, direction = 'LR') => {
   const isHorizontal = direction === 'LR';
-  
+
   // Agrupar materias por cuatrimestre absoluto (Año 1 C1 = 1, Año 1 C2 = 2, etc.)
   const materiasPorCuatri = {};
   nodes.forEach(node => {
@@ -63,7 +63,7 @@ const getLayoutedElements = (nodes, edges, direction = 'LR') => {
   });
 
   const sortedCuatris = Object.keys(materiasPorCuatri).map(Number).sort((a, b) => a - b);
-  
+
   // Espaciado entre columnas (X) y filas (Y)
   const gapX = isHorizontal ? 300 : 250;
   const gapY = isHorizontal ? 150 : 220;
@@ -135,8 +135,8 @@ const FlowInner = ({ materias, progreso }) => {
     return materias.map((m) => ({
       id: m.codigo,
       type: 'materia',
-      data: { 
-        materia: m, 
+      data: {
+        materia: m,
         estado: progreso[m.codigo] || 'Disponible'
       },
       position: { x: 0, y: 0 },
@@ -190,11 +190,11 @@ const FlowInner = ({ materias, progreso }) => {
     if (nodes.length === 0) return;
 
     const timer = setTimeout(() => {
-      const firstSemesterNodes = nodes.filter(n => 
-        n.id === 'header-1' || 
+      const firstSemesterNodes = nodes.filter(n =>
+        n.id === 'header-1' ||
         (n.data?.materia && ((Number(n.data.materia.anio) - 1) * 2 + (Number(n.data.materia.cuatrimestre) % 2 === 0 ? 2 : 1)) === 1)
       );
-      
+
       if (firstSemesterNodes.length > 0) {
         fitView({ nodes: firstSemesterNodes, padding: 0.5, duration: 800 });
       } else {
@@ -208,11 +208,11 @@ const FlowInner = ({ materias, progreso }) => {
 
   // Función para volver al inicio del grafo manualmente
   const handleGoHome = () => {
-    const firstSemesterNodes = nodes.filter(n => 
-      n.id === 'header-1' || 
+    const firstSemesterNodes = nodes.filter(n =>
+      n.id === 'header-1' ||
       (n.data?.materia && ((Number(n.data.materia.anio) - 1) * 2 + (Number(n.data.materia.cuatrimestre) % 2 === 0 ? 2 : 1)) === 1)
     );
-    
+
     if (firstSemesterNodes.length > 0) {
       fitView({ nodes: firstSemesterNodes, padding: 0.5, duration: 800 });
     } else {
@@ -236,21 +236,21 @@ const FlowInner = ({ materias, progreso }) => {
     if (!activeNodeId) return [];
 
     return edges
-        .filter(e => e.source === activeNodeId || e.target === activeNodeId)
-        .map(e => {
-            return {
-                ...e,
-                type: 'straight', // Flechas rectas por pedido del usuario
-                animated: true,
-                style: { 
-                    ...e.style, 
-                    stroke: '#3b82f6', 
-                    strokeWidth: 3,
-                    opacity: 1
-                },
-                markerEnd: { ...e.markerEnd, color: '#3b82f6' }
-            };
-        });
+      .filter(e => e.source === activeNodeId || e.target === activeNodeId)
+      .map(e => {
+        return {
+          ...e,
+          type: 'straight', // Flechas rectas por pedido del usuario
+          animated: true,
+          style: {
+            ...e.style,
+            stroke: '#3b82f6',
+            strokeWidth: 3,
+            opacity: 1
+          },
+          markerEnd: { ...e.markerEnd, color: '#3b82f6' }
+        };
+      });
   }, [edges, activeNodeId]);
 
   return (
@@ -264,16 +264,16 @@ const FlowInner = ({ materias, progreso }) => {
         </ButtonGroup>
 
         <ButtonGroup size="sm" variant="flat" className="bg-background/80 backdrop-blur-md shadow-md border border-default-200">
-          <Button 
-            isIconOnly 
+          <Button
+            isIconOnly
             color={direction === 'LR' ? 'primary' : 'default'}
             onPress={() => setDirection('LR')}
             title="Vista Horizontal"
           >
             <ArrowRight size={18} />
           </Button>
-          <Button 
-            isIconOnly 
+          <Button
+            isIconOnly
             color={direction === 'TB' ? 'primary' : 'default'}
             onPress={() => setDirection('TB')}
             title="Vista Vertical"
@@ -301,9 +301,9 @@ const FlowInner = ({ materias, progreso }) => {
       >
         <Background color="#94a3b8" variant="dots" gap={20} size={1} />
       </ReactFlow>
-      
+
       {/* Leyenda interactiva */}
-      <div className="absolute bottom-4 left-4 z-10 bg-background/80 backdrop-blur-md p-2 rounded-lg border border-default-200 text-[10px] font-bold text-foreground/60 shadow-sm pointer-events-none uppercase tracking-tighter">
+      <div className="absolute bottom-4 left-4 z-10 bg-background/80 backdrop-blur-md p-2 rounded-lg border border-default-200 text-sm font-bold text-foreground/60 shadow-sm pointer-events-none uppercase tracking-tighter">
         Pasa el mouse para ver correlativas
       </div>
     </div>

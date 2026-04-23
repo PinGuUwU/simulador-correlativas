@@ -53,10 +53,10 @@ export default function SimuladorHelp() {
                                 Una vez que terminás de simular tu camino ideal, podés descargar un documento <b>PDF</b> con todo tu cronograma planificado.
                             </p>
                             <div className="p-4 bg-background rounded-xl border border-dashed border-default-300 flex items-center justify-center">
-                                <Button 
-                                    size="sm" 
-                                    color="danger" 
-                                    variant="flat" 
+                                <Button
+                                    size="sm"
+                                    color="danger"
+                                    variant="flat"
                                     startContent={<i className="fa-solid fa-download"></i>}
                                     className="font-bold"
                                 >

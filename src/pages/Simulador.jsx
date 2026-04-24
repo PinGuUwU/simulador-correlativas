@@ -9,14 +9,17 @@ import SimulandoAhora from '../components/Simulador/SimulandoAhora'
 import CarreraFinalizada from '../components/Simulador/CarreraFinalizada'
 import ConfiguracionSimulador from '../components/Simulador/modals/ConfiguracionSimulador'
 import GuardarSimulacion from '../components/Simulador/modals/GuardarSimulacion'
+import ConfirmarImportarModal from '../components/Simulador/modals/ConfirmarImportarModal'
 import MateriasGrafo from '../components/Progreso/MateriasGrafo'
 
 import useSimuladorEstado from '../hooks/Simulador/useSimuladorEstado'
 import useSimuladorMaterias from '../hooks/Simulador/useSimuladorMaterias'
 import useSimuladorPDF from '../hooks/Simulador/useSimuladorPDF'
-import { LayoutGrid, Network } from 'lucide-react'
+import usePlanData from '../hooks/usePlanData'
+import { LayoutGrid, Network, CloudDownload } from 'lucide-react'
 import { calculateProjection } from '../utils/Simulador/projectionUtils'
 import tituloIntermedioUtils from '../utils/Progreso/tituloIntermedioUtils'
+import importUtils from '../utils/Simulador/importUtils'
 
 function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
     // ─── Configuración (viene del modal, no cambia durante la simulación) ────
@@ -29,9 +32,16 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
     const [descargandoPDF, setDescargandoPDF] = useState(false)
     const [viewMode, setViewMode] = useState('grafo') // 'grafo' o 'lista'
 
+    // ─── Datos de Progreso Real (para importar) ──────────────────────────────
+    const { 
+        progreso: progresoReal, 
+        progresoDetalles: progresoDetallesReal 
+    } = usePlanData(plan);
+
     // ─── Modales ─────────────────────────────────────────────────────────────
     const { isOpen: isConfigOpen, onClose: onConfigClose, onOpenChange: onConfigOpenChange, onOpen: onConfigOpen } = useDisclosure()
     const { isOpen: isGuardarOpen, onClose: onGuardarClose, onOpenChange: onGuardarOpenChange, onOpen: onConfigOpenGuardar } = useDisclosure()
+    const { isOpen: isConfirmImportOpen, onClose: onConfirmImportClose, onOpenChange: onConfirmImportOpenChange, onOpen: onConfirmImportOpen } = useDisclosure()
 
     // ─── Estado central de la simulación ─────────────────────────────────────
     const {
@@ -47,8 +57,32 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
         estadoSiguiente,
         simulacionTerminada, setSimulacionTerminada,
         handleAnterior,
-        handleSiguiente
+        handleSiguiente,
+        importarHistorialReconstruido
     } = useSimuladorEstado({ plan, anioInicio, cuatriInicio })
+
+    // Handler para importar progreso
+    const handleImportarProgreso = () => {
+        if (!progresoReal || Object.keys(progresoReal).length === 0) {
+            alert("No se encontró progreso guardado para este plan.");
+            return;
+        }
+        onConfirmImportOpen();
+    }
+
+    const ejecutarImportacion = () => {
+        const resultado = importUtils.reconstruirHistorial(progresoReal, progresoDetallesReal, materias);
+        if (resultado) {
+            importarHistorialReconstruido(resultado);
+            // Solo abrimos el último cuatrimestre importado para no saturar la vista
+            if (resultado.historial.length > 0) {
+                const ultimoIdx = String(resultado.historial.length - 1);
+                setOpenedAccordions(new Set([ultimoIdx]));
+            }
+        } else {
+            alert("No hay materias aprobadas o regulares para importar.");
+        }
+    }
 
     // Lógica Título Intermedio
     const { tituloIntermedioNombre, progresoIntermedio, isIntermedioCompletado } = React.useMemo(() => {
@@ -152,6 +186,12 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                 simulacionTerminada={simulacionTerminada}
             />
 
+            <ConfirmarImportarModal 
+                isOpen={isConfirmImportOpen}
+                onOpenChange={onConfirmImportOpenChange}
+                onConfirm={ejecutarImportacion}
+            />
+
             {/* Modal que muestra el estado de descarga de PDF sin afectar el render base */}
             <Modal isOpen={descargandoPDF} hideCloseButton isDismissable={false} backdrop="blur" placement="center">
                 <ModalContent>
@@ -177,9 +217,25 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                         <h2 className="text-2xl font-bold text-foreground">Configuración Requerida</h2>
                         <p className="text-foreground/80 max-w-sm">Para comenzar la simulación, primero debemos definir los parámetros iniciales.</p>
                     </div>
-                    <Button color="primary" size="lg" variant="shadow" className="font-bold rounded-2xl px-12" onPress={onConfigOpen}>
-                        Configurar Ahora
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <Button color="primary" size="lg" variant="shadow" className="font-bold rounded-2xl px-12" onPress={onConfigOpen}>
+                            Configurar Manualmente
+                        </Button>
+                        <Button 
+                            color="secondary" 
+                            size="lg" 
+                            variant="flat" 
+                            className="font-bold rounded-2xl px-12" 
+                            onPress={() => {
+                                setPlan(initialPlan || "17.14");
+                                // Pequeño delay para dejar que usePlanData empiece a cargar
+                                setTimeout(handleImportarProgreso, 500);
+                            }}
+                            startContent={<CloudDownload size={20} />}
+                        >
+                            Importar Mi Progreso
+                        </Button>
+                    </div>
                 </div>
             )}
 
@@ -187,11 +243,22 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
             {plan && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                     {/* Header + botón de reconfigurar */}
-                    <div className="flex justify-between items-center mb-0">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-0 gap-4">
                         <HeaderSimulador plan={plan} />
-                        <Button isIconOnly variant="flat" color="primary" onPress={onConfigOpen} className="rounded-xl">
-                            <i className="fa-solid fa-sliders" />
-                        </Button>
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <Button 
+                                variant="flat" 
+                                color="secondary" 
+                                onPress={handleImportarProgreso} 
+                                className="font-bold rounded-xl flex-1 sm:flex-none"
+                                startContent={<CloudDownload size={18} />}
+                            >
+                                Importar Progreso
+                            </Button>
+                            <Button isIconOnly variant="flat" color="primary" onPress={onConfigOpen} className="rounded-xl">
+                                <i className="fa-solid fa-sliders" />
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Disclaimer Simulador vs Progreso */}
@@ -267,7 +334,7 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                         <SimulandoAhora cuatri={cuatri} anioActual={anioActual} />
 
                                         {viewMode === 'lista' ? (
-                                            <>
+                                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                                                 {/* Botones de marcar/desmarcar */}
                                                 <div className="flex flex-col sm:flex-row gap-2 justify-end mb-4">
                                                     <Button
@@ -285,7 +352,8 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                                         isDisabled={materiasCursables.length === 0}
                                                     >
                                                         Quitar Todas
-                                                    </Button>                                                </div>
+                                                    </Button>
+                                                </div>
 
                                                 {/* Grilla de materias */}
                                                 {materiasCursables.length === 0 && materiasBloqueadas.length === 0 ? (
@@ -302,7 +370,7 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                                         progreso={progresoSimulado}
                                                     />
                                                 )}
-                                            </>
+                                            </div>
                                         ) : (
                                             /* Vista de Grafo */
                                             <div className="animate-in fade-in zoom-in-95 duration-500 relative h-[700px] border border-default-200 rounded-3xl overflow-hidden shadow-sm">

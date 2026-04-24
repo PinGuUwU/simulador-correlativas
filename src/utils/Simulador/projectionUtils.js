@@ -11,6 +11,7 @@ export const calculateProjection = ({
     anioActual
 }) => {
     const items = {}; 
+    const skippedItems = [];
     const labels = {};
     const materiasRestantes = [...materias];
     
@@ -27,6 +28,14 @@ export const calculateProjection = ({
                     estado: 'Aprobada'
                 };
                 colocadas.add(m.codigo);
+            } else if (semestre.progresoBaseSnapshot?.[m.codigo] !== 'Cursado') {
+                // Fue ofrecida pero no cursada
+                skippedItems.push({
+                    codigo: m.codigo,
+                    materia: m,
+                    columna: col,
+                    estado: 'NoCursada'
+                });
             }
         });
     });
@@ -114,5 +123,5 @@ export const calculateProjection = ({
         }
     });
 
-    return { items, labels, maxCol: Math.max(...Object.keys(labels).map(Number), 0) };
+    return { items, skippedItems, labels, maxCol: Math.max(...Object.keys(labels).map(Number), 0) };
 };

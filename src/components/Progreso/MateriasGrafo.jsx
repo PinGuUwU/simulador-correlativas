@@ -60,7 +60,9 @@ const getLayoutedElements = (nodes, edges, direction = 'LR', projectionData = nu
     const m = node.data.materia;
     let col;
 
-    if (items && items[m.codigo]) {
+    if (node.data.columna) {
+      col = node.data.columna;
+    } else if (items && items[m.codigo]) {
       col = items[m.codigo].columna;
     } else {
       col = (Number(m.anio) - 1) * 2 + (Number(m.cuatrimestre) % 2 === 0 ? 2 : 1);
@@ -148,7 +150,9 @@ const FlowInner = ({ materias, progreso, onNodeClick, projection }) => {
   // Transformar la lista de materias en nodos iniciales para React Flow
   const initialNodes = useMemo(() => {
     const projItems = projection?.items || {};
-    return materias.map((m) => {
+    const skippedItems = projection?.skippedItems || [];
+
+    const baseNodes = materias.map((m) => {
       const proj = projItems[m.codigo];
       const prog = progreso?.[m.codigo];
       
@@ -175,6 +179,23 @@ const FlowInner = ({ materias, progreso, onNodeClick, projection }) => {
         position: { x: 0, y: 0 },
       };
     });
+
+    // Añadir nodos para materias no cursadas en semestres pasados
+    skippedItems.forEach((skip, idx) => {
+      baseNodes.push({
+        id: `skipped-${skip.codigo}-${skip.columna}-${idx}`,
+        type: 'materia',
+        data: {
+          materia: skip.materia,
+          estado: skip.estado,
+          columna: skip.columna,
+          onClick: null // No interactuable
+        },
+        position: { x: 0, y: 0 },
+      });
+    });
+
+    return baseNodes;
   }, [materias, progreso, onNodeClick, projection]);
 
   // Transformar las relaciones de correlatividad en conexiones (edges)

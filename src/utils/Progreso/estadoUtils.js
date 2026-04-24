@@ -50,6 +50,11 @@ const ESTADO_CONFIG = {
         estilo: "bg-success/20 border-success/40 text-success-800 dark:text-success-200 opacity-80",
         color: "success",
         icono: "fa-solid fa-circle-check",
+    },
+    NoCursada: {
+        estilo: "bg-default-100/30 border-default-200/50 text-default-400 opacity-60 border-dashed grayscale-[0.8]",
+        color: "default",
+        icono: "fa-solid fa-xmark",
     }
 };
 

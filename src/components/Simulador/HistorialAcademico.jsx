@@ -131,6 +131,17 @@ function HistorialAcademico({ historialSemestres, openedAccordions, setOpenedAcc
                                                 <span className="font-bold text-foreground text-sm sm:text-lg tracking-tight">
                                                     {item.cuatri}º Cuatrimestre <span className="text-foreground/30 mx-1">•</span> Año {item.anioActual}
                                                 </span>
+                                                {item.esImportado && (
+                                                    <Chip 
+                                                        size="sm" 
+                                                        variant="flat" 
+                                                        color="secondary" 
+                                                        className="h-5 text-[9px] font-black uppercase tracking-tighter"
+                                                        startContent={<i className="fa-solid fa-cloud-arrow-down mr-1" />}
+                                                    >
+                                                        Importado
+                                                    </Chip>
+                                                )}
                                             </div>
                                             <span className="text-[10px] sm:text-xs text-foreground/80 font-bold bg-default-200/50 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap">
                                                 {materiasCursadasReales.length} de {totalSemestre}

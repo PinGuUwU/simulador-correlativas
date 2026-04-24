@@ -106,6 +106,16 @@ const useSimuladorEstado = ({ plan, anioInicio, cuatriInicio }) => {
         }
     }
 
+    const importarHistorialReconstruido = (datos) => {
+        if (!datos) return;
+        setHistorialSemestres(datos.historial);
+        setProgresoSimulado(datos.progresoFinal);
+        setProgresoBase(datos.progresoFinal);
+        setAnioActual(datos.anioFinal);
+        setCuatri(datos.cuatriFinal);
+        setSimulacionTerminada(false);
+    }
+
     return {
         materias,
         cargando,
@@ -124,7 +134,8 @@ const useSimuladorEstado = ({ plan, anioInicio, cuatriInicio }) => {
         simulacionTerminada,
         setSimulacionTerminada,
         handleAnterior,
-        handleSiguiente
+        handleSiguiente,
+        importarHistorialReconstruido
     }
 }
 

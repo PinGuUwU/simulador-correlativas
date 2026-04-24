@@ -10,6 +10,8 @@ const ChatBot = lazy(() => import('../pages/ChatBot'))
 const ComoUsar = lazy(() => import('../pages/ComoUsar'))
 const SettingsPage = lazy(() => import('../pages/SettingsPage'))
 const Contacto = lazy(() => import('../pages/Contacto'))
+const AdminDashboard = lazy(() => import('../pages/AdminDashboard'))
+const AdminRoute = lazy(() => import('../components/Auth/AdminRoute'))
 
 const LoadingFallback = () => (
     <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -50,6 +52,14 @@ const Rutas = ({ plan, setPlan }) => {
         {
             path: "/contacto",
             element: <Contacto />
+        },
+        {
+            path: "/admin",
+            element: (
+                <AdminRoute>
+                    <AdminDashboard />
+                </AdminRoute>
+            )
         }
     ])
     return (

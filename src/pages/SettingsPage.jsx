@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { updateUserConfig } from '../services/dbService';
 import { useTheme } from 'next-themes';
+import { trackSeleccionCarrera } from '../services/analyticsService';
 
 export default function SettingsPage({ plan, setPlan }) {
     const {
@@ -215,7 +216,10 @@ export default function SettingsPage({ plan, setPlan }) {
                                 variant="bordered"
                                 fullWidth
                                 selectedKey={plan || '17.14'}
-                                onSelectionChange={(key) => setPlan(key)}
+                                onSelectionChange={(key) => {
+                                    setPlan(key);
+                                    trackSeleccionCarrera({ plan: key, origen: 'settings' });
+                                }}
                                 classNames={{
                                     base: "w-full",
                                     tabList: "w-full bg-default-100 p-1 border-none shrink-0",

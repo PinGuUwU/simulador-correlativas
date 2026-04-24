@@ -38,6 +38,25 @@ export const saveUserProgreso = async (uid, plan, progreso, detalles = null) => 
 };
 
 /**
+ * Consulta el rol de un usuario en la colección 'roles'.
+ * @param {string} uid 
+ * @returns {Promise<string>} 'admin' | 'user'
+ */
+export const getUserRole = async (uid) => {
+    if (!uid) return 'user';
+    try {
+        const roleRef = doc(db, 'roles', uid);
+        const roleSnap = await getDoc(roleRef);
+        if (roleSnap.exists()) {
+            return roleSnap.data().role || 'user';
+        }
+    } catch (error) {
+        console.error("Error al obtener rol:", error);
+    }
+    return 'user';
+};
+
+/**
  * Recupera todo el documento del usuario actual
  */
 export const getUserData = async (uid) => {

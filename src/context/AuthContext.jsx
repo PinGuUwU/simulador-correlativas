@@ -6,7 +6,7 @@ import { loginConGoogle, logout } from '../services/authService';
 import { isIntentionalAuthCancel } from '../utils/errorCodes';
 import { logError } from '../services/logService';
 import { trackLogin, trackLogout } from '../services/analyticsService';
-import { getUserData, saveUserSimulacion } from '../services/dbService';
+import { getUserData, saveUserSimulacion, getUserRole } from '../services/dbService';
 import { uploadPlanProgress, downloadAllProgress } from '../services/syncService';
 import { addToast } from '@heroui/react';
 
@@ -111,6 +111,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [userData, setUserData] = useState(null); // Datos de Firestore (config, alias, etc.)
+    const [userRole, setUserRole] = useState('user'); 
     const [loading, setLoading] = useState(true);
     const [authError, setAuthError] = useState(null);
     const [firestoreWarning, setFirestoreWarning] = useState(null);
@@ -130,14 +131,20 @@ export function AuthProvider({ children }) {
                     setUser(firebaseUser);
                     
                     // Al iniciar sesión, siempre intentamos descargar el progreso de la nube.
-                    const cloudData = await downloadAllProgress(firebaseUser.uid);
+                    const [cloudData, role] = await Promise.all([
+                        downloadAllProgress(firebaseUser.uid),
+                        getUserRole(firebaseUser.uid)
+                    ]);
+                    
                     if (cloudData) {
                         setUserData(cloudData);
                     }
+                    setUserRole(role);
 
                 } else {
                     setUser(null);
                     setUserData(null);
+                    setUserRole('user');
                 }
             } catch (err) {
                 console.error("Error en el observer de Auth:", err);
@@ -160,6 +167,11 @@ export function AuthProvider({ children }) {
 
         try {
             const { user: loggedUser, firestoreWarning: warning } = await loginConGoogle();
+            
+            // Fetch role after login
+            const role = await getUserRole(loggedUser.uid);
+            setUserRole(role);
+
             trackLogin({ userId: loggedUser.uid });
             if (warning) setFirestoreWarning(warning);
 
@@ -184,6 +196,7 @@ export function AuthProvider({ children }) {
             // No hacemos nada si el logout de Firebase falla, la limpieza local es suficiente.
         } finally {
             clearSession();
+            setUserRole('user');
             // El onAuthStateChanged se encargará de poner el user a null.
         }
     }, []);
@@ -202,8 +215,12 @@ export function AuthProvider({ children }) {
     const refetchUserData = useCallback(async () => {
         if (!user) return;
         try {
-            const cloudData = await getUserData(user.uid);
+            const [cloudData, role] = await Promise.all([
+                getUserData(user.uid),
+                getUserRole(user.uid)
+            ]);
             if (cloudData) setUserData(cloudData);
+            setUserRole(role);
         } catch (err) {
             console.error("Error refetching user data:", err);
         }
@@ -252,8 +269,10 @@ export function AuthProvider({ children }) {
     const value = {
         user,
         userData,
+        userRole,
         loading,
         isAuthenticated: !!user,
+        isAdmin: userRole === 'admin',
         authError,
         firestoreWarning,
         isCriticalError,

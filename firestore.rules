@@ -1,71 +1,26 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // ─── Helpers ─────────────────────────────────────────────────────────────────
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
+    
+    // Función para verificar si el usuario es dueño del documento
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return request.auth != null && request.auth.uid == userId;
     }
 
-    function isValidUserDoc() {
-      let data = request.resource.data;
-      return (
-        data.uid is string && data.uid.size() > 0 &&
-        data.email is string && data.email.size() > 0 &&
-        (data.get('displayName', null) is string || data.get('displayName', null) == null) &&
-        (data.get('photoURL', null) is string || data.get('photoURL', null) == null) &&
-        (data.get('progreso', null) == null || data.get('progreso', null) is map) &&
-        (data.get('config', null) == null || data.get('config', null) is map) &&
-        (data.get('materiasAprobadas', null) == null || data.get('materiasAprobadas', null) is list) &&
-        data.schemaVersion is int && data.schemaVersion >= 1 &&
-        !('password' in data) &&
-        !('token'    in data) &&
-        !('secret'   in data)
-      );
-    }
-
-    function isValidLogDoc() {
-      let data = request.resource.data;
-      return (
-        data.level         is string &&
-        data.errorCode     is string &&
-        data.errorMessage is string &&
-        data.route         is string &&
-        data.schemaVersion is int &&
-        data.errorMessage.size() <= 500 &&
-        !('apiKey'    in data) &&
-        !('password'  in data) &&
-        !('token'     in data)
-      );
-    }
-
-    // ─── Colección: users ─────────────────────────────────────────────────────
+    // Colección de Usuarios: Solo el dueño puede leer y escribir
     match /users/{userId} {
-      // PERMITIR LECTURA: 
-      // Simplificada para asegurar que el "Cargar" funcione siempre que seas el dueño.
+      allow read, write: if isOwner(userId);
+    }
+
+    // Colección de Roles: 
+    // Los usuarios solo pueden leer su propio rol.
+    // Solo admins (o vía Firebase Console/Backend) pueden escribir.
+    match /roles/{userId} {
       allow read: if isOwner(userId);
-
-      // PERMITIR ESCRITURA (Crear y Actualizar): 
-      // Mantenemos la validación estricta para que los datos suban con el formato correcto.
-      allow create, update: if isOwner(userId) && isValidUserDoc();
-
-      // Bloqueamos el borrado desde el cliente por seguridad.
-      allow delete: if false;
+      allow write: if false; // Solo manual o via admin SDK
     }
 
-    // ─── Colección: app_logs ──────────────────────────────────────────────────
-    match /app_logs/{logId} {
-      allow create: if isValidLogDoc();
-      allow read, update, delete: if false;
-    }
-
-    // ─── Resto de la base de datos: denegado por defecto ─────────────────────
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    // Otras colecciones...
   }
 }

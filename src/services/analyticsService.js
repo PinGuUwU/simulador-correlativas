@@ -136,3 +136,44 @@ export const trackCambioTema = ({ tema }) =>
  */
 export const trackDescargaPDF = ({ plan }) =>
     track('descarga_pdf', { plan });
+
+// ─── Nuevos Eventos Estratégicos (Insights Académicos) ────────────────────────
+
+/**
+ * Trackea cuando el usuario elige o cambia de plan (Sistemas, Civil, etc.).
+ * @param {{ plan: string, origen: 'settings' | 'welcome_modal' }} params
+ */
+export const trackSeleccionCarrera = ({ plan, origen }) =>
+    track('seleccion_carrera', { plan, origen });
+
+/**
+ * Trackea el estado inicial del usuario al guardar por primera vez.
+ * @param {{ plan: string, aprobadas: number, total: number }} params
+ */
+export const trackProgresoInicial = ({ plan, aprobadas, total }) =>
+    track('progreso_inicial', { 
+        plan, 
+        cant_aprobadas: aprobadas,
+        porcentaje_inicial: Math.round((aprobadas / total) * 100)
+    });
+
+/**
+ * Trackea clics en materias bloqueadas para identificar trabas.
+ * @param {{ plan: string, codigo: string, nombre: string }} params
+ */
+export const trackFriccionCorrelativa = ({ plan, codigo, nombre }) =>
+    track('friccion_correlativa', { plan, codigo, nombre });
+
+/**
+ * Trackea cuando un alumno pasa de un estado avanzado a uno inicial (recursada).
+ * @param {{ plan: string, codigo: string, estado_anterior: string }} params
+ */
+export const trackRecursada = ({ plan, codigo, estado_anterior }) =>
+    track('recursada_materia', { plan, codigo, estado_anterior });
+
+/**
+ * Trackea la cantidad de semestres proyectados para recibirse al terminar una simulación.
+ * @param {{ plan: string, semestres_totales: number }} params
+ */
+export const trackProyeccionEgreso = ({ plan, semestres_totales }) =>
+    track('proyeccion_egreso', { plan, semestres_totales });

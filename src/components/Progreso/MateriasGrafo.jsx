@@ -309,9 +309,9 @@ const FlowInner = ({ materias, progreso, onNodeClick, projection }) => {
   }, [edges, activeNodeId]);
 
   return (
-    <div className="w-full h-[700px] bg-background/50 border border-default-200 rounded-2xl overflow-hidden relative shadow-inner">
+    <div className="w-full h-full bg-background/50 border border-default-200 rounded-2xl overflow-hidden relative shadow-inner">
       {/* Controles flotantes: Zoom, Home y Cambio de Dirección */}
-      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
         <ButtonGroup size="sm" variant="flat" className="bg-background/80 backdrop-blur-md shadow-md border border-default-200">
           <Button isIconOnly onPress={() => zoomIn()} title="Acercar"><ZoomIn size={18} /></Button>
           <Button isIconOnly onPress={() => zoomOut()} title="Alejar"><ZoomOut size={18} /></Button>

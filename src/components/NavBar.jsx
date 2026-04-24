@@ -327,7 +327,7 @@ export default function NavBar({ setPlan, plan, isCollapsed, setIsCollapsed }) {
                         variant="shadow"
                         onPress={onDrawerOpen}
                         id="btn-menu-mobile"
-                        className="bg-background/80 backdrop-blur-md text-primary border border-default-200 shadow-lg"
+                        className="bg-background text-primary border border-default-200 shadow-xl"
                         aria-label="Abrir menú principal"
                         size="lg"
                     >

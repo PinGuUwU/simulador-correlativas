@@ -16,7 +16,7 @@ import useSimuladorEstado from '../hooks/Simulador/useSimuladorEstado'
 import useSimuladorMaterias from '../hooks/Simulador/useSimuladorMaterias'
 import useSimuladorPDF from '../hooks/Simulador/useSimuladorPDF'
 import usePlanData from '../hooks/usePlanData'
-import { LayoutGrid, Network, CloudDownload } from 'lucide-react'
+import { LayoutGrid, Network, CloudDownload, Maximize2, Minimize2 } from 'lucide-react'
 import { calculateProjection } from '../utils/Simulador/projectionUtils'
 import tituloIntermedioUtils from '../utils/Progreso/tituloIntermedioUtils'
 import importUtils from '../utils/Simulador/importUtils'
@@ -31,6 +31,32 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
     const [openedAccordions, setOpenedAccordions] = useState(new Set())
     const [descargandoPDF, setDescargandoPDF] = useState(false)
     const [viewMode, setViewMode] = useState('grafo') // 'grafo' o 'lista'
+    const [isFullScreen, setIsFullScreen] = useState(false)
+    const grafoContainerRef = React.useRef(null)
+
+    // Handler para pantalla completa
+    const toggleFullScreen = () => {
+        if (!grafoContainerRef.current) return;
+
+        if (!document.fullscreenElement) {
+            grafoContainerRef.current.requestFullscreen?.().catch(err => {
+                console.error(`Error al intentar entrar en pantalla completa: ${err.message}`);
+                // Fallback manual si falla la API nativa
+                setIsFullScreen(true);
+            });
+        } else {
+            document.exitFullscreen?.();
+        }
+    }
+
+    // Escuchar cambios de pantalla completa nativa
+    React.useEffect(() => {
+        const handleFSChange = () => {
+            setIsFullScreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFSChange);
+        return () => document.removeEventListener('fullscreenchange', handleFSChange);
+    }, []);
 
     // ─── Datos de Progreso Real (para importar) ──────────────────────────────
     const { 
@@ -373,29 +399,45 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                             </div>
                                         ) : (
                                             /* Vista de Grafo */
-                                            <div className="animate-in fade-in zoom-in-95 duration-500 relative h-[700px] border border-default-200 rounded-3xl overflow-hidden shadow-sm">
+                                            <div 
+                                                ref={grafoContainerRef}
+                                                className={`animate-in fade-in zoom-in-95 duration-500 relative border border-default-200 shadow-sm transition-all duration-300 flex flex-col ${isFullScreen ? 'fixed inset-0 z-[1000] bg-background p-0 rounded-none w-screen h-screen' : 'h-[700px] rounded-3xl overflow-hidden'}`}
+                                            >
+                                                {/* Botón Pantalla Completa */}
+                                                <div className="absolute top-4 right-4 z-[1001]">
+                                                    <Button
+                                                        isIconOnly
+                                                        variant="flat"
+                                                        className="bg-background/80 backdrop-blur-md shadow-md border border-default-200"
+                                                        onPress={toggleFullScreen}
+                                                        title={isFullScreen ? "Salir de pantalla completa" : "Pantalla completa"}
+                                                    >
+                                                        {isFullScreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                                                    </Button>
+                                                </div>
+
                                                 {/* Controles de Navegación Flotantes - Integrados en el Canva */}
-                                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2">
+                                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 w-full px-4 max-w-md">
                                                     {progresoIntermedio.totales > 0 && (
                                                         <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg backdrop-blur-md border ${isIntermedioCompletado ? 'bg-success/20 text-success border-success/30' : 'bg-primary/20 text-primary border-primary/30'}`}>
                                                             <i className="fa-solid fa-graduation-cap" />
                                                             <span>{tituloIntermedioNombre}: {progresoIntermedio.completadas}/{progresoIntermedio.totales}</span>
                                                         </div>
                                                     )}
-                                                    <div className="flex items-center bg-background/60 backdrop-blur-xl border border-default-200 p-2 rounded-2xl shadow-2xl gap-4 min-w-[300px] justify-between">
+                                                    <div className="flex items-center bg-background/60 backdrop-blur-xl border border-default-200 p-1.5 rounded-2xl shadow-2xl gap-2 sm:gap-4 w-full justify-between">
                                                         <Button
                                                             onPress={handleAnterior}
                                                             isDisabled={!estadoAnterior}
                                                             color="primary" variant="flat" size="lg"
-                                                            className="font-bold rounded-xl px-6"
+                                                            className="font-bold rounded-xl px-4 sm:px-6 min-w-0"
                                                             startContent={<i className="fa-solid fa-chevron-left" />}
                                                         >
-                                                            Anterior
+                                                            <span className="hidden sm:inline">Anterior</span>
                                                         </Button>
 
-                                                        <div className="flex flex-col items-center px-2">
-                                                            <span className="text-[10px] text-foreground/50 font-black uppercase tracking-tighter leading-none">Simulando</span>
-                                                            <span className="text-sm font-black text-primary truncate whitespace-nowrap">
+                                                        <div className="flex flex-col items-center px-1 sm:px-2 min-w-fit">
+                                                            <span className="text-[9px] sm:text-[10px] text-foreground/50 font-black uppercase tracking-tighter leading-none">Simulando</span>
+                                                            <span className="text-xs sm:text-sm font-black text-primary truncate whitespace-nowrap">
                                                                 C{cuatri} {anioActual}
                                                             </span>
                                                         </div>
@@ -404,20 +446,22 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                                             onPress={() => handleSiguiente(materiasCursables)}
                                                             isDisabled={!estadoSiguiente}
                                                             color="primary" variant="shadow" size="lg"
-                                                            className="font-bold rounded-xl px-6 transition-transform hover:scale-105 active:scale-95"
+                                                            className="font-bold rounded-xl px-4 sm:px-6 min-w-0 transition-transform hover:scale-105 active:scale-95"
                                                             endContent={<i className="fa-solid fa-chevron-right" />}
                                                         >
-                                                            Siguiente
+                                                            <span className="hidden sm:inline">Siguiente</span>
                                                         </Button>
                                                     </div>
                                                 </div>
 
-                                                <MateriasGrafo
-                                                    materias={materias}
-                                                    progreso={progresoSimulado}
-                                                    onNodeClick={handleNodeClick}
-                                                    projection={projection}
-                                                />
+                                                <div className="flex-1 min-h-0">
+                                                    <MateriasGrafo
+                                                        materias={materias}
+                                                        progreso={progresoSimulado}
+                                                        onNodeClick={handleNodeClick}
+                                                        projection={projection}
+                                                    />
+                                                </div>
                                             </div>
                                         )}
                                     </>

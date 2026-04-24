@@ -34,6 +34,22 @@ const ESTADO_CONFIG = {
         estilo: "bg-danger/8 border-danger/30 hover:bg-danger/15 hover:border-danger/45 text-danger-900 dark:text-danger-100 font-bold",
         color: "danger",
         icono: "fa-solid fa-user-slash",
+    },
+    // --- Estados para el Simulador Dinámico ---
+    Seleccionada: {
+        estilo: "bg-primary border-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 scale-105 z-10 font-black",
+        color: "primary",
+        icono: "fa-solid fa-check-double",
+    },
+    Proyectada: {
+        estilo: "bg-default-100/40 border-dashed border-default-300 opacity-60 hover:opacity-100 transition-opacity text-default-600",
+        color: "default",
+        icono: "fa-solid fa-wand-magic-sparkles",
+    },
+    Aprobada: {
+        estilo: "bg-success/20 border-success/40 text-success-800 dark:text-success-200 opacity-80",
+        color: "success",
+        icono: "fa-solid fa-circle-check",
     }
 };
 

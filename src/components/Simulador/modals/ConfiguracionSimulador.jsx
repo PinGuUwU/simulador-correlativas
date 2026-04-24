@@ -2,12 +2,11 @@ import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio
 import selectUtils from '../../../utils/Simulador/selectUtils.js'
 import { useState, useEffect } from 'react'
 
-function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setModo, setCuatri, setPlan, initialPlan }) {
+function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setCuatri, setPlan, initialPlan }) {
 
     const [confiPlan, setConfiPlan] = useState(initialPlan || "17.14")
     const [confiAnio, setConfiAnio] = useState("2026")
     const [confiCuatri, setConfiCuatri] = useState("1")
-    const [confiModo, setConfiModo] = useState("viejo")
 
     // Update internal state if initialPlan changes
     useEffect(() => {
@@ -18,7 +17,6 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
         setAnio(confiAnio)
         setPlan(confiPlan)
         setCuatri(confiCuatri)
-        setModo(confiModo)
         onClose()
     }
 
@@ -154,57 +152,6 @@ function ConfiguracionSimulador({ isOpen, onOpenChange, onClose, setAnio, setMod
                                         ))}
                                     </Select>
                                 </div>
-                            </div>
-
-                            {/* Sección: Modo de Simulación */}
-                            <div className="flex flex-col gap-3 sm:gap-4">
-                                <div className="flex items-center gap-2 text-foreground">
-                                    <div className="w-1 h-5 bg-primary rounded-full"></div>
-                                    <h3 className="font-bold text-md">Modo de simulación</h3>
-                                </div>
-
-                                <RadioGroup
-                                    defaultValue={"viejo"}
-                                    aria-label="Modo de simulación"
-                                    onValueChange={setConfiModo}
-                                    classNames={{ wrapper: "gap-2" }}
-                                >
-                                    <Radio
-                                        value="viejo"
-                                        classNames={{
-                                            base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-xl gap-3 p-3 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
-                                            label: "text-foreground font-bold text-sm",
-                                            description: "text-foreground/80 text-[10px] leading-tight",
-                                        }}
-                                        description="Cargá tus materias aprobadas y regulares automáticamente."
-                                    >
-                                        Usar mi progreso actual
-                                    </Radio>
-                                    <Radio
-                                        value="nuevo"
-                                        classNames={{
-                                            base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-xl gap-3 p-3 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
-                                            label: "text-foreground font-bold text-sm",
-                                            description: "text-foreground/80 text-[10px] leading-tight",
-                                        }}
-                                        description="Iniciá una planificación limpia desde el primer año."
-                                    >
-                                        Empezar desde cero
-                                    </Radio>
-                                    {localStorage.getItem(`simulacion+${confiPlan}`) && (
-                                        <Radio
-                                            value="guardado"
-                                            classNames={{
-                                                base: "inline-flex m-0 bg-content1 hover:bg-primary/5 items-center justify-between flex-row-reverse max-w-full cursor-pointer rounded-xl gap-3 p-3 border border-default-100 shadow-sm transition-all data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
-                                                label: "text-foreground font-bold text-sm",
-                                                description: "text-foreground/80 text-[10px] leading-tight",
-                                            }}
-                                            description="Continuá tu simulación exactamente donde la dejaste."
-                                        >
-                                            Cargar simulación guardada
-                                        </Radio>
-                                    )}
-                                </RadioGroup>
                             </div>
                         </ModalBody>
 

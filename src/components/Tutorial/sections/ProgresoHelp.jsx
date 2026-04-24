@@ -54,7 +54,7 @@ export default function ProgresoHelp() {
                     </div>
 
                     {/* Tip para avanzados */}
-                    <Card className="bg-gradient-to-br from-secondary/10 to-primary/10 border-none shadow-none">
+                    <Card className="bg-linear-to-br from-secondary/10 to-primary/10 border-none shadow-none">
                         <CardBody className="p-6 flex flex-col sm:flex-row gap-5 items-center">
                             <div className="p-4 bg-background/50 rounded-2xl text-secondary shadow-sm shrink-0">
                                 <i className="fa-solid fa-wand-magic-sparkles text-2xl"></i>

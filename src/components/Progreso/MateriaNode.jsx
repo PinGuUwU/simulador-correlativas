@@ -8,13 +8,16 @@ import estadoUtils from "../../utils/Progreso/estadoUtils";
  * Representa visualmente una materia con su nombre, código, año, cuatrimestre y estado actual.
  */
 const MateriaNode = ({ data, targetPosition = Position.Left, sourcePosition = Position.Right }) => {
-    const { materia, estado } = data;
+    const { materia, estado, onClick } = data;
 
     // Obtener la configuración visual (colores, íconos, estilos) según el estado de la materia (Aprobada, Cursando, etc.)
     const config = estadoUtils.ESTADO_CONFIG[estado] || estadoUtils.ESTADO_CONFIG["Disponible"];
 
     return (
-        <div className="transition-all duration-300 hover:scale-105">
+        <div 
+            className={`transition-all duration-300 hover:scale-105 ${onClick ? 'cursor-pointer active:scale-95' : ''}`}
+            onClick={() => onClick && onClick(materia.codigo)}
+        >
             {/* 
                 Handle (Anclaje) de entrada:
                 En horizontal usa Position.Left, en vertical usa Position.Top
@@ -40,9 +43,15 @@ const MateriaNode = ({ data, targetPosition = Position.Left, sourcePosition = Po
                         {materia.nombre}
                     </div>
                     <div className="mt-2 flex justify-between items-end">
-                        {/* Información de cursado: Año y Cuatrimestre */}
+                        {/* Información de cursado: Año y Cuatrimestre o Estado dinámico */}
                         <span className="text-sm font-bold opacity-60">
-                            {materia.anio}° Año • C{materia.cuatrimestre}
+                            {estado === 'Seleccionada' ? (
+                                <span className="text-primary animate-pulse">Para cursar ahora</span>
+                            ) : estado === 'Disponible' ? (
+                                <span className="text-primary/70">Disponible</span>
+                            ) : (
+                                `${materia.anio}° Año • C${materia.cuatrimestre}`
+                            )}
                         </span>
                     </div>
                 </CardBody>

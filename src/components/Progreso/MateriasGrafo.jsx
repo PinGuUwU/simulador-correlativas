@@ -50,19 +50,26 @@ const nodeTypes = {
  * getLayoutedElements: Calcula las posiciones de los nodos en base a su año y cuatrimestre.
  * Organiza las materias en una grilla según la dirección (LR: Izquierda-Derecha o TB: Arriba-Abajo).
  */
-const getLayoutedElements = (nodes, edges, direction = 'LR') => {
+const getLayoutedElements = (nodes, edges, direction = 'LR', projection = null) => {
   const isHorizontal = direction === 'LR';
 
-  // Agrupar materias por cuatrimestre absoluto (Año 1 C1 = 1, Año 1 C2 = 2, etc.)
-  const materiasPorCuatri = {};
+  // Agrupar materias por columna (proyectada o fija del plan)
+  const materiasPorColumna = {};
   nodes.forEach(node => {
     const m = node.data.materia;
-    const cuatriReal = (Number(m.anio) - 1) * 2 + (Number(m.cuatrimestre) % 2 === 0 ? 2 : 1);
-    if (!materiasPorCuatri[cuatriReal]) materiasPorCuatri[cuatriReal] = [];
-    materiasPorCuatri[cuatriReal].push(node);
+    let col;
+    
+    if (projection && projection[m.codigo]) {
+      col = projection[m.codigo].columna;
+    } else {
+      col = (Number(m.anio) - 1) * 2 + (Number(m.cuatrimestre) % 2 === 0 ? 2 : 1);
+    }
+
+    if (!materiasPorColumna[col]) materiasPorColumna[col] = [];
+    materiasPorColumna[col].push(node);
   });
 
-  const sortedCuatris = Object.keys(materiasPorCuatri).map(Number).sort((a, b) => a - b);
+  const sortedCols = Object.keys(materiasPorColumna).map(Number).sort((a, b) => a - b);
 
   // Espaciado entre columnas (X) y filas (Y)
   const gapX = isHorizontal ? 300 : 250;
@@ -70,47 +77,56 @@ const getLayoutedElements = (nodes, edges, direction = 'LR') => {
 
   const newNodes = [];
 
-  sortedCuatris.forEach((cuatri, cuatriIdx) => {
-    // 1. Crear nodo de encabezado para el cuatrimestre
+  sortedCols.forEach((col, colIdx) => {
+    // 1. Crear nodo de encabezado para el cuatrimestre/columna
+    // Obtenemos una etiqueta representativa de la columna (si existe proyección)
+    let label = `Cuatrimestre ${col}`;
+    if (projection) {
+        const firstMateriaInCol = materiasPorColumna[col][0];
+        if (firstMateriaInCol && projection[firstMateriaInCol.id]?.labelCol) {
+            label = projection[firstMateriaInCol.id].labelCol;
+        }
+    }
+
     newNodes.push({
-      id: `header-${cuatri}`,
+      id: `header-${col}`,
       type: 'semester',
-      data: { label: `Cuatrimestre ${cuatri}`, direction: direction, variant: 'header' },
+      data: { label, direction: direction, variant: 'header' },
       position: {
-        x: isHorizontal ? cuatriIdx * gapX + 30 : -220,
-        y: isHorizontal ? -100 : cuatriIdx * gapY + 35,
+        x: isHorizontal ? colIdx * gapX + 30 : -220,
+        y: isHorizontal ? -100 : colIdx * gapY + 35,
       },
       zIndex: -1,
-      draggable: false, // Los encabezados nunca son arrastrables
+      draggable: false,
     });
 
-    // 2. Crear nodo separador (línea punteada) entre este cuatrimestre y el anterior
-    if (cuatriIdx > 0) {
+    // 2. Crear nodo separador
+    if (colIdx > 0) {
       newNodes.push({
-        id: `sep-${cuatri}`,
+        id: `sep-${col}`,
         type: 'semester',
         data: { direction: direction, variant: 'separator' },
         position: {
-          x: isHorizontal ? (cuatriIdx * gapX) - 40 : -220,
-          y: isHorizontal ? -100 : (cuatriIdx * gapY) - 50,
+          x: isHorizontal ? (colIdx * gapX) - 40 : -220,
+          y: isHorizontal ? -100 : (colIdx * gapY) - 50,
         },
         zIndex: -2,
         draggable: false,
       });
     }
 
-    // 3. Posicionar las materias dentro del cuatrimestre
-    const nodesInCuatri = materiasPorCuatri[cuatri];
-    nodesInCuatri.forEach((node, nodeIdx) => {
+    // 3. Posicionar las materias dentro de la columna
+    const nodesInCol = materiasPorColumna[col];
+    nodesInCol.forEach((node, nodeIdx) => {
       newNodes.push({
         ...node,
-        targetPosition: isHorizontal ? 'left' : 'top', // Entrada de correlativas
-        sourcePosition: isHorizontal ? 'right' : 'bottom', // Salida hacia materias siguientes
+        targetPosition: isHorizontal ? 'left' : 'top',
+        sourcePosition: isHorizontal ? 'right' : 'bottom',
         position: {
-          x: isHorizontal ? cuatriIdx * gapX : nodeIdx * gapX,
-          y: isHorizontal ? (nodeIdx * gapY) : cuatriIdx * gapY,
+          x: isHorizontal ? colIdx * gapX : nodeIdx * gapX,
+          y: isHorizontal ? (nodeIdx * gapY) : colIdx * gapY,
         },
-        draggable: false, // Deshabilitamos el arrastre por pedido del usuario
+        draggable: false,
       });
     });
   });
@@ -122,7 +138,7 @@ const getLayoutedElements = (nodes, edges, direction = 'LR') => {
  * FlowInner: Componente interno que maneja el estado del grafo y la lógica de interacción.
  * Se encuentra dentro de un ReactFlowProvider.
  */
-const FlowInner = ({ materias, progreso }) => {
+const FlowInner = ({ materias, progreso, onNodeClick, projection }) => {
   const [direction, setDirection] = useState('LR');
   const [hoveredNode, setHoveredNode] = useState(null);
   const { zoomIn, zoomOut, fitView } = useReactFlow();
@@ -137,12 +153,13 @@ const FlowInner = ({ materias, progreso }) => {
       type: 'materia',
       data: {
         materia: m,
-        estado: progreso[m.codigo] || 'Disponible'
+        estado: (projection && projection[m.codigo]?.estado) || (progreso && progreso[m.codigo]) || 'Disponible',
+        onClick: onNodeClick
       },
       position: { x: 0, y: 0 },
     }));
-  }, [materias, progreso]);
-
+  }, [materias, progreso, onNodeClick, projection]);
+  
   // Transformar las relaciones de correlatividad en conexiones (edges)
   const initialEdges = useMemo(() => {
     const edges = [];
@@ -173,16 +190,16 @@ const FlowInner = ({ materias, progreso }) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   // 1. Efecto para actualizar los elementos del grafo (nodos y flechas)
-  // Se ejecuta cada vez que cambian las materias o el progreso, pero NO mueve la cámara.
   useEffect(() => {
     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
       initialNodes,
       initialEdges,
-      direction
+      direction,
+      projection
     );
     setNodes(layoutedNodes);
     setEdges(layoutedEdges);
-  }, [initialNodes, initialEdges, direction, setNodes, setEdges]);
+  }, [initialNodes, initialEdges, direction, setNodes, setEdges, projection]);
 
   // 2. Efecto para el manejo de la cámara (Centrado)
   // Se dispara al cambiar la dirección o cuando los nodos se cargan por primera vez.

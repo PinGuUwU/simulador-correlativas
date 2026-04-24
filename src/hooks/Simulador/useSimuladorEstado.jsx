@@ -3,8 +3,7 @@ import { addToast } from '@heroui/react'
 import planService from '../../services/planService'
 import { useAuth } from '../../context/AuthContext'
 
-const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio }) => {
-    const { getProgresoLocal, getSimulacionLocal } = useAuth();
+const useSimuladorEstado = ({ plan, anioInicio, cuatriInicio }) => {
     const [materias, setMaterias] = useState([])
     const [cargando, setCargando] = useState(false)
     const [progresoSimulado, setProgresoSimulado] = useState(null)
@@ -30,110 +29,25 @@ const useSimuladorEstado = ({ plan, modo, anioInicio, cuatriInicio }) => {
                 setCargando(false);
                 return;
             }
-            setMaterias(planData.materias)
-
-            // Modo: cargar simulación guardada
-            if (modo === 'guardado') {
-                const parsed = getSimulacionLocal(plan);
-                if (parsed) {
-                    // Update saved history with fresh materia definitions from planData
-                    const historialActualizado = (parsed.historialSemestres ?? []).map(semestre => {
-                        return {
-                            ...semestre,
-                            materiasDelSemestre: semestre.materiasDelSemestre.map(mGuardada => {
-                                const mFresca = planData.materias.find(m => m.codigo === mGuardada.codigo);
-                                return mFresca || mGuardada;
-                            })
-                        };
-                    });
-
-                    setHistorialSemestres(historialActualizado)
-                    setProgresoSimulado(parsed.progresoSimulado ?? {})
-                    setProgresoBase(parsed.progresoBase ?? {})
-                    setAnioActual(parsed.anioActual ?? new Date().getFullYear())
-                    setCuatri(parsed.cuatri ?? '1')
-                    setSimulacionTerminada(parsed.simulacionTerminada ?? false)
-                    setCargando(false)
-                    return
-                }
-                // Si no hay guardado, cae al modo "nuevo"
-            }
-
-            // Progreso real del alumno (de /progreso)
-            const progresoInicial = getProgresoLocal(plan);
-
-            let nuevoProgreso = {}
             const data = planData.materias
-            // Modo: nuevo (sin progreso previo)
-            if (modo === 'nuevo' || !progresoInicial) {
-                data.forEach(m => { nuevoProgreso[m.codigo] = 'No Cursado' })
-                setProgresoSimulado(nuevoProgreso)
-                setProgresoBase(nuevoProgreso)
-                setAnioActual(Number(anioInicio) || new Date().getFullYear())
-                setCuatri(cuatriInicio || '1')
-                setHistorialSemestres([])
-                setSimulacionTerminada(false)
-            } else {
-                // Modo: viejo (con progreso previo del alumno)
-                data.forEach(m => {
-                    nuevoProgreso[m.codigo] = ['Regular', 'Aprobado'].includes(progresoInicial[m.codigo])
-                        ? 'Cursado'
-                        : 'No Cursado'
-                })
+            setMaterias(data)
 
-                let maxSemestre = 0
-                data.forEach(m => {
-                    if (nuevoProgreso[m.codigo] === 'Cursado')
-                        maxSemestre = Math.max(maxSemestre, Number(m.cuatrimestre))
-                })
-
-                // Calcular fechas reales hacia atrás desde anioInicio/cuatriInicio
-                let currentY = Number(anioInicio) || new Date().getFullYear()
-                let currentC = Number(cuatriInicio) || 1
-                const pastDates = []
-                for (let i = 0; i < maxSemestre; i++) {
-                    if (currentC === 1) { currentC = 2; currentY-- }
-                    else { currentC = 1 }
-                    pastDates.push({ y: currentY, c: currentC })
-                }
-                pastDates.reverse()
-
-                const fakeHistorial = []
-                const acumulado = {}
-                data.forEach(m => { acumulado[m.codigo] = 'No Cursado' })
-
-                for (let i = 1; i <= maxSemestre; i++) {
-                    const materiasDelSemestre = data.filter(m => Number(m.cuatrimestre) === i)
-                    const progresoBaseSnapshot = { ...acumulado }
-                    materiasDelSemestre.forEach(m => {
-                        if (nuevoProgreso[m.codigo] === 'Cursado') acumulado[m.codigo] = 'Cursado'
-                    })
-                    const progresoSnapshot = { ...acumulado }
-                    const pd = pastDates[i - 1]
-                    fakeHistorial.push({
-                        anioActual: pd.y,
-                        cuatri: String(pd.c),
-                        materiasDelSemestre,
-                        progresoSnapshot,
-                        progresoBaseSnapshot
-                    })
-                }
-
-                setHistorialSemestres(fakeHistorial)
-                setProgresoSimulado({ ...acumulado })
-                setProgresoBase({ ...acumulado })
-                setAnioActual(Number(anioInicio) || new Date().getFullYear())
-                setCuatri(cuatriInicio || '1')
-
-                const cursadas = data.filter(m => acumulado[m.codigo] === 'Cursado').length
-                setSimulacionTerminada(cursadas === data.length && data.length > 0)
-            }
-        } catch {
-            // Error interno al calcular el estado inicial: el finally resetea cargando.
+            // Siempre iniciamos desde cero para una simulación limpia
+            let nuevoProgreso = {}
+            data.forEach(m => { nuevoProgreso[m.codigo] = 'No Cursado' })
+            
+            setProgresoSimulado(nuevoProgreso)
+            setProgresoBase(nuevoProgreso)
+            setAnioActual(Number(anioInicio) || new Date().getFullYear())
+            setCuatri(cuatriInicio || '1')
+            setHistorialSemestres([])
+            setSimulacionTerminada(false)
+        } catch (error) {
+            console.error(error)
         } finally {
             setCargando(false)
         }
-    }, [plan, modo, anioInicio, cuatriInicio])
+    }, [plan]) // Only re-run when plan changes. anioInicio/cuatriInicio are initial values.
 
 
     // ─── Habilitar/deshabilitar botones de navegación ──────────────────────

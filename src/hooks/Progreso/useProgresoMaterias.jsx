@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import materiasUtils from "../../utils/Progreso/materiasUtils"
+import { trackCambioMateria, trackRecursada } from "../../services/analyticsService"
 
 const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthProgreso) => {
 
@@ -148,6 +149,16 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
         // Guardamos en estado local y global/nube
         setProgreso(nuevoProgreso);
         updateAuthProgreso(plan, nuevoProgreso);
+
+        // Trackeamos el cambio
+        trackCambioMateria({ plan, codigoMateria, estadoNuevo });
+
+        // Detección de Recursada (Regresión de estado)
+        const estadosAvanzados = ['Regular', 'Aprobado', 'Promocionado'];
+        const estadosIniciales = ['Cursando', 'Disponible', 'Bloqueado'];
+        if (estadosAvanzados.includes(estadoInicial) && estadosIniciales.includes(estadoNuevo)) {
+            trackRecursada({ plan, codigo: codigoMateria, estado_anterior: estadoInicial });
+        }
     }
 
     // 6. Cambio para múltiples materias a la vez
@@ -167,6 +178,9 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
 
             nuevoProgreso[codigoMateria] = estadoNuevo;
             materiasModificadas.push(codigoMateria);
+
+            // Trackeamos individualmente cada cambio masivo si es relevante
+            trackCambioMateria({ plan, codigoMateria, estadoNuevo });
 
             // Siempre asumiremos targetState === Aprobado para esta utilidad, pero por las dudas:
             if (materiaActual.tesis && (estadoNuevo === materiasUtils.estadosPosibles[1] || estadoNuevo === materiasUtils.estadosPosibles[2])) {

@@ -8,16 +8,31 @@
  * Convención de nombres de eventos: snake_case, máx 40 caracteres (límite GA4).
  */
 
-import { analytics } from './firebase';
+import { analytics, app } from './firebase';
+
+// Función auxiliar para obtener analytics de forma segura
+const getAnalyticsInstance = async () => {
+    if (analytics) return analytics;
+    if (typeof window === "undefined") return null;
+    
+    try {
+        const { getAnalytics } = await import('firebase/analytics');
+        return getAnalytics(app);
+    } catch {
+        return null;
+    }
+};
 
 // Guard: en entornos donde analytics no está disponible (SSR, tests), no falla
 const track = async (eventName, params = {}) => {
     try {
-        if (!analytics) return;
+        const instance = await getAnalyticsInstance();
+        if (!instance) return;
+        
         const { logEvent } = await import('firebase/analytics');
-        logEvent(analytics, eventName, params);
-    } catch {
-        // Never break the app for a tracking failure
+        logEvent(instance, eventName, params);
+    } catch (err) {
+        console.warn(`Analytics error (${eventName}):`, err);
     }
 };
 
@@ -136,3 +151,44 @@ export const trackCambioTema = ({ tema }) =>
  */
 export const trackDescargaPDF = ({ plan }) =>
     track('descarga_pdf', { plan });
+
+// ─── Nuevos Eventos Estratégicos (Insights Académicos) ────────────────────────
+
+/**
+ * Trackea cuando el usuario elige o cambia de plan (Sistemas, Civil, etc.).
+ * @param {{ plan: string, origen: 'settings' | 'welcome_modal' }} params
+ */
+export const trackSeleccionCarrera = ({ plan, origen }) =>
+    track('seleccion_carrera', { plan, origen });
+
+/**
+ * Trackea el estado inicial del usuario al guardar por primera vez.
+ * @param {{ plan: string, aprobadas: number, total: number }} params
+ */
+export const trackProgresoInicial = ({ plan, aprobadas, total }) =>
+    track('progreso_inicial', { 
+        plan, 
+        cant_aprobadas: aprobadas,
+        porcentaje_inicial: Math.round((aprobadas / total) * 100)
+    });
+
+/**
+ * Trackea clics en materias bloqueadas para identificar trabas.
+ * @param {{ plan: string, codigo: string, nombre: string }} params
+ */
+export const trackFriccionCorrelativa = ({ plan, codigo, nombre }) =>
+    track('friccion_correlativa', { plan, codigo, nombre });
+
+/**
+ * Trackea cuando un alumno pasa de un estado avanzado a uno inicial (recursada).
+ * @param {{ plan: string, codigo: string, estado_anterior: string }} params
+ */
+export const trackRecursada = ({ plan, codigo, estado_anterior }) =>
+    track('recursada_materia', { plan, codigo, estado_anterior });
+
+/**
+ * Trackea la cantidad de semestres proyectados para recibirse al terminar una simulación.
+ * @param {{ plan: string, semestres_totales: number }} params
+ */
+export const trackProyeccionEgreso = ({ plan, semestres_totales }) =>
+    track('proyeccion_egreso', { plan, semestres_totales });

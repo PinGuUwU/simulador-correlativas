@@ -2,6 +2,7 @@ import { Card, CardHeader, CardBody, CardFooter, Chip, Popover, PopoverTrigger, 
 import { useState } from "react";
 import estadoUtils from "../../utils/Progreso/estadoUtils";
 import regularidadUtils from "../../utils/Progreso/regularidadUtils";
+import { trackFriccionCorrelativa } from "../../services/analyticsService";
 
 function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, vista = 'grid' }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +11,21 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
     const { codigo, correlativas, nombre, anio, cuatrimestre, horas_totales, horas_semanales } = materia;
 
     const config = estadoUtils.ESTADO_CONFIG[estado] || estadoUtils.ESTADO_CONFIG["Disponible"];
+
+    const handleOpenPopover = (open) => {
+        setIsOpen(open);
+        if (open && estado === 'Bloqueado') {
+            // Buscamos el plan en el contexto si fuera necesario, pero aquí lo pasamos hardcodeado 
+            // o mejor, dejamos que el evento use lo que tiene. 
+            // Como MateriaCard no recibe el plan directamente, lo omitimos o lo inferimos si podemos.
+            // REVISIÓN: El plan suele estar en el contexto de la página que usa MateriaCard.
+            trackFriccionCorrelativa({ 
+                plan: 'unknown', // El plan no está en los props de MateriaCard
+                codigo: codigo,
+                nombre: nombre 
+            });
+        }
+    };
 
     const handleAction = (actionType, arg) => {
         setIsOpen(false); // Cerramos el popover automáticamente
@@ -96,7 +112,7 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
     );
 
     return (
-        <Popover placement="bottom" showArrow={true} className="w-full max-w-[280px]" isOpen={isOpen} onOpenChange={(open) => setIsOpen(open)}>
+        <Popover placement="bottom" showArrow={true} className="w-full max-w-[280px]" isOpen={isOpen} onOpenChange={handleOpenPopover}>
             <PopoverTrigger>
                 <div role="button" aria-label="Cambiar estado" className="w-full cursor-pointer hover:scale-[1.02] transition-transform">
                     {cardContent}

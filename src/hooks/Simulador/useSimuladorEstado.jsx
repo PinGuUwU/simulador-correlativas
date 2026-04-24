@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { addToast } from '@heroui/react'
 import planService from '../../services/planService'
 import { useAuth } from '../../context/AuthContext'
+import { trackAvanceSemestre, trackProyeccionEgreso } from '../../services/analyticsService'
 
 const useSimuladorEstado = ({ plan, anioInicio, cuatriInicio }) => {
     const [materias, setMaterias] = useState([])
@@ -94,10 +95,14 @@ const useSimuladorEstado = ({ plan, anioInicio, cuatriInicio }) => {
         setHistorialSemestres(prev => [...prev, semestreCompletado])
         setProgresoBase({ ...progresoSimulado })
 
+        // Trackeamos el avance
+        trackAvanceSemestre({ plan, anio: anioActual, cuatri });
+
         const cantidadCursados = materias.filter(m => progresoSimulado[m.codigo] === 'Cursado').length
         if (cantidadCursados === materias.length) {
             setSimulacionTerminada(true)
             setEstadoSiguiente(false)
+            trackProyeccionEgreso({ plan, semestres_totales: semestreActualPlan });
         } else if (cuatri === '1') {
             setCuatri('2')
         } else {

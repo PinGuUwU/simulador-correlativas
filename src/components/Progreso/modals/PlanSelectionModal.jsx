@@ -9,8 +9,14 @@ import {
     Card,
     CardBody
 } from '@heroui/react';
+import { trackSeleccionCarrera } from '../../../services/analyticsService';
 
 export default function PlanSelectionModal({ isOpen, onSelect }) {
+    const handleSelect = (plan) => {
+        onSelect(plan);
+        trackSeleccionCarrera({ plan, origen: 'welcome_modal' });
+    };
+
     return (
         <Modal 
             isOpen={isOpen} 
@@ -39,7 +45,7 @@ export default function PlanSelectionModal({ isOpen, onSelect }) {
                         <Card 
                             isPressable 
                             className="border-2 border-transparent hover:border-primary transition-all shadow-sm"
-                            onPress={() => onSelect('17.14')}
+                            onPress={() => handleSelect('17.14')}
                         >
                             <CardBody className="p-6 flex flex-col items-center text-center gap-3">
                                 <div className="p-3 rounded-xl bg-default-100">
@@ -57,7 +63,7 @@ export default function PlanSelectionModal({ isOpen, onSelect }) {
                         <Card 
                             isPressable 
                             className="border-2 border-transparent hover:border-primary transition-all shadow-sm"
-                            onPress={() => onSelect('17.13')}
+                            onPress={() => handleSelect('17.13')}
                         >
                             <CardBody className="p-6 flex flex-col items-center text-center gap-3">
                                 <div className="p-3 rounded-xl bg-default-100">

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Button, Popover, PopoverContent, PopoverTrigger, Spinner, addToast } from '@heroui/react';
 import { useAuth } from '../../context/AuthContext';
+import { trackProgresoInicial } from '../../services/analyticsService';
+import planService from '../../services/planService';
 
 export default function SyncCloud({ plan }) {
-    const { user, uploadPlanProgress, downloadAllProgress } = useAuth();
+    const { user, userData, uploadPlanProgress, downloadAllProgress } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [action, setAction] = useState('');
 
@@ -12,8 +14,23 @@ export default function SyncCloud({ plan }) {
         setIsLoading(true);
         setAction('Guardando...');
         try {
+            // Verificamos si es el primer guardado para este plan
+            const esPrimerGuardado = !userData?.progreso || !userData?.progreso[plan];
+
             await uploadPlanProgress(user.uid, plan);
             addToast({ title: '¡Éxito!', description: 'Tu progreso se guardó en la nube.', color: 'success' });
+
+            if (esPrimerGuardado) {
+                const progresoLocal = JSON.parse(localStorage.getItem(`progreso+${plan}`)) || {};
+                const materiasPlan = planService.getPlanByNumber(plan)?.materias || [];
+                const aprobadas = Object.values(progresoLocal).filter(s => s === 'Aprobado' || s === 'Promocionado').length;
+                
+                trackProgresoInicial({
+                    plan,
+                    aprobadas,
+                    total: materiasPlan.length
+                });
+            }
         } catch (err) {
             addToast({ title: 'Error', description: 'No se pudo guardar en la nube.', color: 'danger' });
         } finally {

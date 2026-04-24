@@ -37,7 +37,7 @@ const ESTADO_CONFIG = {
     },
     // --- Estados para el Simulador Dinámico ---
     Seleccionada: {
-        estilo: "bg-primary border-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 scale-105 z-10 font-black",
+        estilo: "bg-primary/20 border-primary shadow-[0_0_20px_-5px_rgba(59,130,246,0.6)] ring-2 ring-primary/20 text-primary-900 dark:text-primary-100 font-black scale-105 z-10 transition-all duration-300",
         color: "primary",
         icono: "fa-solid fa-check-double",
     },

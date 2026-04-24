@@ -26,7 +26,7 @@ const SemesterNode = ({ data }) => {
     return (
       <div className="pointer-events-none select-none flex items-center justify-center">
         {/* Línea divisoria principal entre cuatrimestres */}
-        <div className={`border-red-300 border-dashed border-4 opacity-90 ${isHorizontal ? 'border-l h-200' : 'border-t w-300'}`} />
+        <div className={`border-red-300 border-dashed border-4 opacity-90 ${isHorizontal ? 'border-l h-400' : 'border-t w-500'}`} />
       </div>
     );
   }
@@ -50,17 +50,18 @@ const nodeTypes = {
  * getLayoutedElements: Calcula las posiciones de los nodos en base a su año y cuatrimestre.
  * Organiza las materias en una grilla según la dirección (LR: Izquierda-Derecha o TB: Arriba-Abajo).
  */
-const getLayoutedElements = (nodes, edges, direction = 'LR', projection = null) => {
+const getLayoutedElements = (nodes, edges, direction = 'LR', projectionData = null) => {
   const isHorizontal = direction === 'LR';
+  const { items, labels, maxCol } = projectionData || { items: {}, labels: {}, maxCol: 0 };
 
   // Agrupar materias por columna (proyectada o fija del plan)
   const materiasPorColumna = {};
   nodes.forEach(node => {
     const m = node.data.materia;
     let col;
-    
-    if (projection && projection[m.codigo]) {
-      col = projection[m.codigo].columna;
+
+    if (items && items[m.codigo]) {
+      col = items[m.codigo].columna;
     } else {
       col = (Number(m.anio) - 1) * 2 + (Number(m.cuatrimestre) % 2 === 0 ? 2 : 1);
     }
@@ -69,24 +70,22 @@ const getLayoutedElements = (nodes, edges, direction = 'LR', projection = null) 
     materiasPorColumna[col].push(node);
   });
 
-  const sortedCols = Object.keys(materiasPorColumna).map(Number).sort((a, b) => a - b);
-
   // Espaciado entre columnas (X) y filas (Y)
   const gapX = isHorizontal ? 300 : 250;
   const gapY = isHorizontal ? 150 : 220;
 
   const newNodes = [];
 
-  sortedCols.forEach((col, colIdx) => {
+  // Determinamos el rango de columnas a dibujar
+  const startCol = 1;
+  const endCol = maxCol || Math.max(...Object.keys(materiasPorColumna).map(Number), 0);
+
+  // Iteramos por TODAS las columnas del rango para no saltarnos las vacías
+  for (let col = startCol; col <= endCol; col++) {
+    const colIdx = col - startCol;
+
     // 1. Crear nodo de encabezado para el cuatrimestre/columna
-    // Obtenemos una etiqueta representativa de la columna (si existe proyección)
-    let label = `Cuatrimestre ${col}`;
-    if (projection) {
-        const firstMateriaInCol = materiasPorColumna[col][0];
-        if (firstMateriaInCol && projection[firstMateriaInCol.id]?.labelCol) {
-            label = projection[firstMateriaInCol.id].labelCol;
-        }
-    }
+    const label = labels?.[col] || `Cuatrimestre ${col}`;
 
     newNodes.push({
       id: `header-${col}`,
@@ -115,8 +114,8 @@ const getLayoutedElements = (nodes, edges, direction = 'LR', projection = null) 
       });
     }
 
-    // 3. Posicionar las materias dentro de la columna
-    const nodesInCol = materiasPorColumna[col];
+    // 3. Posicionar las materias dentro de la columna (si existen)
+    const nodesInCol = materiasPorColumna[col] || [];
     nodesInCol.forEach((node, nodeIdx) => {
       newNodes.push({
         ...node,
@@ -129,7 +128,7 @@ const getLayoutedElements = (nodes, edges, direction = 'LR', projection = null) 
         draggable: false,
       });
     });
-  });
+  }
 
   return { nodes: newNodes, edges };
 };
@@ -148,18 +147,36 @@ const FlowInner = ({ materias, progreso, onNodeClick, projection }) => {
 
   // Transformar la lista de materias en nodos iniciales para React Flow
   const initialNodes = useMemo(() => {
-    return materias.map((m) => ({
-      id: m.codigo,
-      type: 'materia',
-      data: {
-        materia: m,
-        estado: (projection && projection[m.codigo]?.estado) || (progreso && progreso[m.codigo]) || 'Disponible',
-        onClick: onNodeClick
-      },
-      position: { x: 0, y: 0 },
-    }));
+    const projItems = projection?.items || {};
+    return materias.map((m) => {
+      const proj = projItems[m.codigo];
+      const prog = progreso?.[m.codigo];
+      
+      let estadoFinal = 'Disponible';
+
+      if (proj) {
+        if (proj.estado === 'Presente') {
+          // En el cuatrimestre actual, el color depende del click (progresoSimulado)
+          estadoFinal = prog === 'Cursado' ? 'Seleccionada' : 'Disponible';
+        } else {
+          // En pasado y futuro, usamos lo que diga la proyección
+          estadoFinal = proj.estado;
+        }
+      }
+
+      return {
+        id: m.codigo,
+        type: 'materia',
+        data: {
+          materia: m,
+          estado: estadoFinal,
+          onClick: onNodeClick
+        },
+        position: { x: 0, y: 0 },
+      };
+    });
   }, [materias, progreso, onNodeClick, projection]);
-  
+
   // Transformar las relaciones de correlatividad en conexiones (edges)
   const initialEdges = useMemo(() => {
     const edges = [];
@@ -318,11 +335,6 @@ const FlowInner = ({ materias, progreso, onNodeClick, projection }) => {
       >
         <Background color="#94a3b8" variant="dots" gap={20} size={1} />
       </ReactFlow>
-
-      {/* Leyenda interactiva */}
-      <div className="absolute bottom-4 left-4 z-10 bg-background/80 backdrop-blur-md p-2 rounded-lg border border-default-200 text-sm font-bold text-foreground/60 shadow-sm pointer-events-none uppercase tracking-tighter">
-        Pasa el mouse para ver correlativas
-      </div>
     </div>
   );
 };

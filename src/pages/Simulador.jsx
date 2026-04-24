@@ -61,22 +61,23 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
     )
 
     // ─── Proyección Dinámica (para el grafo) ─────────────────────────────────
+    // El layout se calcula basándose en el progresoBASE (estable durante el semestre)
     const projection = React.useMemo(() => {
-        if (!materias.length || !progresoSimulado) return null;
+        if (!materias.length || !progresoBase) return null;
         return calculateProjection({
             materias,
             historialSemestres,
-            progresoSimulado,
+            progresoBase, // Dependencia estable
             cuatriActual: cuatri,
             anioActual
         });
-    }, [materias, historialSemestres, progresoSimulado, cuatri, anioActual]);
+    }, [materias, historialSemestres, progresoBase, cuatri, anioActual]);
 
     // Función para manejar clicks en el grafo - Envuelto en useCallback para estabilidad
     const handleNodeClick = React.useCallback((codigo) => {
         // Solo permitimos interactuar si la materia es parte del presente (columna actual)
-        const item = projection?.[codigo];
-        if (item && (item.estado === 'Seleccionada' || item.estado === 'Disponible')) {
+        const item = projection?.items?.[codigo];
+        if (item && item.estado === 'Presente') {
             cambioDeEstado(codigo);
         }
     }, [projection, cambioDeEstado]);
@@ -281,74 +282,82 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                             </>
                                         ) : (
                                             /* Vista de Grafo */
-                                            <div className="animate-in fade-in zoom-in-95 duration-500 relative">
-                                                {/* Botones de navegación flotantes para el grafo */}
-                                                <div className="absolute bottom-6 right-6 z-50 flex flex-col gap-3">
+                                            <div className="animate-in fade-in zoom-in-95 duration-500 relative h-[700px] border border-default-200 rounded-3xl overflow-hidden shadow-sm">
+                                                {/* Controles de Navegación Flotantes - Integrados en el Canva */}
+                                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center bg-background/60 backdrop-blur-xl border border-default-200 p-2 rounded-2xl shadow-2xl gap-4 min-w-[300px] justify-between">
                                                     <Button
                                                         onPress={handleAnterior}
                                                         isDisabled={!estadoAnterior}
-                                                        color="primary" variant="flat" size="lg" isIconOnly
-                                                        className="shadow-xl backdrop-blur-md rounded-2xl w-14 h-14 border border-primary/20"
-                                                        title="Paso Anterior"
+                                                        color="primary" variant="flat" size="lg"
+                                                        className="font-bold rounded-xl px-6"
+                                                        startContent={<i className="fa-solid fa-chevron-left" />}
                                                     >
-                                                        <i className="fa-solid fa-chevron-left text-xl" />
+                                                        Anterior
                                                     </Button>
+
+                                                    <div className="flex flex-col items-center px-2">
+                                                        <span className="text-[10px] text-foreground/50 font-black uppercase tracking-tighter leading-none">Simulando</span>
+                                                        <span className="text-sm font-black text-primary truncate whitespace-nowrap">
+                                                            C{cuatri} {anioActual}
+                                                        </span>
+                                                    </div>
+
                                                     <Button
                                                         onPress={() => handleSiguiente(materiasCursables)}
                                                         isDisabled={!estadoSiguiente}
-                                                        color="primary" variant="shadow" size="lg" isIconOnly
-                                                        className="shadow-xl rounded-2xl w-14 h-14 transition-transform hover:scale-110 active:scale-95"
-                                                        title="Siguiente Paso"
+                                                        color="primary" variant="shadow" size="lg"
+                                                        className="font-bold rounded-xl px-6 transition-transform hover:scale-105 active:scale-95"
+                                                        endContent={<i className="fa-solid fa-chevron-right" />}
                                                     >
-                                                        <i className="fa-solid fa-chevron-right text-xl" />
+                                                        Siguiente
                                                     </Button>
                                                 </div>
 
                                                 <MateriasGrafo
                                                     materias={materias}
+                                                    progreso={progresoSimulado}
                                                     onNodeClick={handleNodeClick}
                                                     projection={projection}
                                                 />
-                                                <p className="text-xs text-foreground/50 mt-2 italic text-center">
-                                                    * Solo puedes marcar materias disponibles en el cuatrimestre actual.
-                                                </p>
                                             </div>
                                         )}
                                     </>
                                 )}
 
-                                {/* Barra Anterior / Siguiente */}
-                                <Card className="mt-8 bg-background/60 backdrop-blur-md border border-default-200 shadow-sm rounded-2xl">
-                                    <CardBody className="flex flex-col md:flex-row justify-between items-center p-4 md:p-6 gap-4">
-                                        <Button
-                                            onPress={handleAnterior}
-                                            isDisabled={!estadoAnterior}
-                                            variant="flat" color="primary"
-                                            startContent={<i className="fa-solid fa-chevron-left" />}
-                                            className="w-full md:w-auto font-medium"
-                                        >
-                                            Anterior
-                                        </Button>
+                                {/* Barra de navegación de lista (solo se muestra en modo lista) */}
+                                {viewMode === 'lista' && !simulacionTerminada && (
+                                    <Card className="mt-8 bg-background/60 backdrop-blur-md border border-default-200 shadow-sm rounded-2xl">
+                                        <CardBody className="flex flex-col md:flex-row justify-between items-center p-4 md:p-6 gap-4">
+                                            <Button
+                                                onPress={handleAnterior}
+                                                isDisabled={!estadoAnterior}
+                                                variant="flat" color="primary"
+                                                startContent={<i className="fa-solid fa-chevron-left" />}
+                                                className="w-full md:w-auto font-medium"
+                                            >
+                                                Anterior
+                                            </Button>
 
-                                        <div className="flex flex-col items-center text-center">
-                                            <span className="text-xs md:text-sm text-foreground/80 font-medium tracking-wider uppercase mb-1">Progreso</span>
-                                            <span className="text-sm md:text-base font-semibold text-foreground">
-                                                {simulacionTerminada ? 'Simulación finalizada' : 'Continúa configurando el semestre'}
-                                            </span>
-                                        </div>
+                                            <div className="flex flex-col items-center text-center">
+                                                <span className="text-xs md:text-sm text-foreground/80 font-medium tracking-wider uppercase mb-1">Progreso</span>
+                                                <span className="text-sm md:text-base font-semibold text-foreground">
+                                                    Continúa configurando el semestre
+                                                </span>
+                                            </div>
 
-                                        <Button
-                                            onPress={() => handleSiguiente(materiasCursables)}
-                                            isDisabled={!estadoSiguiente}
-                                            variant="shadow" color="primary"
-                                            endContent={<i className="fa-solid fa-chevron-right" />}
-                                            className="w-full md:w-auto font-bold transition-transform hover:scale-105"
-                                            aria-label="Siguiente cuatrimestre"
-                                        >
-                                            Siguiente
-                                        </Button>
-                                    </CardBody>
-                                </Card>
+                                            <Button
+                                                onPress={() => handleSiguiente(materiasCursables)}
+                                                isDisabled={!estadoSiguiente}
+                                                variant="shadow" color="primary"
+                                                endContent={<i className="fa-solid fa-chevron-right" />}
+                                                className="w-full md:w-auto font-bold transition-transform hover:scale-105"
+                                                aria-label="Siguiente cuatrimestre"
+                                            >
+                                                Siguiente
+                                            </Button>
+                                        </CardBody>
+                                    </Card>
+                                )}
                             </div>
                         </div>
                     )}

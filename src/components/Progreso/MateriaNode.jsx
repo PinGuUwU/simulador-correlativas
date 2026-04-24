@@ -46,7 +46,9 @@ const MateriaNode = ({ data, targetPosition = Position.Left, sourcePosition = Po
                         {/* Información de cursado: Año y Cuatrimestre o Estado dinámico */}
                         <span className="text-sm font-bold opacity-60">
                             {estado === 'Seleccionada' ? (
-                                <span className="text-primary animate-pulse">Para cursar ahora</span>
+                                <span className="text-primary-600 dark:text-primary-400 flex items-center gap-1.5 animate-pulse">
+                                    <i className="fa-solid fa-check-circle text-[10px]" /> Seleccionada
+                                </span>
                             ) : estado === 'Disponible' ? (
                                 <span className="text-primary/70">Disponible</span>
                             ) : (

@@ -6,119 +6,113 @@
 export const calculateProjection = ({
     materias,
     historialSemestres,
-    progresoSimulado,
+    progresoBase,
     cuatriActual,
     anioActual
 }) => {
-    const projection = {}; // codigo -> { columna, estado }
+    const items = {}; 
+    const labels = {};
     const materiasRestantes = [...materias];
     
-    // 1. Mapear materias ya aprobadas en el historial (Pasado)
+    // 1. Mapear materias ya aprobadas (Pasado)
+    const colocadas = new Set();
     historialSemestres.forEach((semestre, index) => {
+        const col = index + 1;
+        labels[col] = `C${semestre.cuatri} ${semestre.anioActual}`;
+        
         semestre.materiasDelSemestre.forEach(m => {
             if (semestre.progresoSnapshot[m.codigo] === 'Cursado') {
-                projection[m.codigo] = { 
-                    columna: index + 1, 
-                    estado: 'Aprobada',
-                    labelCol: `C${semestre.cuatri} ${semestre.anioActual}`
+                items[m.codigo] = { 
+                    columna: col, 
+                    estado: 'Aprobada'
                 };
+                colocadas.add(m.codigo);
             }
         });
     });
 
-    const materiasAprobadasCount = Object.keys(projection).length;
     let turn = historialSemestres.length + 1;
     let currentCuatri = cuatriActual;
     let currentAnio = anioActual;
 
-    // Materias que el usuario ya seleccionó en el cuatrimestre actual
-    const seleccionadasAhora = new Set();
+    // 2. Procesar el Cuatrimestre Actual (Presente)
+    labels[turn] = `C${currentCuatri} ${currentAnio}`;
     const disponiblesAhora = new Set();
 
-    // 2. Procesar el Cuatrimestre Actual (Presente)
-    const colocadas = new Set(Object.keys(projection));
-    
-    // Identificar qué materias PODRÍAN cursarse ahora (correlativas + paridad)
     materiasRestantes.forEach(m => {
         if (colocadas.has(m.codigo)) return;
         
         const correlativasCumplidas = (m.correlativas || []).every(c => colocadas.has(c));
         const paridadCorrecta = Number(m.cuatrimestre) % 2 === Number(currentCuatri) % 2;
 
-        if (correlativasCumplidas && paridadCorrecta) {
+        // Regla Tesina
+        let cumpleTesina = true;
+        if (m.tesis) {
+            const otrasPendientes = materias.some(mat => !mat.tesis && !colocadas.has(mat.codigo));
+            if (otrasPendientes) cumpleTesina = false;
+        }
+
+        if (correlativasCumplidas && paridadCorrecta && cumpleTesina) {
             disponiblesAhora.add(m.codigo);
-            const estaSeleccionada = progresoSimulado[m.codigo] === 'Cursado';
-            
-            projection[m.codigo] = {
+            items[m.codigo] = {
                 columna: turn,
-                estado: estaSeleccionada ? 'Seleccionada' : 'Disponible',
-                labelCol: `C${currentCuatri} ${currentAnio}`
+                estado: 'Presente'
             };
-            
-            if (estaSeleccionada) {
-                seleccionadasAhora.add(m.codigo);
-            }
         }
     });
 
-    // 3. Proyectar el Futuro y el Resto (Gris/Bloqueado)
-    // Para la proyección, asumimos que las "Seleccionadas" se aprueban
-    let proyectadasAprobadas = new Set([...colocadas, ...seleccionadasAhora]);
+    // 3. Proyectar el Futuro
+    let proyectadasAprobadas = new Set([...colocadas, ...disponiblesAhora]);
     let turnFuturo = turn + 1;
     let fCuatri = currentCuatri === '1' ? '2' : '1';
     let fAnio = currentCuatri === '2' ? currentAnio + 1 : currentAnio;
 
     let loopSafety = 0;
-    while (proyectadasAprobadas.size < materias.length && loopSafety < 100) {
+    while (proyectadasAprobadas.size < materias.length && loopSafety < 50) {
         loopSafety++;
-        let huboCambios = false;
+        labels[turnFuturo] = `C${fCuatri} ${fAnio}*`;
+        let nuevasEnEsteTurno = [];
 
         materiasRestantes.forEach(m => {
-            if (projection[m.codigo]) return; // Ya colocada en pasado o presente
+            if (items[m.codigo]) return;
 
             const correlativasCumplidas = (m.correlativas || []).every(c => proyectadasAprobadas.has(c));
             const paridadCorrecta = Number(m.cuatrimestre) % 2 === Number(fCuatri) % 2;
 
-            if (correlativasCumplidas && paridadCorrecta) {
-                projection[m.codigo] = {
+            let cumpleTesina = true;
+            if (m.tesis) {
+                const otrasPendientes = materias.some(mat => !mat.tesis && !proyectadasAprobadas.has(mat.codigo));
+                if (otrasPendientes) cumpleTesina = false;
+            }
+
+            if (correlativasCumplidas && paridadCorrecta && cumpleTesina) {
+                items[m.codigo] = {
                     columna: turnFuturo,
-                    estado: 'Proyectada',
-                    labelCol: `C${fCuatri} ${fAnio}*`
+                    estado: 'Proyectada'
                 };
-                huboCambios = true;
+                nuevasEnEsteTurno.push(m.codigo);
             }
         });
 
-        // Para el siguiente paso de la proyección, asumimos que todas las proyectadas en este turno se aprueban
-        let nuevasAprobadas = false;
-        Object.keys(projection).forEach(codigo => {
-            if (projection[codigo].columna === turnFuturo) {
-                proyectadasAprobadas.add(codigo);
-                nuevasAprobadas = true;
-            }
-        });
-
+        nuevasEnEsteTurno.forEach(c => proyectadasAprobadas.add(c));
+        
         turnFuturo++;
         fCuatri = fCuatri === '1' ? '2' : '1';
         if (fCuatri === '1') fAnio++;
         
-        if (!nuevasAprobadas && loopSafety > 20) {
-             // Si no logramos colocar nada nuevo en varios turnos, salimos para evitar bucle
-             break;
-        }
+        if (nuevasEnEsteTurno.length === 0 && loopSafety > 20) break;
     }
 
-    // 4. Asegurar que TODAS las materias tengan una posición (Incluso las que no entran en la proyección ideal)
-    // Estas son materias que quedaron bloqueadas por no elegir sus correlativas en el paso actual
+    // 4. Postergadas
     materias.forEach(m => {
-        if (!projection[m.codigo]) {
-            projection[m.codigo] = {
-                columna: turnFuturo + 1,
-                estado: 'Bloqueado',
-                labelCol: 'Postergado'
+        if (!items[m.codigo]) {
+            items[m.codigo] = {
+                columna: turnFuturo,
+                estado: 'Bloqueado'
             };
+            labels[turnFuturo] = 'Postergado';
         }
     });
 
-    return projection;
+    return { items, labels, maxCol: Math.max(...Object.keys(labels).map(Number), 0) };
 };

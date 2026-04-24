@@ -11,6 +11,7 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import regularidadUtils from '../../utils/Progreso/regularidadUtils.js'
 import { Search } from 'lucide-react'
 import SyncCloud from './SyncCloud';
+import tituloIntermedioUtils from '../../utils/Progreso/tituloIntermedioUtils'
 
 function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, plan, busqueda = "", filtros = [], isAnioOpen, setIsAnioOpen, handleMostrarTodo }) {
     const { updateAuthProgreso } = useAuth();
@@ -167,17 +168,9 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
     const aniosTotales = [...new Set(materias.map((m) => Number(m.anio)))].sort((a, b) => a - b)
     const talleres = materias.filter(m => m.taller === true)
 
-    // Logica Título Intermedio
-    let tituloIntermedioText = "";
-    let materiasIntermedio = [];
-
-    if (plan === "Sistemas 17.14" || plan?.includes("17.14")) {
-        tituloIntermedioText = "Título Intermedio (Analista)";
-        materiasIntermedio = materias.filter(m => Number(m.cuatrimestre) <= 6 && !m.tesis && m.codigo !== "N/A");
-    } else if (plan === "Sistemas 17.13" || plan?.includes("17.13")) {
-        tituloIntermedioText = "Título Intermedio (Analista)";
-        materiasIntermedio = materias.filter(m => Number(m.cuatrimestre) <= 7 && !m.tesis && m.codigo !== "N/A");
-    }
+    // Lógica Título Intermedio
+    const tituloIntermedioText = tituloIntermedioUtils.getTituloIntermedioNombre(plan);
+    const materiasIntermedio = tituloIntermedioUtils.getMateriasIntermedio(plan, materias);
 
     // Para poder filtrar las materias
     const tabs = [

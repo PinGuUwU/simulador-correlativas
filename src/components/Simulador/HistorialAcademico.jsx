@@ -1,11 +1,36 @@
 import React from 'react'
-import { Button, Accordion, AccordionItem, Card, CardBody } from '@heroui/react'
+import { Button, Accordion, AccordionItem, Card, CardBody, Chip } from '@heroui/react'
+import tituloIntermedioUtils from '../../utils/Progreso/tituloIntermedioUtils'
 
 /**
  * Muestra el historial de semestres completados como una línea de tiempo con acordeones.
  */
-function HistorialAcademico({ historialSemestres, openedAccordions, setOpenedAccordions, descargandoPDF, plan }) {
+function HistorialAcademico({ historialSemestres, openedAccordions, setOpenedAccordions, descargandoPDF, plan, materias }) {
     if (historialSemestres.length === 0) return null
+
+    const tituloIntermedioNombre = tituloIntermedioUtils.getTituloIntermedioNombre(plan);
+    const materiasIntermedio = tituloIntermedioUtils.getMateriasIntermedio(plan, materias);
+
+    // Encontrar en qué índice de historial se alcanza el título intermedio
+    let indiceIntermedio = -1;
+    if (materiasIntermedio.length > 0) {
+        for (let i = 0; i < historialSemestres.length; i++) {
+            const snap = historialSemestres[i].progresoSnapshot;
+            // Convertimos el progreso del simulador (Cursado/No Cursado) al formato esperado por la utilidad (Aprobado/Promocionado)
+            // O adaptamos la utilidad para que acepte un mapeo de estados.
+            // En el simulador usamos 'Cursado'.
+            const mappedProgreso = {};
+            Object.keys(snap).forEach(key => {
+                if (snap[key] === 'Cursado') mappedProgreso[key] = 'Aprobado';
+            });
+
+            const { completadas, totales } = tituloIntermedioUtils.calcularProgresoIntermedio(materiasIntermedio, mappedProgreso);
+            if (completadas === totales) {
+                indiceIntermedio = i;
+                break;
+            }
+        }
+    }
 
     return (
         <div
@@ -68,11 +93,21 @@ function HistorialAcademico({ historialSemestres, openedAccordions, setOpenedAcc
                         <div key={idx} className="relative">
                             {/* Nodo de la timeline */}
                             <div
-                                className="absolute -left-[27px] top-6 bg-success text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] shadow-sm ring-4 ring-background z-10"
+                                className={`absolute -left-[27px] top-6 ${idx === indiceIntermedio ? 'bg-primary animate-pulse shadow-[0_0_15px_rgba(var(--heroui-primary-500),0.5)]' : 'bg-success'} text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] shadow-sm ring-4 ring-background z-10`}
                                 data-html2canvas-ignore
                             >
-                                <i className="fa-solid fa-check" />
+                                <i className={`fa-solid ${idx === indiceIntermedio ? 'fa-graduation-cap' : 'fa-check'}`} />
                             </div>
+
+                            {/* Aviso de Título Intermedio */}
+                            {idx === indiceIntermedio && (
+                                <div className="absolute -left-[40px] -top-10 z-20 w-full flex justify-start pointer-events-none">
+                                    <div className="bg-primary text-white text-[10px] font-black uppercase px-3 py-1 rounded-full shadow-lg flex items-center gap-2 animate-in slide-in-from-left-4 duration-500 pointer-events-auto">
+                                        <i className="fa-solid fa-graduation-cap" />
+                                        <span>¡Alcanzaste el {tituloIntermedioNombre}!</span>
+                                    </div>
+                                </div>
+                            )}
 
                             <Accordion
                                 selectionMode="multiple"

@@ -16,6 +16,7 @@ import useSimuladorMaterias from '../hooks/Simulador/useSimuladorMaterias'
 import useSimuladorPDF from '../hooks/Simulador/useSimuladorPDF'
 import { LayoutGrid, Network } from 'lucide-react'
 import { calculateProjection } from '../utils/Simulador/projectionUtils'
+import tituloIntermedioUtils from '../utils/Progreso/tituloIntermedioUtils'
 
 function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
     // ─── Configuración (viene del modal, no cambia durante la simulación) ────
@@ -48,6 +49,27 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
         handleAnterior,
         handleSiguiente
     } = useSimuladorEstado({ plan, anioInicio, cuatriInicio })
+
+    // Lógica Título Intermedio
+    const { tituloIntermedioNombre, progresoIntermedio, isIntermedioCompletado } = React.useMemo(() => {
+        const nombre = tituloIntermedioUtils.getTituloIntermedioNombre(plan);
+        const materiasIntermedio = tituloIntermedioUtils.getMateriasIntermedio(plan, materias);
+        
+        // Convertimos el progreso del simulador al formato de la utilidad
+        const mappedProgreso = {};
+        if (progresoSimulado) {
+            Object.keys(progresoSimulado).forEach(key => {
+                if (progresoSimulado[key] === 'Cursado') mappedProgreso[key] = 'Aprobado';
+            });
+        }
+
+        const progreso = tituloIntermedioUtils.calcularProgresoIntermedio(materiasIntermedio, mappedProgreso);
+        return {
+            tituloIntermedioNombre: nombre,
+            progresoIntermedio: progreso,
+            isIntermedioCompletado: progreso.totales > 0 && progreso.completadas === progreso.totales
+        };
+    }, [plan, materias, progresoSimulado]);
 
     // ─── Materias disponibles para el cuatrimestre actual ────────────────────
     const { cambioDeEstado, materiasCursables, materiasBloqueadas } = useSimuladorMaterias(
@@ -221,6 +243,7 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                 setOpenedAccordions={setOpenedAccordions}
                                 descargandoPDF={descargandoPDF}
                                 plan={plan}
+                                materias={materias}
                             />
 
                             {/* ── Estado actual o finalizado ── */}
@@ -284,33 +307,41 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                             /* Vista de Grafo */
                                             <div className="animate-in fade-in zoom-in-95 duration-500 relative h-[700px] border border-default-200 rounded-3xl overflow-hidden shadow-sm">
                                                 {/* Controles de Navegación Flotantes - Integrados en el Canva */}
-                                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center bg-background/60 backdrop-blur-xl border border-default-200 p-2 rounded-2xl shadow-2xl gap-4 min-w-[300px] justify-between">
-                                                    <Button
-                                                        onPress={handleAnterior}
-                                                        isDisabled={!estadoAnterior}
-                                                        color="primary" variant="flat" size="lg"
-                                                        className="font-bold rounded-xl px-6"
-                                                        startContent={<i className="fa-solid fa-chevron-left" />}
-                                                    >
-                                                        Anterior
-                                                    </Button>
+                                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2">
+                                                    {progresoIntermedio.totales > 0 && (
+                                                        <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg backdrop-blur-md border ${isIntermedioCompletado ? 'bg-success/20 text-success border-success/30' : 'bg-primary/20 text-primary border-primary/30'}`}>
+                                                            <i className="fa-solid fa-graduation-cap" />
+                                                            <span>{tituloIntermedioNombre}: {progresoIntermedio.completadas}/{progresoIntermedio.totales}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex items-center bg-background/60 backdrop-blur-xl border border-default-200 p-2 rounded-2xl shadow-2xl gap-4 min-w-[300px] justify-between">
+                                                        <Button
+                                                            onPress={handleAnterior}
+                                                            isDisabled={!estadoAnterior}
+                                                            color="primary" variant="flat" size="lg"
+                                                            className="font-bold rounded-xl px-6"
+                                                            startContent={<i className="fa-solid fa-chevron-left" />}
+                                                        >
+                                                            Anterior
+                                                        </Button>
 
-                                                    <div className="flex flex-col items-center px-2">
-                                                        <span className="text-[10px] text-foreground/50 font-black uppercase tracking-tighter leading-none">Simulando</span>
-                                                        <span className="text-sm font-black text-primary truncate whitespace-nowrap">
-                                                            C{cuatri} {anioActual}
-                                                        </span>
+                                                        <div className="flex flex-col items-center px-2">
+                                                            <span className="text-[10px] text-foreground/50 font-black uppercase tracking-tighter leading-none">Simulando</span>
+                                                            <span className="text-sm font-black text-primary truncate whitespace-nowrap">
+                                                                C{cuatri} {anioActual}
+                                                            </span>
+                                                        </div>
+
+                                                        <Button
+                                                            onPress={() => handleSiguiente(materiasCursables)}
+                                                            isDisabled={!estadoSiguiente}
+                                                            color="primary" variant="shadow" size="lg"
+                                                            className="font-bold rounded-xl px-6 transition-transform hover:scale-105 active:scale-95"
+                                                            endContent={<i className="fa-solid fa-chevron-right" />}
+                                                        >
+                                                            Siguiente
+                                                        </Button>
                                                     </div>
-
-                                                    <Button
-                                                        onPress={() => handleSiguiente(materiasCursables)}
-                                                        isDisabled={!estadoSiguiente}
-                                                        color="primary" variant="shadow" size="lg"
-                                                        className="font-bold rounded-xl px-6 transition-transform hover:scale-105 active:scale-95"
-                                                        endContent={<i className="fa-solid fa-chevron-right" />}
-                                                    >
-                                                        Siguiente
-                                                    </Button>
                                                 </div>
 
                                                 <MateriasGrafo
@@ -340,9 +371,16 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
 
                                             <div className="flex flex-col items-center text-center">
                                                 <span className="text-xs md:text-sm text-foreground/80 font-medium tracking-wider uppercase mb-1">Progreso</span>
-                                                <span className="text-sm md:text-base font-semibold text-foreground">
-                                                    Continúa configurando el semestre
-                                                </span>
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className="text-sm md:text-base font-semibold text-foreground leading-none">
+                                                        Continúa configurando el semestre
+                                                    </span>
+                                                    {progresoIntermedio.totales > 0 && (
+                                                        <span className={`text-[10px] font-bold uppercase tracking-tighter ${isIntermedioCompletado ? 'text-success' : 'text-primary'}`}>
+                                                            {tituloIntermedioNombre}: {progresoIntermedio.porcentaje}%
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             <Button

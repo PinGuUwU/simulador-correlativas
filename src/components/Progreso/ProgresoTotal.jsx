@@ -3,11 +3,24 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import MateriasProgreso from './MateriasProgreso'
 import regularidadUtils from '../../utils/Progreso/regularidadUtils'
+import tituloIntermedioUtils from '../../utils/Progreso/tituloIntermedioUtils'
 
 function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, materias, isSticky, headerRef, setIsSticky }) {
     const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
     const promedios = regularidadUtils.calcularPromedioGeneral(progresoDetalles, progreso);
+
+    // Lógica Título Intermedio
+    const tituloIntermedioNombre = tituloIntermedioUtils.getTituloIntermedioNombre(plan);
+    const materiasIntermedio = tituloIntermedioUtils.getMateriasIntermedio(plan, materias);
+    const progresoIntermedio = tituloIntermedioUtils.calcularProgresoIntermedio(materiasIntermedio, progreso);
+    
+    // Calcular en qué porcentaje de la carrera total se encuentra el título intermedio
+    const markerPosition = materias.length > 0 && materiasIntermedio.length > 0
+        ? (materiasIntermedio.length / materias.length) * 100
+        : 0;
+
+    const isIntermedioCompletado = progresoIntermedio.totales > 0 && progresoIntermedio.completadas === progresoIntermedio.totales;
 
     // Calcular carga horaria de progreso (Regular, Aprobado, Promocionado)
     const totalHorasProgreso = materias.reduce((acc, m) => {
@@ -197,9 +210,24 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                 >
                     <div className={isSticky ? "max-w-7xl mx-auto lg:pl-64 transition-all duration-300" : ""}>
                         <div className="flex sm:px-10 pr-10 sm:p-0 justify-between items-end mb-3 ">
-                            <div className="space-y-0.5">
+                            <div className="space-y-0.5 flex flex-col items-start">
                                 <span className="text-default-500 text-xs uppercase tracking-widest font-black">Estado Actual</span>
-                                <p className="text-foreground font-bold ">Progreso de la carrera</p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-foreground font-bold ">Progreso de la carrera</p>
+                                    {isIntermedioCompletado && (
+                                        <Tooltip content={`¡Felicidades! Completaste el ${tituloIntermedioNombre}`}>
+                                            <Chip
+                                                size="sm"
+                                                color="success"
+                                                variant="flat"
+                                                className="h-5 font-bold animate-pulse"
+                                                startContent={<i className="fa-solid fa-graduation-cap text-[10px] mr-1" />}
+                                            >
+                                                Analista
+                                            </Chip>
+                                        </Tooltip>
+                                    )}
+                                </div>
                             </div>
                             <div className="text-right">
                                 <span className="text-2xl font-black text-secondary tabular-nums">{progress}%</span>
@@ -207,17 +235,39 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                             </div>
                         </div>
 
-                        <Progress
-                            value={progress}
-                            aria-label="Progreso total de la carrera"
-                            color="secondary"
-                            className="h-2.5"
-                            showValueLabel={false}
-                            classNames={{
-                                track: "bg-default-200/60 ",
-                                indicator: "bg-gradient-to-r from-secondary to-primary"
-                            }}
-                        />
+                        <div className="relative w-full">
+                            <Progress
+                                value={progress}
+                                aria-label="Progreso total de la carrera"
+                                color="secondary"
+                                className="h-2.5"
+                                showValueLabel={false}
+                                classNames={{
+                                    track: "bg-default-200/60 ",
+                                    indicator: "bg-gradient-to-r from-secondary to-primary"
+                                }}
+                            />
+                            {markerPosition > 0 && markerPosition < 100 && (
+                                <Tooltip 
+                                    content={
+                                        <div className="px-1 py-1">
+                                            <p className="font-bold text-tiny">{tituloIntermedioNombre}</p>
+                                            <p className="text-tiny text-default-500">{progresoIntermedio.completadas}/{progresoIntermedio.totales} materias ({progresoIntermedio.porcentaje}%)</p>
+                                        </div>
+                                    }
+                                >
+                                    <div 
+                                        className="absolute top-0 bottom-0 w-1 bg-white/50 backdrop-blur-xs z-10 shadow-[0_0_8px_rgba(255,255,255,0.5)] cursor-help group"
+                                        style={{ left: `${markerPosition}%`, height: '10px', top: '0px' }}
+                                    >
+                                        <div className={`absolute -top-6 left-1/2 -translate-x-1/2 flex flex-col items-center transition-opacity duration-300 ${isIntermedioCompletado ? 'text-success' : 'text-default-400 group-hover:text-primary'}`}>
+                                            <i className="fa-solid fa-graduation-cap text-[10px]"></i>
+                                            <div className="w-0.5 h-2 bg-current mt-0.5"></div>
+                                        </div>
+                                    </div>
+                                </Tooltip>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -23,7 +23,7 @@ function Equivalencias() {
             trackSearch({ 
                 term: busqueda, 
                 resultsCount: materiasFiltradas.length, 
-                context: 'equivalencias' 
+                search_origen: 'equivalencias' 
             });
         }, 1000);
         return () => clearTimeout(timer);

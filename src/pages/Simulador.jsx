@@ -20,6 +20,7 @@ import { LayoutGrid, Network, CloudDownload, Maximize2, Minimize2 } from 'lucide
 import { calculateProjection } from '../utils/Simulador/projectionUtils'
 import tituloIntermedioUtils from '../utils/Progreso/tituloIntermedioUtils'
 import importUtils from '../utils/Simulador/importUtils'
+import { trackCambioVista } from '../services/analyticsService'
 
 function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
     // ─── Configuración (viene del modal, no cambia durante la simulación) ────
@@ -303,7 +304,10 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                         <div className="flex flex-col gap-2 p-1 bg-default-100 rounded-2xl border border-default-200 h-fit self-center">
                             <ButtonGroup size="lg" variant="flat">
                                 <Button
-                                    onPress={() => setViewMode('grafo')}
+                                    onPress={() => {
+                                        setViewMode('grafo');
+                                        trackCambioVista({ tipo: 'tipo_simulacion', valor: 'grafo' });
+                                    }}
                                     color={viewMode === 'grafo' ? 'primary' : 'default'}
                                     className={`font-bold transition-all ${viewMode === 'grafo' ? 'shadow-md' : 'bg-transparent text-foreground/50'}`}
                                     startContent={<Network size={20} />}
@@ -311,7 +315,10 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
                                     Grafo
                                 </Button>
                                 <Button
-                                    onPress={() => setViewMode('lista')}
+                                    onPress={() => {
+                                        setViewMode('lista');
+                                        trackCambioVista({ tipo: 'tipo_simulacion', valor: 'lista' });
+                                    }}
                                     color={viewMode === 'lista' ? 'primary' : 'default'}
                                     className={`font-bold transition-all ${viewMode === 'lista' ? 'shadow-md' : 'bg-transparent text-foreground/50'}`}
                                     startContent={<LayoutGrid size={20} />}

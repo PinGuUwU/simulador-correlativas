@@ -157,7 +157,7 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
         const estadosAvanzados = ['Regular', 'Aprobado', 'Promocionado'];
         const estadosIniciales = ['Cursando', 'Disponible', 'Bloqueado'];
         if (estadosAvanzados.includes(estadoInicial) && estadosIniciales.includes(estadoNuevo)) {
-            trackRecursada({ plan, codigo: codigoMateria, estado_anterior: estadoInicial });
+            trackRecursada({ plan, materia_codigo: codigoMateria, materia_nombre: materiaActual.nombre, estado_anterior: estadoInicial });
         }
     }
 

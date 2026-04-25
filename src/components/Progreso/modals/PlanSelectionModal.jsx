@@ -14,7 +14,7 @@ import { trackSeleccionCarrera } from '../../../services/analyticsService';
 export default function PlanSelectionModal({ isOpen, onSelect }) {
     const handleSelect = (plan) => {
         onSelect(plan);
-        trackSeleccionCarrera({ plan, origen: 'welcome_modal' });
+        trackSeleccionCarrera({ plan, origen_plan: 'welcome_modal' });
     };
 
     return (

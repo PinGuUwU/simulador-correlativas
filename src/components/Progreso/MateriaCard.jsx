@@ -4,7 +4,7 @@ import estadoUtils from "../../utils/Progreso/estadoUtils";
 import regularidadUtils from "../../utils/Progreso/regularidadUtils";
 import { trackFriccionCorrelativa } from "../../services/analyticsService";
 
-function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, vista = 'grid' }) {
+function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, vista = 'grid', plan = null }) {
     const [isOpen, setIsOpen] = useState(false);
 
     if (!estado) return <p>Cargando Materia...</p>
@@ -15,14 +15,10 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
     const handleOpenPopover = (open) => {
         setIsOpen(open);
         if (open && estado === 'Bloqueado') {
-            // Buscamos el plan en el contexto si fuera necesario, pero aquí lo pasamos hardcodeado 
-            // o mejor, dejamos que el evento use lo que tiene. 
-            // Como MateriaCard no recibe el plan directamente, lo omitimos o lo inferimos si podemos.
-            // REVISIÓN: El plan suele estar en el contexto de la página que usa MateriaCard.
             trackFriccionCorrelativa({ 
-                plan: 'unknown', // El plan no está en los props de MateriaCard
-                codigo: codigo,
-                nombre: nombre 
+                plan: plan ?? 'unknown',
+                materia_codigo: codigo,
+                materia_nombre: nombre 
             });
         }
     };

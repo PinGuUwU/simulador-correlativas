@@ -12,6 +12,7 @@ import regularidadUtils from '../../utils/Progreso/regularidadUtils.js'
 import { Search } from 'lucide-react'
 import SyncCloud from './SyncCloud';
 import tituloIntermedioUtils from '../../utils/Progreso/tituloIntermedioUtils'
+import { trackSearch, trackCambioVista } from '../../services/analyticsService.js';
 
 function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDetalles, materias, plan, busqueda = "", filtros = [], isAnioOpen, setIsAnioOpen, handleMostrarTodo }) {
     const { updateAuthProgreso } = useAuth();
@@ -73,7 +74,21 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
 
     useEffect(() => {
         localStorage.setItem('materias_vista_preferida', vista);
+        trackCambioVista({ tipo: 'tipo_progreso', valor: vista });
     }, [vista]);
+
+    // Trackear búsquedas en Progreso con debounce
+    useEffect(() => {
+        if (!busqueda) return;
+        const timer = setTimeout(() => {
+            trackSearch({
+                term: busqueda,
+                resultsCount: materiasFiltradas.length,
+                search_origen: 'progreso'
+            });
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [busqueda, materiasFiltradas.length]);
 
     const navigate = useNavigate()
 
@@ -613,6 +628,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                                         actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
                                         abrirInfo={() => abrirInfo(materia)}
                                         vista={vista}
+                                        plan={plan}
                                     />
                                 </div>
                             ))}
@@ -730,6 +746,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                                                                                     actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
                                                                                     abrirInfo={() => abrirInfo(materia)}
                                                                                     vista={vista}
+                                                                                    plan={plan}
                                                                                 />
                                                                             </div>
                                                                         )

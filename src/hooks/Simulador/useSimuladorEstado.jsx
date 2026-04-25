@@ -102,7 +102,9 @@ const useSimuladorEstado = ({ plan, anioInicio, cuatriInicio }) => {
         if (cantidadCursados === materias.length) {
             setSimulacionTerminada(true)
             setEstadoSiguiente(false)
-            trackProyeccionEgreso({ plan, semestres_totales: semestreActualPlan });
+            // El año proyectado de egreso: anio actual + semestres restantes / 2 (redondeado)
+            const anioEgreso = anioActual + Math.ceil((semestreActualPlan) / 2);
+            trackProyeccionEgreso({ plan, semestres_totales: semestreActualPlan, anio_proyeccion: anioEgreso });
         } else if (cuatri === '1') {
             setCuatri('2')
         } else {

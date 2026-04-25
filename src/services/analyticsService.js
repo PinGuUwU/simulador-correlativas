@@ -10,6 +10,8 @@
 
 import { analytics, app } from './firebase';
 
+console.log('[Analytics] Módulo cargado correctamente');
+
 // Función auxiliar para obtener analytics de forma segura
 const getAnalyticsInstance = async () => {
     if (analytics) return analytics;
@@ -27,8 +29,17 @@ const getAnalyticsInstance = async () => {
 const track = async (eventName, params = {}) => {
     try {
         const instance = await getAnalyticsInstance();
-        if (!instance) return;
+        if (!instance) {
+            console.warn(`[Analytics] No hay instancia para el evento: ${eventName}`);
+            return;
+        }
         
+        // Activar DebugView en desarrollo
+        if (import.meta.env.DEV) {
+            params.debug_mode = true;
+            console.log(`[Analytics Debug] Enviando: ${eventName}`, params);
+        }
+
         const { logEvent } = await import('firebase/analytics');
         logEvent(instance, eventName, params);
     } catch (err) {
@@ -84,8 +95,8 @@ export const trackPageView = ({ path, title = document.title }) =>
  * Trackea cuando el usuario cambia el estado de una materia en /progreso.
  * @param {{ plan: string, codigoMateria: string, estadoNuevo: string }} params
  */
-export const trackCambioMateria = ({ plan, codigoMateria, estadoNuevo }) =>
-    track('cambio_materia', { plan, codigo: codigoMateria, estado: estadoNuevo });
+export const trackCambioMateria = ({ plan, codigoMateria, estadoNuevo, origenMateria = null }) =>
+    track('cambio_materia', { plan, materia_codigo: codigoMateria, estado_materia: estadoNuevo, ...(origenMateria && { origen_materia: origenMateria }) });
 
 /**
  * Trackea cuando el usuario guarda su simulación.
@@ -108,12 +119,12 @@ export const trackAvanceSemestre = ({ plan, anio, cuatri }) =>
  * Útil para detectar si los usuarios buscan cosas que no existen.
  * @param {{ term: string, resultsCount: number, context: string }} params
  */
-export const trackSearch = ({ term, resultsCount, context }) => {
+export const trackSearch = ({ term, resultsCount, search_origen }) => {
     if (!term || term.length < 3) return; // Evitar ruido de búsquedas cortas
     track('search_materia', { 
         search_term: term.toLowerCase(), 
-        results_count: resultsCount,
-        context: context // 'equivalencias', 'progreso', etc.
+        result_count: resultsCount,
+        search_origen: search_origen // 'equivalencias', 'progreso', etc.
     });
 };
 
@@ -143,7 +154,7 @@ export const trackErrorGA = ({ code, message, fatal = false }) =>
  * @param {{ tema: string }} params
  */
 export const trackCambioTema = ({ tema }) =>
-    track('cambio_tema', { tema });
+    track('cambio_tema', { ui_tema: tema });
 
 /**
  * Trackea la descarga del PDF del historial.
@@ -156,10 +167,10 @@ export const trackDescargaPDF = ({ plan }) =>
 
 /**
  * Trackea cuando el usuario elige o cambia de plan (Sistemas, Civil, etc.).
- * @param {{ plan: string, origen: 'settings' | 'welcome_modal' }} params
+ * @param {{ plan: string, origen_plan: 'settings' | 'welcome_modal', carrera?: string }} params
  */
-export const trackSeleccionCarrera = ({ plan, origen }) =>
-    track('seleccion_carrera', { plan, origen });
+export const trackSeleccionCarrera = ({ plan, origen_plan, carrera = 'Analista en Sistemas' }) =>
+    track('seleccion_carrera', { plan, origen_plan, carrera });
 
 /**
  * Trackea el estado inicial del usuario al guardar por primera vez.
@@ -176,19 +187,26 @@ export const trackProgresoInicial = ({ plan, aprobadas, total }) =>
  * Trackea clics en materias bloqueadas para identificar trabas.
  * @param {{ plan: string, codigo: string, nombre: string }} params
  */
-export const trackFriccionCorrelativa = ({ plan, codigo, nombre }) =>
-    track('friccion_correlativa', { plan, codigo, nombre });
+export const trackFriccionCorrelativa = ({ plan, materia_codigo, materia_nombre }) =>
+    track('friccion_correlativa', { plan, materia_codigo, materia_nombre });
 
 /**
  * Trackea cuando un alumno pasa de un estado avanzado a uno inicial (recursada).
  * @param {{ plan: string, codigo: string, estado_anterior: string }} params
  */
-export const trackRecursada = ({ plan, codigo, estado_anterior }) =>
-    track('recursada_materia', { plan, codigo, estado_anterior });
+export const trackRecursada = ({ plan, materia_codigo, materia_nombre, estado_anterior }) =>
+    track('recursada_materia', { plan, materia_codigo, materia_nombre, estado_anterior });
 
 /**
  * Trackea la cantidad de semestres proyectados para recibirse al terminar una simulación.
- * @param {{ plan: string, semestres_totales: number }} params
+ * @param {{ plan: string, semestres_totales: number, anio_proyeccion: number }} params
  */
-export const trackProyeccionEgreso = ({ plan, semestres_totales }) =>
-    track('proyeccion_egreso', { plan, semestres_totales });
+export const trackProyeccionEgreso = ({ plan, semestres_totales, anio_proyeccion }) =>
+    track('proyeccion_egreso', { plan, cuatrimestres_totales: semestres_totales, anio_proyeccion });
+
+/**
+ * Trackea cuando el usuario cambia entre vista de lista/cuadrícula (Progreso) o grafo/lista (Simulador).
+ * @param {{ tipo: 'tipo_progreso' | 'tipo_simulacion', valor: string }} params
+ */
+export const trackCambioVista = ({ tipo, valor }) =>
+    track('cambio_vista', { [tipo]: valor });

@@ -218,7 +218,7 @@ export default function SettingsPage({ plan, setPlan }) {
                                 selectedKey={plan || '17.14'}
                                 onSelectionChange={(key) => {
                                     setPlan(key);
-                                    trackSeleccionCarrera({ plan: key, origen: 'settings' });
+                                    trackSeleccionCarrera({ plan: key, origen_plan: 'settings' });
                                 }}
                                 classNames={{
                                     base: "w-full",

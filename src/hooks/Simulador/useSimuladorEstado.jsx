@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { addToast } from '@heroui/react'
 import planService from '../../services/planService'
 import { useAuth } from '../../context/AuthContext'
-import { trackAvanceSemestre, trackProyeccionEgreso } from '../../services/analyticsService'
+import { trackAvanceSemestre, trackProyeccionEgreso, trackIntencionCursada, trackAlertaDesercion } from '../../services/analyticsService'
 
 const useSimuladorEstado = ({ plan, anioInicio, cuatriInicio }) => {
     const [materias, setMaterias] = useState([])
@@ -98,6 +98,19 @@ const useSimuladorEstado = ({ plan, anioInicio, cuatriInicio }) => {
         // Trackeamos el avance
         trackAvanceSemestre({ plan, anio: anioActual, cuatri });
 
+        // Trackeamos intención de cursada (materias que pasaron a Cursado en este paso)
+        const materiasNuevasCursadas = materiasCursables
+            .filter(m => progresoSimulado[m.codigo] === 'Cursado')
+            .map(m => m.codigo);
+        
+        if (materiasNuevasCursadas.length > 0) {
+            trackIntencionCursada({
+                plan,
+                materias: materiasNuevasCursadas,
+                periodo: `${anioActual}-C${cuatri}`
+            });
+        }
+
         const cantidadCursados = materias.filter(m => progresoSimulado[m.codigo] === 'Cursado').length
         if (cantidadCursados === materias.length) {
             setSimulacionTerminada(true)
@@ -105,6 +118,16 @@ const useSimuladorEstado = ({ plan, anioInicio, cuatriInicio }) => {
             // El año proyectado de egreso: anio actual + semestres restantes / 2 (redondeado)
             const anioEgreso = anioActual + Math.ceil((semestreActualPlan) / 2);
             trackProyeccionEgreso({ plan, semestres_totales: semestreActualPlan, anio_proyeccion: anioEgreso });
+
+            // Alerta de estancamiento si supera el 150% de la duración teórica (10 semestres estándar)
+            const DURACION_TEORICA = 10;
+            if (semestreActualPlan > DURACION_TEORICA * 1.5) {
+                trackAlertaDesercion({
+                    plan,
+                    semestres_proyectados: semestreActualPlan,
+                    exceso_porcentaje: Math.round(((semestreActualPlan - DURACION_TEORICA) / DURACION_TEORICA) * 100)
+                });
+            }
         } else if (cuatri === '1') {
             setCuatri('2')
         } else {

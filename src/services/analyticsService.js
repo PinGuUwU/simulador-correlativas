@@ -186,10 +186,10 @@ export const trackProgresoInicial = ({ plan, aprobadas, total }) =>
 
 /**
  * Trackea clics en materias bloqueadas para identificar trabas.
- * @param {{ plan: string, codigo: string, nombre: string }} params
+ * @param {{ plan: string, codigo: string, nombre: string, impacto?: number }} params
  */
-export const trackFriccionCorrelativa = ({ plan, materia_codigo, materia_nombre }) =>
-    track('friccion_correlativa', { plan, materia_codigo, materia_nombre });
+export const trackFriccionCorrelativa = ({ plan, materia_codigo, materia_nombre, impacto = 0 }) =>
+    track('friccion_correlativa', { plan, materia_codigo, materia_nombre, materias_bloqueadas: impacto });
 
 /**
  * Trackea cuando un alumno pasa de un estado avanzado a uno inicial (recursada).
@@ -204,6 +204,20 @@ export const trackRecursada = ({ plan, materia_codigo, materia_nombre, estado_an
  */
 export const trackProyeccionEgreso = ({ plan, semestres_totales, anio_proyeccion }) =>
     track('proyeccion_egreso', { plan, cuatrimestres_totales: semestres_totales, anio_proyeccion });
+
+/**
+ * Trackea la intención de cursada de materias futuras.
+ * @param {{ plan: string, materias: string[], periodo: string }} params
+ */
+export const trackIntencionCursada = ({ plan, materias, periodo }) =>
+    track('intencion_planificacion', { plan, cant_materias: materias.length, periodo, materias_codigos: materias.join(',') });
+
+/**
+ * Trackea una alerta de posible deserción o estancamiento crítico.
+ * @param {{ plan: string, semestres_proyectados: number, exceso_porcentaje: number }} params
+ */
+export const trackAlertaDesercion = ({ plan, semestres_proyectados, exceso_porcentaje }) =>
+    track('alerta_estancamiento_critico', { plan, semestres_proyectados, exceso_porcentaje });
 
 /**
  * Trackea cuando el usuario cambia entre vista de lista/cuadrícula (Progreso) o grafo/lista (Simulador).

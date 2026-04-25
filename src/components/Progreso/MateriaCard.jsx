@@ -2,9 +2,10 @@ import { Card, CardHeader, CardBody, CardFooter, Chip, Popover, PopoverTrigger, 
 import { useState } from "react";
 import estadoUtils from "../../utils/Progreso/estadoUtils";
 import regularidadUtils from "../../utils/Progreso/regularidadUtils";
+import materiasUtils from "../../utils/Progreso/materiasUtils";
 import { trackFriccionCorrelativa } from "../../services/analyticsService";
 
-function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, vista = 'grid', plan = null }) {
+function MateriaCard({ materia, todasLasMaterias, estado, detalles, actualizarEstados, abrirInfo, vista = 'grid', plan = null }) {
     const [isOpen, setIsOpen] = useState(false);
 
     if (!estado) return <p>Cargando Materia...</p>
@@ -15,10 +16,12 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
     const handleOpenPopover = (open) => {
         setIsOpen(open);
         if (open && estado === 'Bloqueado') {
+            const impacto = todasLasMaterias ? materiasUtils.calcularImpactoTapon(codigo, todasLasMaterias) : 0;
             trackFriccionCorrelativa({ 
                 plan: plan ?? 'unknown',
                 materia_codigo: codigo,
-                materia_nombre: nombre 
+                materia_nombre: nombre,
+                impacto
             });
         }
     };

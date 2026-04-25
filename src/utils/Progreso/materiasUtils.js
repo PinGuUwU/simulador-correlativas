@@ -36,10 +36,28 @@ const estadosActivos = ['Regular', 'Aprobado', 'Cursando'] // Los que cuentan co
 const bloquear = 'Bloqueado'
 const numsRomanos = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"]
 
+// Calcula cuántas materias dependen directa o indirectamente de una materia específica
+const calcularImpactoTapon = (codigoMateria, materias) => {
+    let bloqueadas = new Set();
+
+    const encontrarDependientes = (codigo) => {
+        materias.forEach(m => {
+            if (m.correlativas.includes(codigo) && !bloqueadas.has(m.codigo)) {
+                bloqueadas.add(m.codigo);
+                encontrarDependientes(m.codigo);
+            }
+        });
+    };
+
+    encontrarDependientes(codigoMateria);
+    return bloqueadas.size;
+};
+
 export default {
     estadosPosibles,
     estadosActivos,
     buscarMateriasCorrelativas,
     obtenerEstiloPorEstado,
-    bloquear
+    bloquear,
+    calcularImpactoTapon
 }

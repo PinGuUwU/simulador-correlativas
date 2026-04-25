@@ -637,6 +637,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                                 <div key={materia.codigo}>
                                     <MateriaCard
                                         materia={materia}
+                                        todasLasMaterias={materias}
                                         estado={progreso[materia.codigo]}
                                         detalles={progresoDetalles?.[materia.codigo]}
                                         actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}
@@ -755,6 +756,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                                                                             <div key={materia.codigo !== "N/A" ? materia.codigo : `${materia.codigo}-${index}`} id={esElPrimero ? 'materia-card-ejemplo' : undefined}>
                                                                                 <MateriaCard
                                                                                     materia={materia}
+                                                                                    todasLasMaterias={materias}
                                                                                     estado={progreso[materia.codigo]}
                                                                                     detalles={progresoDetalles?.[materia.codigo]}
                                                                                     actualizarEstados={(target) => handleCambioDeEstado(materia.codigo, target)}

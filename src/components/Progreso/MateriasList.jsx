@@ -290,7 +290,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
         }
 
         if (tipoCaptura) {
-            setCapturaConfig({ tipo: tipoCaptura, materia, pendingState: mappedState });
+            setCapturaConfig({ tipo: tipoCaptura, materia, pendingState: mappedState, estadoAnterior: estadoActual });
             setCodigoMateria(codigo);
             onCapturaOpen();
             return;
@@ -812,6 +812,7 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
                 onOpenChange={onCapturaOpenChange}
                 tipo={capturaConfig.tipo}
                 materia={capturaConfig.materia}
+                config={capturaConfig}
                 onConfirm={handleCapturaConfirm}
             />
 

@@ -128,8 +128,8 @@ export function calcularPromedioGeneral(progresoDetalles, progreso) {
             }
         });
 
-        // Si la materia está aprobada pero no tenía el intento cargado (por ej: aprobación directa / equivalencia)
-        if (estado === 'Aprobado' && detalles.notaFinal != null && !notaAprobadaCounted) {
+        // Si la materia está aprobada o promocionada pero no tenía el intento cargado (por ej: aprobación directa / equivalencia / promoción)
+        if ((estado === 'Aprobado' || estado === 'Promocionado') && detalles.notaFinal != null && !notaAprobadaCounted) {
             const notaNum = Number(detalles.notaFinal);
             sumaTodos += notaNum;
             cantTodos++;

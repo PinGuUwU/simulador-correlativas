@@ -1,7 +1,7 @@
 import {
     Card, CardHeader, Chip, Divider,
     Drawer, DrawerBody, DrawerContent,
-    Button, Input, Select, SelectItem
+    Button, Input, Select, SelectItem, Switch
 } from "@heroui/react";
 import materiasUtils from "../../../utils/Progreso/materiasUtils";
 import regularidadUtils from "../../../utils/Progreso/regularidadUtils";
@@ -9,7 +9,7 @@ import ConsejoMateria from "./ConsejoMateria";
 import useDetalleMateria from "../../../hooks/Progreso/useDetalleMateria";
 import { useState } from "react";
 
-const ESTADOS_CON_HISTORIAL = ['Regular', 'Libre', 'Aprobado'];
+const ESTADOS_CON_HISTORIAL = ['Regular', 'Libre', 'Aprobado', 'Promocionado'];
 
 function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progresoDetalles, setProgresoDetalles, plan, onOpenChange, cambioDeEstado }) {
 
@@ -31,7 +31,8 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
         handleEliminarIntento,
         handleUpdateIntento,
         handleUpdateCursadaHistorial,
-        handleEliminarCursadaHistorial
+        handleEliminarCursadaHistorial,
+        handleToggleLibre
     } = useDetalleMateria(
         infoMateria,
         progresoDetalles,
@@ -67,6 +68,12 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
     const intentosFinal = detallesLocales.intentosFinal || [];
     const anioActualReg = detallesLocales.fechaRegularidad?.anio || "";
     const cuatriAsignado = infoMateria?.cuatrimestre ? (Number(infoMateria.cuatrimestre) % 2 === 0 ? 2 : 1) : 1;
+
+    // Determinar si se considera rendida libre para mostrar el switch.
+    // Priorizamos el flag explícito si existe, sino usamos la heurística (campos vacíos en aprobado)
+    const isRendidaLibre = detallesLocales.rendidaLibre !== undefined 
+        ? detallesLocales.rendidaLibre 
+        : ((estadoActual === 'Aprobado' || estadoActual === 'Promocionado') && !detallesLocales.fechaRegularidad && !detallesLocales.notaRegularizacion);
 
     return (
         <Drawer
@@ -147,25 +154,45 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                             Historial Académico
                                         </h4>
                                         <div className="flex flex-col gap-5">
-                                            <div className="flex flex-col gap-1">
-                                                <label className="text-xs font-semibold text-default-500 uppercase tracking-wide">Año de Regularización</label>
-                                                <div className="flex items-center gap-3">
-                                                    <Input
-                                                        type="number" variant="faded" color="warning" size="sm" className="flex-1"
-                                                        value={String(anioActualReg)} onChange={handleCambioAnio}
+                                            {/* Interruptor Aprobado Libre (Solo para estado Aprobado) */}
+                                            {estadoActual === 'Aprobado' && (
+                                                <div className="bg-default-100/50 p-3 rounded-xl border border-default-200 flex items-center justify-between">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs font-bold text-foreground/80">Rendí en condición libre</span>
+                                                        <span className="text-[10px] text-default-400">Ocultar datos de regularización</span>
+                                                    </div>
+                                                    <Switch 
+                                                        isSelected={isRendidaLibre}
+                                                        onValueChange={handleToggleLibre}
+                                                        color="success"
+                                                        size="sm"
                                                     />
-                                                    <Chip size="sm" variant="flat" color="default">{cuatriAsignado}° Cuatri</Chip>
                                                 </div>
-                                            </div>
+                                            )}
 
-                                            <div className="flex flex-col gap-1">
-                                                <label className="text-xs font-semibold text-default-500 uppercase tracking-wide">Nota de Cursada</label>
-                                                <Input
-                                                    type="number" placeholder="0 - 10" variant="faded" color="warning" size="sm"
-                                                    value={detallesLocales.notaRegularizacion != null ? String(detallesLocales.notaRegularizacion) : ""}
-                                                    onValueChange={handleCambioNotaCursada}
-                                                />
-                                            </div>
+                                            {!isRendidaLibre && (
+                                                <>
+                                                    <div className="flex flex-col gap-1">
+                                                        <label className="text-xs font-semibold text-default-500 uppercase tracking-wide">Año de Regularización</label>
+                                                        <div className="flex items-center gap-3">
+                                                            <Input
+                                                                type="number" variant="faded" color="warning" size="sm" className="flex-1"
+                                                                value={String(anioActualReg)} onChange={handleCambioAnio}
+                                                            />
+                                                            <Chip size="sm" variant="flat" color="default">{cuatriAsignado}° Cuatri</Chip>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-1">
+                                                        <label className="text-xs font-semibold text-default-500 uppercase tracking-wide">Nota de Cursada</label>
+                                                        <Input
+                                                            type="number" placeholder="0 - 10" variant="faded" color="warning" size="sm"
+                                                            value={detallesLocales.notaRegularizacion != null ? String(detallesLocales.notaRegularizacion) : ""}
+                                                            onValueChange={handleCambioNotaCursada}
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
 
                                             <Divider />
 
@@ -264,7 +291,7 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                                 </div>
                                             </div>
 
-                                            {estadoActual === 'Aprobado' && detallesLocales.notaFinal != null && (
+                                            {(estadoActual === 'Aprobado' || estadoActual === 'Promocionado') && detallesLocales.notaFinal != null && (
                                                 <div className="flex items-center justify-between bg-success/10 border border-success/30 rounded-xl px-4 py-3">
                                                     <span className="text-sm font-bold text-success-700">Nota Final</span>
                                                     <Chip color="success" variant="flat" size="lg" className="font-black text-lg">{detallesLocales.notaFinal}</Chip>

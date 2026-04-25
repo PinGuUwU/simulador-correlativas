@@ -59,6 +59,23 @@ export default function useDetalleMateria(infoMateria, progresoDetalles, setProg
         guardarDetalles({ ...currentData, notaRegularizacion: val === "" ? null : Number(val) });
     };
 
+    const handleToggleLibre = (isLibre) => {
+        const currentData = progresoDetalles[infoMateria?.codigo] || { intentosFinal: [] };
+        if (isLibre) {
+            guardarDetalles({
+                ...currentData,
+                fechaRegularidad: null,
+                notaRegularizacion: null,
+                rendidaLibre: true
+            });
+        } else {
+            guardarDetalles({
+                ...currentData,
+                rendidaLibre: false
+            });
+        }
+    };
+
     const handleGuardarIntento = () => {
         setNotaError("");
         if (estadoVal === 'rendido') {
@@ -208,6 +225,7 @@ export default function useDetalleMateria(infoMateria, progresoDetalles, setProg
         handleEliminarIntento,
         handleUpdateIntento,
         handleUpdateCursadaHistorial,
-        handleEliminarCursadaHistorial
+        handleEliminarCursadaHistorial,
+        handleToggleLibre
     };
 }

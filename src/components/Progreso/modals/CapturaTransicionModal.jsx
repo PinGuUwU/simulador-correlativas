@@ -1,4 +1,4 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Chip } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Chip, Switch } from "@heroui/react";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
@@ -12,11 +12,12 @@ import PropTypes from "prop-types";
  *   'hacia_aprobado_desde_reg'    → Pide solo nota final
  *   'hacia_aprobado_directo'      → Pide nota cursada + nota final
  */
-function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm }) {
+function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, config, onConfirm }) {
     const [anio, setAnio] = useState(String(new Date().getFullYear()));
     const [notaCursada, setNotaCursada] = useState("");
     const [notaFinal, setNotaFinal] = useState("");
     const [fechaFinal, setFechaFinal] = useState("");
+    const [isLibre, setIsLibre] = useState(false);
     const [errors, setErrors] = useState({});
     // Estado de sugerencia cuando nota cursada < 4
     const [sugerenciaLibre, setSugerenciaLibre] = useState(false);
@@ -28,7 +29,14 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
         setFechaFinal(new Date().toISOString().split("T")[0]);
         setErrors({});
         setSugerenciaLibre(false);
-    }, [isOpen]);
+
+        // Si viene del estado Libre, marcar el switch por defecto
+        if (config?.estadoAnterior === 'Libre' && tipo === 'hacia_aprobado_directo') {
+            setIsLibre(true);
+        } else {
+            setIsLibre(false);
+        }
+    }, [isOpen, tipo, config]);
 
     // Detectar si la nota de cursada es reprobatoria para mostrar alerta
     useEffect(() => {
@@ -63,8 +71,8 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
             }
         }
 
-        // Validar nota cursada (cuando se pide)
-        if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo)) {
+        // Validar nota cursada (cuando se pide, y si no es aprobación libre)
+        if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo) && !isLibre) {
             if (notaCursada !== "") {
                 const err = validarNota(notaCursada, "Nota de cursada");
                 if (err) newErrors.notaCursada = err;
@@ -98,13 +106,13 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
             if (tipo === 'hacia_cursando' || tipo === 'hacia_regular') {
                 payload.fechaInicioCursada = nuevaFecha;
             }
-            
+
             if (tipo === 'hacia_regular' || tipo === 'desde_cursando_hacia_reg') {
                 payload.fechaRegularidad = nuevaFecha;
             }
         }
 
-        if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo) && notaCursada !== "") {
+        if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo) && notaCursada !== "" && !isLibre) {
             payload.notaRegularizacion = Number(notaCursada);
         }
 
@@ -114,7 +122,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
             if (anio !== "") payload.anioExamen = Number(anio);
         }
 
-        if (tipo === 'hacia_aprobado_directo' && anio !== "") {
+        if (tipo === 'hacia_aprobado_directo' && anio !== "" && !isLibre) {
             payload.fechaRegularidad = {
                 anio: Number(anio),
                 cuatrimestre: cuatrimestreAuto
@@ -153,14 +161,14 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
     const icono = ICONOS[tipo] || 'fa-graduation-cap';
 
     const necesitaAnio = ['hacia_cursando', 'hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo);
-    const necesitaNotaCursada = ['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo);
+    const necesitaNotaCursada = ['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo) && !isLibre;
     const necesitaNotaFinal = ['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo);
 
     return (
-        <Modal 
-            isOpen={isOpen} 
-            onOpenChange={onOpenChange} 
-            placement="center" 
+        <Modal
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            placement="center"
             backdrop="opaque"
             classNames={{
                 backdrop: "bg-black/50"
@@ -185,6 +193,22 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
                         </ModalHeader>
 
                         <ModalBody className="gap-4">
+                            {/* Opción Aprobado Libre (Solo para aprobación directa y estado Aprobado) */}
+                            {tipo === 'hacia_aprobado_directo' && config?.pendingState === 'Aprobado' && (
+                                <div className="bg-danger-100 p-3 rounded-xl flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <span className="text-md font-bold">Rendí en condición libre</span>
+                                        <span className="text-md text-default-800">No requiere registrar nota de cursada</span>
+                                    </div>
+                                    <Switch
+                                        isSelected={isLibre}
+                                        onValueChange={setIsLibre}
+                                        color="success"
+                                        size="sm"
+                                    />
+                                </div>
+                            )}
+
                             {/* Año de inicio/regularización/aprobación */}
                             {necesitaAnio && (
                                 <div className="flex flex-col gap-2">
@@ -202,10 +226,12 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
                                         max="2100"
                                         fullWidth
                                     />
-                                    <div className="text-xs text-default-400 bg-default-50 px-3 py-2 rounded-lg border border-default-200">
-                                        <i className="fa-solid fa-circle-info mr-1 text-primary" />
-                                        Cuatrimestre asignado: <strong>{cuatrimestreAuto}°</strong> (según configuración de la materia)
-                                    </div>
+                                    {!isLibre && (
+                                        <div className="text-xs text-default-400 bg-default-50 px-3 py-2 rounded-lg border border-default-200">
+                                            <i className="fa-solid fa-circle-info mr-1 text-primary" />
+                                            Cuatrimestre asignado: <strong>{cuatrimestreAuto}°</strong> (según configuración de la materia)
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -310,6 +336,7 @@ CapturaTransicionModal.propTypes = {
         'hacia_aprobado_directo'
     ]),
     materia: PropTypes.object,
+    config: PropTypes.object,
     onConfirm: PropTypes.func.isRequired,
 };
 

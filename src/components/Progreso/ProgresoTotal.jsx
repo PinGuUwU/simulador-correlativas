@@ -6,7 +6,7 @@ import regularidadUtils from '../../utils/Progreso/regularidadUtils'
 import tituloIntermedioUtils from '../../utils/Progreso/tituloIntermedioUtils'
 
 function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, materias, isSticky, headerRef, setIsSticky }) {
-    const [isStatsExpanded, setIsStatsExpanded] = useState(false);
+    const [isStatsExpanded, setIsStatsExpanded] = useState(window.innerWidth >= 768);
 
     const promedios = regularidadUtils.calcularPromedioGeneral(progresoDetalles, progreso);
 
@@ -180,7 +180,7 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                         <Button
                             size="sm"
                             variant="flat"
-                            className="md:hidden font-bold h-7 px-3 rounded-lg"
+                            className="font-bold h-7 px-3 rounded-lg"
                             onPress={() => setIsStatsExpanded(!isStatsExpanded)}
                             endContent={<i className={`fa-solid fa-chevron-down transition-transform duration-300 ${isStatsExpanded ? 'rotate-180' : ''}`}></i>}
                         >
@@ -188,7 +188,7 @@ function ProgresoTotal({ carrera, plan, progress, progreso, progresoDetalles, ma
                         </Button>
                     </div>
 
-                    <div className={`mt-4 flex ${isStatsExpanded ? 'block animate-in fade-in slide-in-from-top-2' : 'hidden md:block'}`}>
+                    <div className={`mt-4 ${isStatsExpanded ? 'flex animate-in fade-in slide-in-from-top-2' : 'hidden'}`}>
                         <MateriasProgreso progreso={progreso} materias={materias} />
                     </div>
                 </div>

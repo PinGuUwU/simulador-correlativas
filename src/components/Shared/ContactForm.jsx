@@ -13,15 +13,40 @@ const ContactForm = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Recolectar información de diagnóstico
+        // Recolectar información de diagnóstico simplificada
+        const getBrowserInfo = () => {
+            const ua = navigator.userAgent;
+            if (ua.includes("Edg/")) return "Microsoft Edge";
+            if (ua.includes("Chrome/")) return "Google Chrome";
+            if (ua.includes("Firefox/")) return "Mozilla Firefox";
+            if (ua.includes("Safari/") && !ua.includes("Chrome/")) return "Safari";
+            return "Navegador Desconocido";
+        };
+
+        const getPlatformInfo = () => {
+            const platform = navigator.platform.toLowerCase();
+            if (platform.includes("win")) return "Windows";
+            if (platform.includes("mac")) return "macOS";
+            if (platform.includes("linux")) return "Linux";
+            if (/android|iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())) return "Mobile";
+            return navigator.platform || "Plataforma Desconocida";
+        };
+
+        const getLanguageInfo = () => {
+            const lang = navigator.language.toLowerCase();
+            if (lang.startsWith("es")) return "Español";
+            if (lang.startsWith("en")) return "Inglés";
+            return navigator.language.toUpperCase();
+        };
+
         const diagnostics = {
             uid: user?.uid || 'Invitado (Sin sesión)',
-            browser: navigator.userAgent,
-            platform: navigator.platform,
+            browser: getBrowserInfo(),
+            platform: getPlatformInfo(),
             resolution: `${window.screen.width}x${window.screen.height}`,
-            language: navigator.language,
-            url: window.location.href,
-            timestamp: new Date().toISOString()
+            language: getLanguageInfo(),
+            url: window.location.origin + window.location.pathname,
+            timestamp: new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })
         };
 
         // Clonar los datos del formulario para modificar el mensaje sin afectar la UI
@@ -31,7 +56,7 @@ const ContactForm = () => {
         const diagnosticString = `
 \n\n--- Información de Diagnóstico ---
 • UID: ${diagnostics.uid}
-• Browser: ${diagnostics.browser}
+• Navegador: ${diagnostics.browser}
 • Plataforma: ${diagnostics.platform}
 • Resolución: ${diagnostics.resolution}
 • Idioma: ${diagnostics.language}

@@ -62,7 +62,7 @@ const ContactForm = () => {
                     setTimeout(() => setAction(null), 3000);
                 },
                 (error) => {
-                    console.error('EmailJS Error:', error);
+                    if (import.meta.env.DEV) console.error('EmailJS Error:', error);
                     addToast({ 
                         title: "Error", 
                         description: "Hubo un problema al enviar el mensaje. Inténtalo de nuevo más tarde.", 

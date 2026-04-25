@@ -54,7 +54,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
         const newErrors = {};
 
         // Validar año (cuando se pide)
-        if (['hacia_regular', 'hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
+        if (['hacia_cursando', 'hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
             if (anio !== "") {
                 const anioN = Number(anio);
                 if (isNaN(anioN) || anioN < 2000 || anioN > 2100) {
@@ -89,15 +89,19 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
 
         const payload = {};
 
-        if (tipo === 'hacia_regular' && anio !== "") {
-            payload.fechaInicioCursada = {
+        if (['hacia_cursando', 'hacia_regular', 'desde_cursando_hacia_reg'].includes(tipo) && anio !== "") {
+            const nuevaFecha = {
                 anio: Number(anio),
                 cuatrimestre: cuatrimestreAuto
             };
-            payload.fechaRegularidad = {
-                anio: Number(anio),
-                cuatrimestre: cuatrimestreAuto
-            };
+
+            if (tipo === 'hacia_cursando' || tipo === 'hacia_regular') {
+                payload.fechaInicioCursada = nuevaFecha;
+            }
+            
+            if (tipo === 'hacia_regular' || tipo === 'desde_cursando_hacia_reg') {
+                payload.fechaRegularidad = nuevaFecha;
+            }
         }
 
         if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo) && notaCursada !== "") {
@@ -130,6 +134,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
     };
 
     const TITULOS = {
+        'hacia_cursando': 'Registrar Inicio de Cursada',
         'hacia_regular': 'Registrar Regularización',
         'desde_cursando_hacia_reg': 'Registrar Regularización',
         'hacia_aprobado_desde_reg': 'Registrar Aprobación',
@@ -137,6 +142,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
     };
 
     const ICONOS = {
+        'hacia_cursando': 'fa-pencil',
         'hacia_regular': 'fa-clock',
         'desde_cursando_hacia_reg': 'fa-clock',
         'hacia_aprobado_desde_reg': 'fa-circle-check',
@@ -146,7 +152,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
     const titulo = TITULOS[tipo] || 'Registrar Datos';
     const icono = ICONOS[tipo] || 'fa-graduation-cap';
 
-    const necesitaAnio = ['hacia_regular', 'hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo);
+    const necesitaAnio = ['hacia_cursando', 'hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo);
     const necesitaNotaCursada = ['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo);
     const necesitaNotaFinal = ['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo);
 
@@ -183,11 +189,11 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, onConfirm
                             {necesitaAnio && (
                                 <div className="flex flex-col gap-2">
                                     <Input
-                                        label={['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo) ? 'Año de aprobación' : 'Año de regularización'}
+                                        label={['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo) ? 'Año de aprobación' : (tipo === 'hacia_cursando' ? 'Año de inicio de cursada' : 'Año de regularización')}
                                         placeholder="ej: 2024"
                                         type="number"
                                         variant="faded"
-                                        color={['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo) ? 'success' : 'warning'}
+                                        color={['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo) ? 'success' : (tipo === 'hacia_cursando' ? 'primary' : 'warning')}
                                         value={anio}
                                         onValueChange={setAnio}
                                         isInvalid={!!errors.anio}
@@ -297,6 +303,7 @@ CapturaTransicionModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onOpenChange: PropTypes.func.isRequired,
     tipo: PropTypes.oneOf([
+        'hacia_cursando',
         'hacia_regular',
         'desde_cursando_hacia_reg',
         'hacia_aprobado_desde_reg',

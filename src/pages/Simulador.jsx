@@ -41,7 +41,7 @@ function Simulador({ plan: initialPlan, setPlan: setGlobalPlan }) {
 
         if (!document.fullscreenElement) {
             grafoContainerRef.current.requestFullscreen?.().catch(err => {
-                console.error(`Error al intentar entrar en pantalla completa: ${err.message}`);
+                if (import.meta.env.DEV) console.error(`Error al intentar entrar en pantalla completa: ${err.message}`);
                 // Fallback manual si falla la API nativa
                 setIsFullScreen(true);
             });

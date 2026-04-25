@@ -12,7 +12,7 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 export const app = initializeApp(firebaseConfig);
-console.log("[Firebase] App inicializada. MeasurementID:", firebaseConfig.measurementId);
+if (import.meta.env.DEV) console.log("[Firebase] App inicializada. MeasurementID:", firebaseConfig.measurementId);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
@@ -20,14 +20,14 @@ export const db = getFirestore(app);
 // Lazy inicialización de analytics
 export let analytics = null;
 if (typeof window !== "undefined") {
-    console.log("[Firebase] Intentando cargar Analytics...");
+    if (import.meta.env.DEV) console.log("[Firebase] Intentando cargar Analytics...");
     import("firebase/analytics")
         .then(({ getAnalytics }) => {
-            console.log("[Firebase] SDK de Analytics importado");
+            if (import.meta.env.DEV) console.log("[Firebase] SDK de Analytics importado");
             analytics = getAnalytics(app);
-            console.log("[Firebase] Analytics inicializado correctamente:", analytics);
+            if (import.meta.env.DEV) console.log("[Firebase] Analytics inicializado correctamente:", analytics);
         })
         .catch((err) => {
-            console.error("[Firebase] Error cargando analytics:", err);
+            if (import.meta.env.DEV) console.error("[Firebase] Error cargando analytics:", err);
         });
 }

@@ -147,7 +147,7 @@ export function AuthProvider({ children }) {
                     setUserRole('user');
                 }
             } catch (err) {
-                console.error("Error en el observer de Auth:", err);
+                if (import.meta.env.DEV) console.error("Error en el observer de Auth:", err);
                 logError(err, { route: 'auth/observer' });
                 setFirestoreWarning('Error al sincronizar datos. Podés usar la app offline.');
             } finally {
@@ -222,7 +222,7 @@ export function AuthProvider({ children }) {
             if (cloudData) setUserData(cloudData);
             setUserRole(role);
         } catch (err) {
-            console.error("Error refetching user data:", err);
+            if (import.meta.env.DEV) console.error("Error refetching user data:", err);
         }
     }, [user]);
 
@@ -260,7 +260,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem(`simulacion+${plan}`, JSON.stringify(data));
         if (user) {
             saveUserSimulacion(user.uid, plan, data).catch(err => {
-                console.error("Error al guardar simulación en la nube:", err);
+                if (import.meta.env.DEV) console.error("Error al guardar simulación en la nube:", err);
             });
         }
     }, [user]);

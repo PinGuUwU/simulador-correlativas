@@ -54,7 +54,7 @@ export default function usePlanData(plan) {
                 setProgresoDetalles(localDetalles || {});
                 setCargandoPlan(false);
             }).catch(err => {
-                console.error("Error al cargar el plan académico:", err);
+                if (import.meta.env.DEV) console.error("Error al cargar el plan académico:", err);
                 if (isMounted) {
                     addToast({ 
                         title: 'Error de carga', 

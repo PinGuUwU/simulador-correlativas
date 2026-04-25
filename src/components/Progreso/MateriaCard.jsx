@@ -72,6 +72,14 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
                     </Chip>
                 )}
 
+                {/* Indicador de recursada */}
+                {detalles?.historial && detalles.historial.length > 0 && (
+                    <Chip color="primary" variant="flat" size="sm" className="font-bold border border-primary/20">
+                        <i className="fa-solid fa-clock-rotate-left mr-1" />
+                        Recursada ({detalles.historial.length})
+                    </Chip>
+                )}
+
                 {estado === 'Regular' && detalles?.fechaRegularidad && (
                     <Chip color="warning" variant="dot" size="sm" className="font-bold">
                         Vence: {regularidadUtils.obtenerFechaVencimientoLabel(detalles.fechaRegularidad)}
@@ -130,14 +138,14 @@ function MateriaCard({ materia, estado, detalles, actualizarEstados, abrirInfo, 
                     )}
 
                     <div className="flex flex-col gap-2 w-full mt-1">
-                        {/* Solo mostrar Cursando si está Disponible o Bloqueado */}
-                        {(estado === 'Disponible' || estado === 'Bloqueado') && (
+                        {/* Cursando: disponible si no está ya en ese estado ni aprobado/promocionado */}
+                        {!['Cursando', 'Aprobado', 'Promocionado'].includes(estado) && (
                             <Button size="sm" color="secondary" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-pencil w-4" />} onPress={() => handleAction('estado', 'Cursando')}>
                                 Cursando
                             </Button>
                         )}
-                        {/* Desde Cursando hacia Regular */}
-                        {estado !== 'Aprobado' && (
+                        {/* Regular: no mostrar si ya está Regular, Aprobado o Promocionado */}
+                        {!['Regular', 'Aprobado', 'Promocionado'].includes(estado) && (
                             <Button size="sm" color="warning" variant="flat" className="justify-start font-bold" startContent={<i className="fa-solid fa-clock w-4" />} onPress={() => handleAction('estado', 'Regular')}>
                                 Regular
                             </Button>

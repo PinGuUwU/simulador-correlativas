@@ -248,8 +248,19 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             return;
         }
 
-        // Si es "Cursando", no preguntamos nada y tomamos el año actual automáticamente
+        // Si es "Cursando", verificamos si es una recursada
         if (mappedState === "Cursando") {
+            const viniendoDeEstadoAvanzado = ['Regular', 'Libre', 'Aprobado', 'Promocionado'].includes(estadoActual);
+            
+            if (viniendoDeEstadoAvanzado) {
+                // Es recursada, pedimos datos (año)
+                setCapturaConfig({ tipo: 'hacia_cursando', materia, pendingState: mappedState });
+                setCodigoMateria(codigo);
+                onCapturaOpen();
+                return;
+            }
+
+            // Si no es recursada (viene de Disponible/Bloqueado), tomamos el año actual automáticamente
             const cuatrimestreAuto = materia?.cuatrimestre
                 ? (Number(materia.cuatrimestre) % 2 === 0 ? 2 : 1)
                 : 1;
@@ -294,10 +305,13 @@ function MateriasList({ progreso, setProgreso, progresoDetalles, setProgresoDeta
             const detallesActuales = progresoDetalles?.[codigo] || {};
             const estadoActual = progreso[codigo];
 
-            // ¿Es una recursada? (viniendo de Libre, Aprobado o Promocionado y queriendo regularizar/cursar de nuevo)
-            const viniendoDeEstadoFinal = ['Libre', 'Aprobado', 'Promocionado'].includes(estadoActual);
+            // ¿Es una recursada? (viniendo de un estado que ya implica cursada previa y queriendo cursar/regularizar de nuevo)
+            const viniendoDeEstadoAvanzado = ['Regular', 'Libre', 'Aprobado', 'Promocionado', 'Cursando'].includes(estadoActual);
             const yendoAEstadoActivo = ['Cursando', 'Regular', 'Aprobado', 'Promocionado'].includes(config.pendingState);
-            const esRecursada = viniendoDeEstadoFinal && yendoAEstadoActivo;
+            // Es recursada si viene de un estado avanzado y el nuevo estado es Cursando, 
+            // O si viene de un estado final (Libre/Aprobado) y va a uno activo.
+            const esRecursada = (viniendoDeEstadoAvanzado && config.pendingState === 'Cursando') || 
+                               (['Libre', 'Aprobado', 'Promocionado'].includes(estadoActual) && yendoAEstadoActivo);
 
             let nuevosDetallesBase = { ...detallesActuales };
 

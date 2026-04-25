@@ -288,29 +288,89 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                                     const actualIdx = detallesLocales.historial.length - 1 - idx;
                                                     return (
                                                         <Card key={idx} className="bg-default-50 border border-default-200 shadow-none p-4 relative group">
-                                                            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <Button isIconOnly size="sm" variant="flat" className="h-6 w-6" onPress={() => setEditingHistorialIndex(actualIdx)}><i className="fa-solid fa-pen text-[10px]" /></Button>
-                                                                <Button isIconOnly size="sm" variant="flat" color="danger" className="h-6 w-6" onPress={() => handleEliminarCursadaHistorial(actualIdx)}><i className="fa-solid fa-trash-can text-[10px]" /></Button>
-                                                            </div>
-                                                            <div className="flex justify-between items-start mb-3">
-                                                                <div className="flex flex-col gap-0.5">
-                                                                    <span className="text-[10px] font-black text-primary uppercase tracking-widest">Cursada #{detallesLocales.historial.length - idx}</span>
-                                                                    <span className="text-xs font-bold text-foreground/70">{cursada.fechaRegularidad?.anio || 'Año N/A'} • {cursada.fechaRegularidad?.cuatrimestre}° Cuatri</span>
-                                                                </div>
-                                                                <Chip size="sm" color={estiloEstado(cursada.estadoFinal)} variant="flat" className="h-6 font-bold text-[10px]">Finalizó: {cursada.estadoFinal}</Chip>
-                                                            </div>
-                                                            <div className="flex justify-between items-center bg-default-100/50 rounded-lg px-3 py-2 border border-default-100">
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[9px] text-default-400 font-bold uppercase">Nota Cursada</span>
-                                                                    <span className="text-sm font-bold text-default-700">{cursada.notaRegularizacion || '-'}</span>
-                                                                </div>
-                                                                {cursada.notaFinal && (
-                                                                    <div className="flex flex-col items-end">
-                                                                        <span className="text-[9px] text-success-500 font-bold uppercase">Nota Final</span>
-                                                                        <span className="text-sm font-black text-success-700">{cursada.notaFinal}</span>
+                                                            {editingHistorialIndex === actualIdx ? (
+                                                                <div className="flex flex-col gap-3">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">Editando Cursada #{detallesLocales.historial.length - idx}</span>
                                                                     </div>
-                                                                )}
-                                                            </div>
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        <Input 
+                                                                            label="Año" 
+                                                                            size="sm" 
+                                                                            variant="faded" 
+                                                                            type="number"
+                                                                            defaultValue={cursada.fechaRegularidad?.anio || ""} 
+                                                                            id={`edit-hist-anio-${actualIdx}`}
+                                                                        />
+                                                                        <Input 
+                                                                            label="Nota Cursada" 
+                                                                            size="sm" 
+                                                                            variant="faded" 
+                                                                            type="number"
+                                                                            defaultValue={cursada.notaRegularizacion || ""} 
+                                                                            id={`edit-hist-nota-${actualIdx}`}
+                                                                        />
+                                                                    </div>
+                                                                    {cursada.notaFinal && (
+                                                                        <Input 
+                                                                            label="Nota Final" 
+                                                                            size="sm" 
+                                                                            variant="faded" 
+                                                                            type="number"
+                                                                            defaultValue={cursada.notaFinal} 
+                                                                            id={`edit-hist-final-${actualIdx}`}
+                                                                        />
+                                                                    )}
+                                                                    <div className="flex justify-end gap-2 mt-2">
+                                                                        <Button size="sm" color="success" variant="flat" onPress={() => {
+                                                                            const eAnio = document.getElementById(`edit-hist-anio-${actualIdx}`).value;
+                                                                            const eNota = document.getElementById(`edit-hist-nota-${actualIdx}`).value;
+                                                                            const eFinal = document.getElementById(`edit-hist-final-${actualIdx}`)?.value;
+                                                                            
+                                                                            handleUpdateCursadaHistorial(actualIdx, {
+                                                                                ...cursada,
+                                                                                fechaRegularidad: {
+                                                                                    ...cursada.fechaRegularidad,
+                                                                                    anio: Number(eAnio)
+                                                                                },
+                                                                                notaRegularizacion: eNota !== "" ? Number(eNota) : null,
+                                                                                ...(eFinal !== undefined && { notaFinal: eFinal !== "" ? Number(eFinal) : null })
+                                                                            });
+                                                                        }}>
+                                                                            Guardar
+                                                                        </Button>
+                                                                        <Button size="sm" variant="flat" onPress={() => setEditingHistorialIndex(null)}>
+                                                                            Cancelar
+                                                                        </Button>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <>
+                                                                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                        <Button isIconOnly size="sm" variant="flat" className="h-6 w-6" onPress={() => setEditingHistorialIndex(actualIdx)}><i className="fa-solid fa-pen text-[10px]" /></Button>
+                                                                        <Button isIconOnly size="sm" variant="flat" color="danger" className="h-6 w-6" onPress={() => handleEliminarCursadaHistorial(actualIdx)}><i className="fa-solid fa-trash-can text-[10px]" /></Button>
+                                                                    </div>
+                                                                    <div className="flex justify-between items-start mb-3">
+                                                                        <div className="flex flex-col gap-0.5">
+                                                                            <span className="text-[10px] font-black text-primary uppercase tracking-widest">Cursada #{detallesLocales.historial.length - idx}</span>
+                                                                            <span className="text-xs font-bold text-foreground/70">{cursada.fechaRegularidad?.anio || 'Año N/A'} • {cursada.fechaRegularidad?.cuatrimestre}° Cuatri</span>
+                                                                        </div>
+                                                                        <Chip size="sm" color={estiloEstado(cursada.estadoFinal)} variant="flat" className="h-6 font-bold text-[10px]">Finalizó: {cursada.estadoFinal}</Chip>
+                                                                    </div>
+                                                                    <div className="flex justify-between items-center bg-default-100/50 rounded-lg px-3 py-2 border border-default-100">
+                                                                        <div className="flex flex-col">
+                                                                            <span className="text-[9px] text-default-400 font-bold uppercase">Nota Cursada</span>
+                                                                            <span className="text-sm font-bold text-default-700">{cursada.notaRegularizacion || '-'}</span>
+                                                                        </div>
+                                                                        {cursada.notaFinal && (
+                                                                            <div className="flex flex-col items-end">
+                                                                                <span className="text-[9px] text-success-500 font-bold uppercase">Nota Final</span>
+                                                                                <span className="text-sm font-black text-success-700">{cursada.notaFinal}</span>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </>
+                                                            )}
                                                         </Card>
                                                     )
                                                 })}

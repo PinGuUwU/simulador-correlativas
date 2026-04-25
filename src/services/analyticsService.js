@@ -10,7 +10,7 @@
 
 import { analytics, app } from './firebase';
 
-console.log('[Analytics] Módulo cargado correctamente');
+if (import.meta.env.DEV) console.log('[Analytics] Módulo cargado correctamente');
 
 // Función auxiliar para obtener analytics de forma segura
 const getAnalyticsInstance = async () => {
@@ -27,23 +27,24 @@ const getAnalyticsInstance = async () => {
 
 // Guard: en entornos donde analytics no está disponible (SSR, tests), no falla
 const track = async (eventName, params = {}) => {
+    if (import.meta.env.DEV) console.log(`[Analytics] Intentando trackear evento: ${eventName}`, params);
     try {
         const instance = await getAnalyticsInstance();
         if (!instance) {
-            console.warn(`[Analytics] No hay instancia para el evento: ${eventName}`);
+            if (import.meta.env.DEV) console.warn(`[Analytics] No se pudo obtener la instancia para: ${eventName}. Revisa si el SDK cargó correctamente.`);
             return;
         }
         
-        // Activar DebugView en desarrollo
+        // Activar DebugView en desarrollo (esto es para GA4)
         if (import.meta.env.DEV) {
             params.debug_mode = true;
-            console.log(`[Analytics Debug] Enviando: ${eventName}`, params);
+            console.log(`[Analytics] ✅ Enviando a GA4: ${eventName}`, params);
         }
 
         const { logEvent } = await import('firebase/analytics');
         logEvent(instance, eventName, params);
     } catch (err) {
-        console.warn(`Analytics error (${eventName}):`, err);
+        if (import.meta.env.DEV) console.error(`[Analytics] Error en track (${eventName}):`, err);
     }
 };
 

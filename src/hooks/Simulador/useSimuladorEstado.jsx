@@ -44,7 +44,7 @@ const useSimuladorEstado = ({ plan, anioInicio, cuatriInicio }) => {
             setHistorialSemestres([])
             setSimulacionTerminada(false)
         } catch (error) {
-            console.error(error)
+            if (import.meta.env.DEV) console.error(error)
         } finally {
             setCargando(false)
         }

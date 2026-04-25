@@ -18,7 +18,7 @@ export const uploadPlanProgress = async (uid, plan) => {
         await saveUserProgreso(uid, plan, progreso, detalles || {});
         return true;
     } catch (error) {
-        console.error("Error al subir datos:", error);
+        if (import.meta.env.DEV) console.error("Error al subir datos:", error);
         throw error;
     }
 };
@@ -62,7 +62,7 @@ export const downloadAllProgress = async (uid) => {
             if (!detalles['17.14']) detalles['17.14'] = detalles['17']['14'];
         }
 
-        console.log("🛠️ Progreso procesado para sincronización:", { progreso, detalles });
+        if (import.meta.env.DEV) console.log("🛠️ Progreso procesado para sincronización:", { progreso, detalles });
 
         if (Object.keys(progreso).length === 0) {
             return false;
@@ -102,7 +102,7 @@ export const downloadAllProgress = async (uid) => {
         
         return cloudData;
     } catch (error) {
-        console.error("Error al descargar datos:", error);
+        if (import.meta.env.DEV) console.error("Error al descargar datos:", error);
         throw error;
     }
 };

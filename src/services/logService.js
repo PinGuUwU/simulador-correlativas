@@ -120,9 +120,9 @@ const sanitizeMessage = (msg) =>
  */
 const devLog = (level, errorCode, errorMessage, context) => {
     const prefix = `[LogService:${level.toUpperCase()}] ${errorCode}`;
-    if (level === LOG_LEVEL.ERROR)   { console.error(prefix, errorMessage, context); return; }
-    if (level === LOG_LEVEL.WARNING) { console.warn (prefix, errorMessage, context); return; }
-    console.info(prefix, errorMessage, context);
+    if (level === LOG_LEVEL.ERROR)   { if (import.meta.env.DEV) console.error(prefix, errorMessage, context); return; }
+    if (level === LOG_LEVEL.WARNING) { if (import.meta.env.DEV) console.warn (prefix, errorMessage, context); return; }
+    if (import.meta.env.DEV) console.info(prefix, errorMessage, context);
 };
 
 // ─── API pública ──────────────────────────────────────────────────────────────

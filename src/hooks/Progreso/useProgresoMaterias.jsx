@@ -153,10 +153,12 @@ const useProgresoMaterias = (progreso, setProgreso, materias, plan, updateAuthPr
         // Trackeamos el cambio
         trackCambioMateria({ plan, codigoMateria, estadoNuevo });
 
-        // Detección de Recursada (Regresión de estado)
-        const estadosAvanzados = ['Regular', 'Aprobado', 'Promocionado'];
-        const estadosIniciales = ['Cursando', 'Disponible', 'Bloqueado'];
-        if (estadosAvanzados.includes(estadoInicial) && estadosIniciales.includes(estadoNuevo)) {
+        // Detección de Recursada (Regresión de estado o vuelta desde Libre)
+        const estadosQueImplicanRecursada = ['Regular', 'Aprobado', 'Promocionado', 'Libre'];
+        const estadosPostRecursada = ['Cursando', 'Disponible', 'Bloqueado', 'Regular', 'Aprobado', 'Promocionado'];
+        const esRecursadaDesdeLibre = estadoInicial === 'Libre' && estadosPostRecursada.includes(estadoNuevo);
+        const esRegresionDeEstado = ['Regular', 'Aprobado', 'Promocionado'].includes(estadoInicial) && ['Cursando', 'Disponible', 'Bloqueado'].includes(estadoNuevo);
+        if (esRecursadaDesdeLibre || esRegresionDeEstado) {
             trackRecursada({ plan, materia_codigo: codigoMateria, materia_nombre: materiaActual.nombre, estado_anterior: estadoInicial });
         }
     }

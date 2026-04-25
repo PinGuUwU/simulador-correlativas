@@ -51,7 +51,7 @@ export const getUserRole = async (uid) => {
             return roleSnap.data().role || 'user';
         }
     } catch (error) {
-        console.error("Error al obtener rol:", error);
+        if (import.meta.env.DEV) console.error("Error al obtener rol:", error);
     }
     return 'user';
 };
@@ -67,11 +67,11 @@ export const getUserData = async (uid) => {
     
     if (docSnap.exists()) {
         const data = docSnap.data();
-        console.log("☁️ Datos recuperados de Firestore:", data);
+        if (import.meta.env.DEV) console.log("☁️ Datos recuperados de Firestore:", data);
         return data;
     }
     
-    console.warn("⚠️ No existe el documento del usuario en Firestore.");
+    if (import.meta.env.DEV) console.warn("⚠️ No existe el documento del usuario en Firestore.");
     return null;
 };
 

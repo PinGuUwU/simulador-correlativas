@@ -18,6 +18,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, config, o
     const [notaFinal, setNotaFinal] = useState("");
     const [fechaFinal, setFechaFinal] = useState("");
     const [isLibre, setIsLibre] = useState(false);
+    const [isEquivalencia, setIsEquivalencia] = useState(false);
     const [errors, setErrors] = useState({});
     // Estado de sugerencia cuando nota cursada < 4
     const [sugerenciaLibre, setSugerenciaLibre] = useState(false);
@@ -29,6 +30,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, config, o
         setFechaFinal(new Date().toISOString().split("T")[0]);
         setErrors({});
         setSugerenciaLibre(false);
+        setIsEquivalencia(false);
 
         // Si viene del estado Libre, marcar el switch por defecto
         if (config?.estadoAnterior === 'Libre' && tipo === 'hacia_aprobado_directo') {
@@ -37,6 +39,17 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, config, o
             setIsLibre(false);
         }
     }, [isOpen, tipo, config]);
+
+    // Exclusividad entre Libre y Equivalencia
+    const handleToggleLibre = (val) => {
+        setIsLibre(val);
+        if (val) setIsEquivalencia(false);
+    };
+
+    const handleToggleEquivalencia = (val) => {
+        setIsEquivalencia(val);
+        if (val) setIsLibre(false);
+    };
 
     // Detectar si la nota de cursada es reprobatoria para mostrar alerta
     useEffect(() => {
@@ -65,14 +78,16 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, config, o
         if (['hacia_cursando', 'hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo)) {
             if (anio !== "") {
                 const anioN = Number(anio);
-                if (isNaN(anioN) || anioN < 2000 || anioN > 2100) {
-                    newErrors.anio = "Ingresá un año válido (ej: 2024)";
+                // Si es equivalencia permitimos desde 1990
+                const minYear = isEquivalencia ? 1990 : 2000;
+                if (isNaN(anioN) || anioN < minYear || anioN > 2100) {
+                    newErrors.anio = `Ingresá un año válido (mín: ${minYear})`;
                 }
             }
         }
 
-        // Validar nota cursada (cuando se pide, y si no es aprobación libre)
-        if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo) && !isLibre) {
+        // Validar nota cursada (cuando se pide, y si no es aprobación libre ni equivalencia)
+        if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo) && !isLibre && !isEquivalencia) {
             if (notaCursada !== "") {
                 const err = validarNota(notaCursada, "Nota de cursada");
                 if (err) newErrors.notaCursada = err;
@@ -112,7 +127,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, config, o
             }
         }
 
-        if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo) && notaCursada !== "" && !isLibre) {
+        if (['hacia_regular', 'desde_cursando_hacia_reg', 'hacia_aprobado_directo'].includes(tipo) && notaCursada !== "" && !isLibre && !isEquivalencia) {
             payload.notaRegularizacion = Number(notaCursada);
         }
 
@@ -122,11 +137,24 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, config, o
             if (anio !== "") payload.anioExamen = Number(anio);
         }
 
-        if (tipo === 'hacia_aprobado_directo' && anio !== "" && !isLibre) {
+        if (tipo === 'hacia_aprobado_directo' && anio !== "" && !isLibre && !isEquivalencia) {
             payload.fechaRegularidad = {
                 anio: Number(anio),
                 cuatrimestre: cuatrimestreAuto
             };
+        }
+
+        if (isEquivalencia) {
+            payload.esEquivalencia = true;
+            // Para equivalencias, nos aseguramos de no guardar datos de regularización
+            payload.fechaRegularidad = null;
+            payload.notaRegularizacion = null;
+        }
+
+        if (isLibre) {
+            payload.rendidaLibre = true;
+            payload.fechaRegularidad = null;
+            payload.notaRegularizacion = null;
         }
 
         onConfirm(payload);
@@ -194,16 +222,32 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, config, o
 
                         <ModalBody className="gap-4">
                             {/* Opción Aprobado Libre (Solo para aprobación directa y estado Aprobado) */}
-                            {tipo === 'hacia_aprobado_directo' && config?.pendingState === 'Aprobado' && (
-                                <div className="bg-danger-100 p-3 rounded-xl flex items-center justify-between">
+                            {tipo === 'hacia_aprobado_directo' && config?.pendingState === 'Aprobado' && !isEquivalencia && (
+                                <div className="bg-danger/5 p-3 rounded-xl flex items-center justify-between border border-danger/20">
                                     <div className="flex flex-col">
-                                        <span className="text-md font-bold">Rendí en condición libre</span>
-                                        <span className="text-md text-default-800">No requiere registrar nota de cursada</span>
+                                        <span className="text-sm font-bold text-danger-600">Rendí en condición libre</span>
+                                        <span className="text-[10px] text-default-500">No requiere registrar nota de cursada</span>
                                     </div>
                                     <Switch
                                         isSelected={isLibre}
-                                        onValueChange={setIsLibre}
-                                        color="success"
+                                        onValueChange={handleToggleLibre}
+                                        color="danger"
+                                        size="sm"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Opción Equivalencia (Solo para estado Aprobado) */}
+                            {tipo === 'hacia_aprobado_directo' && config?.pendingState === 'Aprobado' && !isLibre && (
+                                <div className="bg-primary/5 p-3 rounded-xl flex items-center justify-between border border-primary/20">
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-bold text-primary-600">Es por equivalencia</span>
+                                        <span className="text-[10px] text-default-500">Materia otorgada por otra carrera/institución</span>
+                                    </div>
+                                    <Switch
+                                        isSelected={isEquivalencia}
+                                        onValueChange={handleToggleEquivalencia}
+                                        color="primary"
                                         size="sm"
                                     />
                                 </div>
@@ -213,20 +257,18 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, config, o
                             {necesitaAnio && (
                                 <div className="flex flex-col gap-2">
                                     <Input
-                                        label={['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo) ? 'Año de aprobación' : (tipo === 'hacia_cursando' ? 'Año de inicio de cursada' : 'Año de regularización')}
+                                        label={isEquivalencia ? 'Año de otorgamiento' : (['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo) ? 'Año de aprobación' : (tipo === 'hacia_cursando' ? 'Año de inicio de cursada' : 'Año de regularización'))}
                                         placeholder="ej: 2024"
                                         type="number"
                                         variant="faded"
-                                        color={['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo) ? 'success' : (tipo === 'hacia_cursando' ? 'primary' : 'warning')}
+                                        color={isEquivalencia ? 'primary' : (['hacia_aprobado_desde_reg', 'hacia_aprobado_directo'].includes(tipo) ? 'success' : (tipo === 'hacia_cursando' ? 'primary' : 'warning'))}
                                         value={anio}
                                         onValueChange={setAnio}
                                         isInvalid={!!errors.anio}
                                         errorMessage={errors.anio}
-                                        min="2000"
-                                        max="2100"
                                         fullWidth
                                     />
-                                    {!isLibre && (
+                                    {!isLibre && !isEquivalencia && (
                                         <div className="text-xs text-default-400 bg-default-50 px-3 py-2 rounded-lg border border-default-200">
                                             <i className="fa-solid fa-circle-info mr-1 text-primary" />
                                             Cuatrimestre asignado: <strong>{cuatrimestreAuto}°</strong> (según configuración de la materia)
@@ -236,7 +278,7 @@ function CapturaTransicionModal({ isOpen, onOpenChange, tipo, materia, config, o
                             )}
 
                             {/* Nota de cursada */}
-                            {necesitaNotaCursada && (
+                            {necesitaNotaCursada && !isEquivalencia && (
                                 <div className="flex flex-col gap-2">
                                     <Input
                                         label="Nota de cursada (promedio de parciales)"

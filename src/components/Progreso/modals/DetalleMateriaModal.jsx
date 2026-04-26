@@ -32,7 +32,9 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
         handleUpdateIntento,
         handleUpdateCursadaHistorial,
         handleEliminarCursadaHistorial,
-        handleToggleLibre
+        handleToggleLibre,
+        handleToggleEquivalencia,
+        handleCambioNotaEquivalencia
     } = useDetalleMateria(
         infoMateria,
         progresoDetalles,
@@ -73,7 +75,20 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
     // Priorizamos el flag explícito si existe, sino usamos la heurística (campos vacíos en aprobado)
     const isRendidaLibre = detallesLocales.rendidaLibre !== undefined 
         ? detallesLocales.rendidaLibre 
-        : ((estadoActual === 'Aprobado' || estadoActual === 'Promocionado') && !detallesLocales.fechaRegularidad && !detallesLocales.notaRegularizacion);
+        : (estadoActual === 'Aprobado' && !detallesLocales.fechaRegularidad && !detallesLocales.notaRegularizacion && !detallesLocales.esEquivalencia);
+
+    const isEquivalencia = detallesLocales.esEquivalencia === true;
+
+    // Handlers con exclusividad
+    const onToggleLibre = (val) => {
+        handleToggleLibre(val);
+        if (val) handleToggleEquivalencia(false);
+    };
+
+    const onToggleEquivalencia = (val) => {
+        handleToggleEquivalencia(val);
+        if (val) handleToggleLibre(false);
+    };
 
     return (
         <Drawer
@@ -119,9 +134,14 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                         <span className="text-sm font-medium tracking-wide">{infoMateria.mostrarCodigo === false ? '---' : infoMateria.codigo}</span>
                                     </div>
 
-                                    <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight leading-tight">
-                                        {infoMateria.nombre}
-                                    </h2>
+                                    <div className="flex items-center gap-3 mb-3 flex-wrap">
+                                        <h2 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight leading-tight">
+                                            {infoMateria.nombre}
+                                        </h2>
+                                        {isEquivalencia && (
+                                            <Chip color="primary" variant="dot" size="sm" className="font-bold border-primary/30">Equivalencia</Chip>
+                                        )}
+                                    </div>
 
                                     <div className="flex flex-col m-2">
                                         <div className="flex items-center gap-3 text-sm text-default-600 mb-5 justify-center flex-wrap">
@@ -154,23 +174,42 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                             Historial Académico
                                         </h4>
                                         <div className="flex flex-col gap-5">
-                                            {/* Interruptor Aprobado Libre (Solo para estado Aprobado) */}
-                                            {estadoActual === 'Aprobado' && (
-                                                <div className="bg-default-100/50 p-3 rounded-xl border border-default-200 flex items-center justify-between">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-xs font-bold text-foreground/80">Rendí en condición libre</span>
-                                                        <span className="text-[10px] text-default-400">Ocultar datos de regularización</span>
+                                            
+                                            <div className="flex flex-col gap-2">
+                                                {/* Interruptor Aprobado Libre (Solo para estado Aprobado y si no es equivalencia) */}
+                                                {estadoActual === 'Aprobado' && !isEquivalencia && (
+                                                    <div className="bg-danger/5 p-3 rounded-xl border border-danger/20 flex items-center justify-between">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-xs font-bold text-danger-700">Rendí en condición libre</span>
+                                                            <span className="text-[10px] text-default-400">No requiere registrar nota de cursada</span>
+                                                        </div>
+                                                        <Switch 
+                                                            isSelected={isRendidaLibre}
+                                                            onValueChange={onToggleLibre}
+                                                            color="danger"
+                                                            size="sm"
+                                                        />
                                                     </div>
-                                                    <Switch 
-                                                        isSelected={isRendidaLibre}
-                                                        onValueChange={handleToggleLibre}
-                                                        color="success"
-                                                        size="sm"
-                                                    />
-                                                </div>
-                                            )}
+                                                )}
 
-                                            {!isRendidaLibre && (
+                                                {/* Interruptor Equivalencia (Solo para estado Aprobado y si no es libre) */}
+                                                {estadoActual === 'Aprobado' && !isRendidaLibre && (
+                                                    <div className="bg-primary/5 p-3 rounded-xl border border-primary/20 flex items-center justify-between">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-xs font-bold text-primary-700">Es por equivalencia</span>
+                                                            <span className="text-[10px] text-default-400">Otorgada por otra carrera/institución</span>
+                                                        </div>
+                                                        <Switch 
+                                                            isSelected={isEquivalencia}
+                                                            onValueChange={onToggleEquivalencia}
+                                                            color="primary"
+                                                            size="sm"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {!isRendidaLibre && !isEquivalencia && (
                                                 <>
                                                     <div className="flex flex-col gap-1">
                                                         <label className="text-xs font-semibold text-default-500 uppercase tracking-wide">Año de Regularización</label>
@@ -194,106 +233,129 @@ function DetalleMateriaModal({ isOpen, infoMateria, materias, progreso, progreso
                                                 </>
                                             )}
 
+                                            {isEquivalencia && (
+                                                <div className="flex flex-col gap-4">
+                                                    <div className="flex flex-col gap-1">
+                                                        <label className="text-xs font-semibold text-primary-600 uppercase tracking-wide">Año de Otorgamiento</label>
+                                                        <Input
+                                                            type="number" variant="faded" color="primary" size="sm"
+                                                            value={detallesLocales.anioExamen != null ? String(detallesLocales.anioExamen) : ""} 
+                                                            onChange={handleCambioAnio}
+                                                        />
+                                                    </div>
+                                                    <div className="flex flex-col gap-1">
+                                                        <label className="text-xs font-semibold text-primary-600 uppercase tracking-wide">Nota de Equivalencia (Opcional)</label>
+                                                        <Input
+                                                            type="number" placeholder="0 - 10" variant="faded" color="primary" size="sm"
+                                                            value={detallesLocales.notaFinal != null ? String(detallesLocales.notaFinal) : ""}
+                                                            onValueChange={handleCambioNotaEquivalencia}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             <Divider />
 
-                                            <div className="flex flex-col gap-3">
-                                                <div className="flex justify-between items-center">
-                                                    <div>
-                                                        <span className="text-xs font-semibold text-default-500 uppercase tracking-wide block">Intentos de Examen Final</span>
-                                                        <span className={`text-xs font-bold ${statusPlan.intentosRestantes > 1 ? "text-success" : "text-danger"}`}>
-                                                            {statusPlan.intentosRestantes} intento{statusPlan.intentosRestantes !== 1 ? 's' : ''} restante{statusPlan.intentosRestantes !== 1 ? 's' : ''}
-                                                        </span>
-                                                    </div>
-                                                    {intentosFinal.length < 5 && !intentosFinal.some(i => i.estado === 'aprobado') && (
-                                                        <Button size="sm" color="primary" variant="flat" onPress={() => setShowNotaForm(!showNotaForm)}>
-                                                            {showNotaForm ? 'Cancelar' : '+ Agregar'}
-                                                        </Button>
-                                                    )}
-                                                </div>
-
-                                                {showNotaForm && (
-                                                    <div className="flex flex-col gap-3 p-4 bg-default-100/50 rounded-xl border border-default-200">
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                            <Input type="date" label="Fecha" labelPlacement="outside" value={fechaIntento} onChange={(e) => setFechaIntento(e.target.value)} />
-                                                            <div className="flex gap-2 items-end">
-                                                                <Select label="Estado" labelPlacement="outside" selectedKeys={[estadoVal]} onChange={(e) => setEstadoVal(e.target.value)} className="flex-2">
-                                                                    <SelectItem key="rendido">Rindió</SelectItem>
-                                                                    <SelectItem key="ausente">Ausente</SelectItem>
-                                                                </Select>
-                                                                {estadoVal === 'rendido' && <Input type="number" label="Nota" labelPlacement="outside" placeholder="0-10" value={notaVal} onValueChange={setNotaVal} isInvalid={!!notaError} errorMessage={notaError} className="flex-1" />}
-                                                            </div>
+                                            {!isEquivalencia && (
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="flex justify-between items-center">
+                                                        <div>
+                                                            <span className="text-xs font-semibold text-default-500 uppercase tracking-wide block">Intentos de Examen Final</span>
+                                                            <span className={`text-xs font-bold ${statusPlan.intentosRestantes > 1 ? "text-success" : "text-danger"}`}>
+                                                                {statusPlan.intentosRestantes} intento{statusPlan.intentosRestantes !== 1 ? 's' : ''} restante{statusPlan.intentosRestantes !== 1 ? 's' : ''}
+                                                            </span>
                                                         </div>
-                                                        <Button size="md" color="secondary" className="w-full font-bold" onPress={handleGuardarIntento}>Registrar</Button>
+                                                        {intentosFinal.length < 5 && !intentosFinal.some(i => i.estado === 'aprobado') && (
+                                                            <Button size="sm" color="primary" variant="flat" onPress={() => setShowNotaForm(!showNotaForm)}>
+                                                                {showNotaForm ? 'Cancelar' : '+ Agregar'}
+                                                            </Button>
+                                                        )}
                                                     </div>
-                                                )}
 
-                                                <div className="flex gap-1.5 w-full">
-                                                    {[0, 1, 2, 3, 4].map(i => (
-                                                        <div key={i} className={`flex-1 h-4 rounded-full ${intentosFinal[i] ? (intentosFinal[i].estado === 'aprobado' ? "bg-success" : (intentosFinal[i].estado === 'ausente' ? "bg-warning" : "bg-danger")) : "bg-default-200"}`} />
-                                                    ))}
-                                                </div>
-                                                <div className="flex justify-between text-[10px] text-default-400 font-bold px-0.5">
-                                                    <span>1°</span><span>2°</span><span>3°</span><span>4°</span><span>5°</span>
-                                                </div>
-
-                                                <div className="flex flex-col gap-1.5 mt-2">
-                                                    {intentosFinal.map((intento, i) => (
-                                                        <div key={i} className="flex items-center justify-between text-xs text-default-600 bg-default-100/50 rounded-lg pl-3 pr-1 py-1 group">
-                                                            {editingIntentoIndex === i ? (
-                                                                <div className="flex-1 flex flex-col gap-2 w-full py-1">
-                                                                    <div className="flex gap-2 items-center w-full">
-                                                                        <Input type="date" size="sm" defaultValue={intento.fecha} id={`edit-fecha-${i}`} className="flex-3" aria-label="Fecha del intento" />
-                                                                        <Select size="sm" defaultSelectedKeys={[intento.estado === 'ausente' ? 'ausente' : 'rendido']} id={`edit-estado-${i}`} className="flex-3 min-w-[110px]" aria-label="Estado del examen">
-                                                                            <SelectItem key="rendido">Rindió</SelectItem>
-                                                                            <SelectItem key="ausente">Ausente</SelectItem>
-                                                                        </Select>
-                                                                        <Input type="number" size="sm" defaultValue={intento.nota != null ? String(intento.nota) : ""} placeholder="Nota" id={`edit-nota-${i}`} className="flex-1 w-14" aria-label="Nota del examen" />
-                                                                    </div>
-                                                                    <div className="flex justify-end gap-2 w-full">
-                                                                        <Button size="sm" color="success" variant="flat" onPress={() => {
-                                                                            const eFecha = document.getElementById(`edit-fecha-${i}`).value;
-                                                                            const eEstadoVisual = document.getElementById(`edit-estado-${i}`).value;
-                                                                            const eNota = document.getElementById(`edit-nota-${i}`).value;
-                                                                            const finalNota = eEstadoVisual === 'ausente' ? null : Number(eNota);
-                                                                            const finalEstado = eEstadoVisual === 'ausente' ? 'ausente' : (finalNota >= 4 ? 'aprobado' : 'reprobado');
-                                                                            handleUpdateIntento(i, { fecha: eFecha, estado: finalEstado, nota: finalNota });
-                                                                        }}>
-                                                                            <i className="fa-solid fa-check mr-1" /> Guardar
-                                                                        </Button>
-                                                                        <Button size="sm" color="default" variant="flat" onPress={() => setEditingIntentoIndex(null)}>
-                                                                            Cancelar
-                                                                        </Button>
-                                                                    </div>
+                                                    {showNotaForm && (
+                                                        <div className="flex flex-col gap-3 p-4 bg-default-100/50 rounded-xl border border-default-200">
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                <Input type="date" label="Fecha" labelPlacement="outside" value={fechaIntento} onChange={(e) => setFechaIntento(e.target.value)} />
+                                                                <div className="flex gap-2 items-end">
+                                                                    <Select label="Estado" labelPlacement="outside" selectedKeys={[estadoVal]} onChange={(e) => setEstadoVal(e.target.value)} className="flex-2">
+                                                                        <SelectItem key="rendido">Rindió</SelectItem>
+                                                                        <SelectItem key="ausente">Ausente</SelectItem>
+                                                                    </Select>
+                                                                    {estadoVal === 'rendido' && <Input type="number" label="Nota" labelPlacement="outside" placeholder="0-10" value={notaVal} onValueChange={setNotaVal} isInvalid={!!notaError} errorMessage={notaError} className="flex-1" />}
                                                                 </div>
-                                                            ) : (
-                                                                <>
-                                                                    <div className="flex-1 flex justify-between mr-2">
-                                                                        <div className="flex flex-col">
-                                                                            <span className="font-bold">{i + 1}° intento</span>
-                                                                            <span className="text-[10px] text-default-400">{intento.fecha || 'Sin fecha'}</span>
-                                                                        </div>
-                                                                        <span className={intento.estado === 'aprobado' ? "text-success font-black" : (intento.estado === 'reprobado' ? "text-danger font-black" : "text-warning font-black")}>
-                                                                            {intento.estado === 'ausente' ? 'Ausente (Nota: -)' : `Nota: ${intento.nota}`}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
-                                                                        <Button isIconOnly size="sm" variant="light" color="secondary" className="h-7 w-7" onPress={() => setEditingIntentoIndex(i)}>
-                                                                            <i className="fa-solid fa-pen text-[10px]" />
-                                                                        </Button>
-                                                                        <Button isIconOnly size="sm" variant="light" color="danger" className="h-7 w-7" onPress={() => handleEliminarIntento(i)}>
-                                                                            <i className="fa-solid fa-trash-can text-[10px]" />
-                                                                        </Button>
-                                                                    </div>
-                                                                </>
-                                                            )}
+                                                            </div>
+                                                            <Button size="md" color="secondary" className="w-full font-bold" onPress={handleGuardarIntento}>Registrar</Button>
                                                         </div>
-                                                    ))}
+                                                    )}
+
+                                                    <div className="flex gap-1.5 w-full">
+                                                        {[0, 1, 2, 3, 4].map(i => (
+                                                            <div key={i} className={`flex-1 h-4 rounded-full ${intentosFinal[i] ? (intentosFinal[i].estado === 'aprobado' ? "bg-success" : (intentosFinal[i].estado === 'ausente' ? "bg-warning" : "bg-danger")) : "bg-default-200"}`} />
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex justify-between text-[10px] text-default-400 font-bold px-0.5">
+                                                        <span>1°</span><span>2°</span><span>3°</span><span>4°</span><span>5°</span>
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-1.5 mt-2">
+                                                        {intentosFinal.map((intento, i) => (
+                                                            <div key={i} className="flex items-center justify-between text-xs text-default-600 bg-default-100/50 rounded-lg pl-3 pr-1 py-1 group">
+                                                                {editingIntentoIndex === i ? (
+                                                                    <div className="flex-1 flex flex-col gap-2 w-full py-1">
+                                                                        <div className="flex gap-2 items-center w-full">
+                                                                            <Input type="date" size="sm" defaultValue={intento.fecha} id={`edit-fecha-${i}`} className="flex-3" aria-label="Fecha del intento" />
+                                                                            <Select size="sm" defaultSelectedKeys={[intento.estado === 'ausente' ? 'ausente' : 'rendido']} id={`edit-estado-${i}`} className="flex-3 min-w-[110px]" aria-label="Estado del examen">
+                                                                                <SelectItem key="rendido">Rindió</SelectItem>
+                                                                                <SelectItem key="ausente">Ausente</SelectItem>
+                                                                            </Select>
+                                                                            <Input type="number" size="sm" defaultValue={intento.nota != null ? String(intento.nota) : ""} placeholder="Nota" id={`edit-nota-${i}`} className="flex-1 w-14" aria-label="Nota del examen" />
+                                                                        </div>
+                                                                        <div className="flex justify-end gap-2 w-full">
+                                                                            <Button size="sm" color="success" variant="flat" onPress={() => {
+                                                                                const eFecha = document.getElementById(`edit-fecha-${i}`).value;
+                                                                                const eEstadoVisual = document.getElementById(`edit-estado-${i}`).value;
+                                                                                const eNota = document.getElementById(`edit-nota-${i}`).value;
+                                                                                const finalNota = eEstadoVisual === 'ausente' ? null : Number(eNota);
+                                                                                const finalEstado = eEstadoVisual === 'ausente' ? 'ausente' : (finalNota >= 4 ? 'aprobado' : 'reprobado');
+                                                                                handleUpdateIntento(i, { fecha: eFecha, estado: finalEstado, nota: finalNota });
+                                                                            }}>
+                                                                                <i className="fa-solid fa-check mr-1" /> Guardar
+                                                                            </Button>
+                                                                            <Button size="sm" color="default" variant="flat" onPress={() => setEditingIntentoIndex(null)}>
+                                                                                Cancelar
+                                                                            </Button>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <>
+                                                                        <div className="flex-1 flex justify-between mr-2">
+                                                                            <div className="flex flex-col">
+                                                                                <span className="font-bold">{i + 1}° intento</span>
+                                                                                <span className="text-[10px] text-default-400">{intento.fecha || 'Sin fecha'}</span>
+                                                                            </div>
+                                                                            <span className={intento.estado === 'aprobado' ? "text-success font-black" : (intento.estado === 'reprobado' ? "text-danger font-black" : "text-warning font-black")}>
+                                                                                {intento.estado === 'ausente' ? 'Ausente (Nota: -)' : `Nota: ${intento.nota}`}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="flex gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
+                                                                            <Button isIconOnly size="sm" variant="light" color="secondary" className="h-7 w-7" onPress={() => setEditingIntentoIndex(i)}>
+                                                                                <i className="fa-solid fa-pen text-[10px]" />
+                                                                            </Button>
+                                                                            <Button isIconOnly size="sm" variant="light" color="danger" className="h-7 w-7" onPress={() => handleEliminarIntento(i)}>
+                                                                                <i className="fa-solid fa-trash-can text-[10px]" />
+                                                                            </Button>
+                                                                        </div>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
 
                                             {(estadoActual === 'Aprobado' || estadoActual === 'Promocionado') && detallesLocales.notaFinal != null && (
                                                 <div className="flex items-center justify-between bg-success/10 border border-success/30 rounded-xl px-4 py-3">
-                                                    <span className="text-sm font-bold text-success-700">Nota Final</span>
+                                                    <span className="text-sm font-bold text-success-700">Nota Final {isEquivalencia ? '(Equivalencia)' : ''}</span>
                                                     <Chip color="success" variant="flat" size="lg" className="font-black text-lg">{detallesLocales.notaFinal}</Chip>
                                                 </div>
                                             )}

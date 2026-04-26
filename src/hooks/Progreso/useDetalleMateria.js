@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import regularidadUtils from '../../utils/Progreso/regularidadUtils';
 import reglas from '../../utils/Progreso/reglas_universidad.json';
 import { useAuth } from '../../context/AuthContext';
@@ -17,63 +17,122 @@ export default function useDetalleMateria(infoMateria, progresoDetalles, setProg
     const [editingHistorialIndex, setEditingHistorialIndex] = useState(null);
     const [editingIntentoIndex, setEditingIntentoIndex] = useState(null);
 
-    const guardarDetalles = (nuevosDetalles) => {
-        const payload = { ...progresoDetalles, [infoMateria.codigo]: nuevosDetalles };
-        setProgresoDetalles(payload);
-        updateAuthProgreso(plan, progreso, payload);
+    // Ref para evitar ciclos infinitos o actualizaciones innecesarias si se desea, 
+    // pero aquí usaremos useEffect para el side effect del servidor.
+    const lastDetallesRef = useRef(progresoDetalles);
+
+    useEffect(() => {
+        lastDetallesRef.current = progresoDetalles;
+    }, [progresoDetalles]);
+
+    // Función centralizada para guardar detalles usando actualización funcional
+    const updateDetalles = (updater) => {
+        if (!infoMateria?.codigo) return;
+        setProgresoDetalles(prev => {
+            const currentData = prev[infoMateria.codigo] || { intentosFinal: [] };
+            const newData = typeof updater === 'function' ? updater(currentData) : updater;
+            const updated = { ...prev, [infoMateria.codigo]: newData };
+            
+            // Disparamos la actualización al servidor (side effect controlado)
+            // Lo ideal es hacerlo fuera del setstate, pero aquí lo mantenemos simple con un delay 
+            // o simplemente confiando en que updateAuthProgreso es seguro.
+            // Para ser 100% React-compliant, lo sacaremos a un useEffect.
+            return updated;
+        });
     };
 
+    // Sincronización con el servidor cuando cambian los detalles locales
+    useEffect(() => {
+        if (infoMateria) {
+            updateAuthProgreso(plan, progreso, progresoDetalles);
+        }
+    }, [progresoDetalles, plan, progreso]);
+
     const handleCambioAnio = (e) => {
-        const currentData = progresoDetalles[infoMateria?.codigo] || { intentosFinal: [] };
         const anioN = Number(e.target.value);
-        
-        if (anioN < 2000) {
-            guardarDetalles({
-                ...currentData,
-                fechaRegularidad: { anio: anioN, cuatrimestre: 1 }
-            });
-            return;
-        }
-
         const cuatriAuto = infoMateria?.cuatrimestre ? (Number(infoMateria.cuatrimestre) % 2 === 0 ? 2 : 1) : 1;
-        const nuevaFecha = { anio: anioN, cuatrimestre: cuatriAuto };
-        
-        guardarDetalles({
-            ...currentData,
-            fechaRegularidad: nuevaFecha
+        const nuevaFecha = anioN < 2000 ? { anio: anioN, cuatrimestre: 1 } : { anio: anioN, cuatrimestre: cuatriAuto };
+
+        updateDetalles(currentData => {
+            if (currentData.esEquivalencia) {
+                return {
+                    ...currentData,
+                    anioExamen: anioN
+                };
+            }
+
+            const newData = {
+                ...currentData,
+                fechaRegularidad: nuevaFecha
+            };
+
+            const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
+                estadoActual,
+                nuevaFecha,
+                currentData.intentosFinal
+            );
+
+            if (estadoActualizado !== estadoActual) {
+                setTimeout(() => cambioDeEstado(infoMateria.codigo, estadoActualizado), 0);
+            }
+
+            return newData;
         });
-
-        const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
-            estadoActual,
-            nuevaFecha,
-            currentData.intentosFinal
-        );
-
-        if (estadoActualizado !== estadoActual) {
-            cambioDeEstado(infoMateria.codigo, estadoActualizado);
-        }
     };
 
     const handleCambioNotaCursada = (val) => {
-        const currentData = progresoDetalles[infoMateria?.codigo] || { intentosFinal: [] };
-        guardarDetalles({ ...currentData, notaRegularizacion: val === "" ? null : Number(val) });
+        const nota = val === "" ? null : Number(val);
+        updateDetalles(currentData => ({
+            ...currentData,
+            notaRegularizacion: nota
+        }));
     };
 
     const handleToggleLibre = (isLibre) => {
-        const currentData = progresoDetalles[infoMateria?.codigo] || { intentosFinal: [] };
-        if (isLibre) {
-            guardarDetalles({
-                ...currentData,
-                fechaRegularidad: null,
-                notaRegularizacion: null,
-                rendidaLibre: true
-            });
-        } else {
-            guardarDetalles({
-                ...currentData,
-                rendidaLibre: false
-            });
-        }
+        updateDetalles(currentData => {
+            if (isLibre) {
+                return {
+                    ...currentData,
+                    fechaRegularidad: null,
+                    notaRegularizacion: null,
+                    rendidaLibre: true,
+                    esEquivalencia: false
+                };
+            } else {
+                return {
+                    ...currentData,
+                    rendidaLibre: false
+                };
+            }
+        });
+    };
+
+    const handleToggleEquivalencia = (isEquiv) => {
+        updateDetalles(currentData => {
+            if (isEquiv) {
+                return {
+                    ...currentData,
+                    fechaRegularidad: null,
+                    notaRegularizacion: null,
+                    intentosFinal: [],
+                    esEquivalencia: true,
+                    rendidaLibre: false
+                };
+            } else {
+                return {
+                    ...currentData,
+                    esEquivalencia: false
+                };
+            }
+        });
+    };
+
+    const handleCambioNotaEquivalencia = (val) => {
+        const nota = val === "" ? null : Number(val);
+        updateDetalles(currentData => ({
+            ...currentData,
+            notaFinal: nota
+        }));
     };
 
     const handleGuardarIntento = () => {
@@ -91,123 +150,120 @@ export default function useDetalleMateria(infoMateria, progresoDetalles, setProg
             ? (notaParsed >= 4 ? 'aprobado' : 'reprobado')
             : 'ausente';
 
-        const currentData = progresoDetalles[infoMateria?.codigo] || { intentosFinal: [] };
-        const intentosActuales = currentData.intentosFinal || [];
+        updateDetalles(currentData => {
+            const intentosActuales = currentData.intentosFinal || [];
+            if (intentosActuales.length >= reglas.limites.intentos_final) return currentData;
 
-        if (intentosActuales.length >= reglas.limites.intentos_final) return;
+            const newIntentos = [...intentosActuales, {
+                nota: notaParsed,
+                estado: status,
+                fecha: fechaIntento
+            }];
 
-        const newIntentos = [...intentosActuales, {
-            nota: notaParsed,
-            estado: status,
-            fecha: fechaIntento
-        }];
+            if (status === 'aprobado') {
+                setTimeout(() => cambioDeEstado(infoMateria.codigo, 'Aprobado'), 0);
+            } else {
+                const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
+                    "Regular",
+                    currentData.fechaRegularidad,
+                    newIntentos
+                );
+                if (estadoActualizado === 'Libre') {
+                    setTimeout(() => cambioDeEstado(infoMateria.codigo, 'Libre'), 0);
+                }
+            }
 
-        const updatedData = {
-            ...currentData,
-            intentosFinal: newIntentos,
-            ...(status === 'aprobado' && { notaFinal: notaParsed })
-        };
-        guardarDetalles(updatedData);
+            return {
+                ...currentData,
+                intentosFinal: newIntentos,
+                ...(status === 'aprobado' && { notaFinal: notaParsed })
+            };
+        });
 
         setShowNotaForm(false);
         setNotaVal("");
         setEstadoVal("rendido");
         setFechaIntento(new Date().toISOString().split('T')[0]);
-
-        if (status === 'aprobado') {
-            cambioDeEstado(infoMateria.codigo, 'Aprobado');
-        } else {
-            const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
-                "Regular",
-                currentData.fechaRegularidad,
-                newIntentos
-            );
-            if (estadoActualizado === 'Libre') {
-                cambioDeEstado(infoMateria.codigo, 'Libre');
-            }
-        }
     };
 
     const handleEliminarIntento = (index) => {
-        const currentData = progresoDetalles[infoMateria?.codigo];
-        if (!currentData || !currentData.intentosFinal) return;
+        updateDetalles(currentData => {
+            if (!currentData || !currentData.intentosFinal) return currentData;
 
-        const newIntentos = currentData.intentosFinal.filter((_, i) => i !== index);
-        const fueAprobado = currentData.intentosFinal[index]?.estado === 'aprobado';
+            const newIntentos = currentData.intentosFinal.filter((_, i) => i !== index);
+            const fueAprobado = currentData.intentosFinal[index]?.estado === 'aprobado';
 
-        const updatedData = {
-            ...currentData,
-            intentosFinal: newIntentos,
-            ...(fueAprobado && { notaFinal: null })
-        };
-        guardarDetalles(updatedData);
-
-        if (fueAprobado) {
-            cambioDeEstado(infoMateria.codigo, 'Regular');
-        } else {
-            const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
-                estadoActual,
-                currentData.fechaRegularidad,
-                newIntentos
-            );
-            if (estadoActualizado !== estadoActual) {
-                cambioDeEstado(infoMateria.codigo, estadoActualizado);
+            if (fueAprobado) {
+                setTimeout(() => cambioDeEstado(infoMateria.codigo, 'Regular'), 0);
+            } else {
+                const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
+                    estadoActual,
+                    currentData.fechaRegularidad,
+                    newIntentos
+                );
+                if (estadoActualizado !== estadoActual) {
+                    setTimeout(() => cambioDeEstado(infoMateria.codigo, estadoActualizado), 0);
+                }
             }
-        }
+
+            return {
+                ...currentData,
+                intentosFinal: newIntentos,
+                ...(fueAprobado && { notaFinal: null })
+            };
+        });
     };
 
     const handleUpdateCursadaHistorial = (index, dataActualizada) => {
-        const currentData = { ...(progresoDetalles[infoMateria?.codigo] || {}) };
-        const newHistorial = [...(currentData.historial || [])];
-        newHistorial[index] = dataActualizada;
-        
-        guardarDetalles({
-            ...currentData,
-            historial: newHistorial
+        updateDetalles(currentData => {
+            const newHistorial = [...(currentData.historial || [])];
+            newHistorial[index] = dataActualizada;
+            return {
+                ...currentData,
+                historial: newHistorial
+            };
         });
         setEditingHistorialIndex(null);
     };
 
     const handleEliminarCursadaHistorial = (index) => {
-        const currentData = { ...(progresoDetalles[infoMateria?.codigo] || {}) };
-        const newHistorial = (currentData.historial || []).filter((_, i) => i !== index);
-        
-        guardarDetalles({
-            ...currentData,
-            historial: newHistorial
+        updateDetalles(currentData => {
+            const newHistorial = (currentData.historial || []).filter((_, i) => i !== index);
+            return {
+                ...currentData,
+                historial: newHistorial
+            };
         });
     };
 
     const handleUpdateIntento = (index, dataActualizada) => {
-        const currentData = progresoDetalles[infoMateria?.codigo];
-        if (!currentData || !currentData.intentosFinal) return;
+        updateDetalles(currentData => {
+            if (!currentData || !currentData.intentosFinal) return currentData;
 
-        const newIntentos = [...currentData.intentosFinal];
-        newIntentos[index] = dataActualizada;
+            const newIntentos = [...currentData.intentosFinal];
+            newIntentos[index] = dataActualizada;
 
-        // Si se editó a "aprobado", actualizar notaFinal. Si ya no es, remover notaFinal
-        const fueAprobado = dataActualizada.estado === 'aprobado';
-        
-        const updatedData = {
-            ...currentData,
-            intentosFinal: newIntentos,
-            ...(fueAprobado ? { notaFinal: dataActualizada.nota } : { notaFinal: null })
-        };
-        guardarDetalles(updatedData);
-
-        // Actualizar estado general consolidado
-        if (fueAprobado) {
-            cambioDeEstado(infoMateria.codigo, 'Aprobado');
-        } else {
-            const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
-                estadoActual === "Aprobado" ? "Regular" : estadoActual, 
-                currentData.fechaRegularidad,
-                newIntentos
-            );
-            if (estadoActualizado !== estadoActual) {
-                cambioDeEstado(infoMateria.codigo, estadoActualizado);
+            const fueAprobado = dataActualizada.estado === 'aprobado';
+            
+            if (fueAprobado) {
+                setTimeout(() => cambioDeEstado(infoMateria.codigo, 'Aprobado'), 0);
+            } else {
+                const estadoActualizado = regularidadUtils.calcularEstadoConsolidado(
+                    estadoActual === "Aprobado" ? "Regular" : estadoActual, 
+                    currentData.fechaRegularidad,
+                    newIntentos
+                );
+                if (estadoActualizado !== estadoActual) {
+                    setTimeout(() => cambioDeEstado(infoMateria.codigo, estadoActualizado), 0);
+                }
             }
-        }
+
+            return {
+                ...currentData,
+                intentosFinal: newIntentos,
+                ...(fueAprobado ? { notaFinal: dataActualizada.nota } : { notaFinal: null })
+            };
+        });
         setEditingIntentoIndex(null);
     };
 
@@ -226,6 +282,8 @@ export default function useDetalleMateria(infoMateria, progresoDetalles, setProg
         handleUpdateIntento,
         handleUpdateCursadaHistorial,
         handleEliminarCursadaHistorial,
-        handleToggleLibre
+        handleToggleLibre,
+        handleToggleEquivalencia,
+        handleCambioNotaEquivalencia
     };
 }

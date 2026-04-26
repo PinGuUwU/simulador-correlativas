@@ -75,6 +75,21 @@ function MateriaCard({ materia, todasLasMaterias, estado, detalles, actualizarEs
                     </Chip>
                 )}
 
+                {/* Indicadores de Equivalencia o Libre */}
+                {detalles?.esEquivalencia && (
+                    <Chip color="primary" variant="flat" size="sm" className="font-bold border border-primary/20">
+                        <i className="fa-solid fa-handshake mr-1" />
+                        Equivalencia
+                    </Chip>
+                )}
+
+                {detalles?.rendidaLibre && estado === 'Aprobado' && (
+                    <Chip color="danger" variant="flat" size="sm" className="font-bold border border-danger/20">
+                        <i className="fa-solid fa-user-slash mr-1" />
+                        Libre
+                    </Chip>
+                )}
+
                 {/* Indicador de recursada */}
                 {detalles?.historial && detalles.historial.length > 0 && (
                     <Chip color="primary" variant="flat" size="sm" className="font-bold border border-primary/20">
